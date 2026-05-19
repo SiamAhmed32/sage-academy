@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/monthly-bills",
+      "schedule": "5 18 1 * *"
+    },
+    {
+      "path": "/api/cron/monthly-bills",
+      "schedule": "0 18 * * *"
+    }
+  ]
+}
