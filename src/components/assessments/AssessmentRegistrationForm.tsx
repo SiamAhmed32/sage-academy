@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -9,8 +9,27 @@ import type { PublicAssessment } from "@/lib/assessments";
 
 const inputClass = "h-12 rounded-xl border border-sage-warm-border bg-white px-4 text-sm font-semibold text-sage-secondary outline-none focus:border-sage-primary focus:ring-2 focus:ring-sage-primary/15";
 
-export function AssessmentRegistrationForm({ assessment }: { assessment: PublicAssessment }) {
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(assessment.subjects.slice(0, 1));
+export function AssessmentRegistrationForm({ 
+  assessment,
+  activeClass,
+  onClassChange,
+}: { 
+  assessment: PublicAssessment;
+  activeClass: number;
+  onClassChange: (level: number) => void;
+}) {
+  const classInfo = useMemo(() => {
+    return assessment.classSpecificInfo?.find(c => c.classLevel === activeClass) || { subjects: [] as string[] };
+  }, [assessment.classSpecificInfo, activeClass]);
+
+  const classSubjects = classInfo.subjects || [];
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+
+  // Sync selected subjects when activeClass or class subjects change
+  useEffect(() => {
+    setSelectedSubjects(classSubjects);
+  }, [activeClass, classSubjects.join(",")]);
+
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const classOptions = useMemo(
@@ -89,7 +108,13 @@ export function AssessmentRegistrationForm({ assessment }: { assessment: PublicA
         <input name="name" required placeholder="শিক্ষার্থীর নাম" className={inputClass} />
         <input name="phone" required placeholder="মোবাইল নম্বর" className={inputClass} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <select name="classLabel" required className={inputClass} defaultValue={classOptions[0]?.value || ""}>
+          <select 
+            name="classLabel" 
+            required 
+            className={inputClass} 
+            value={String(activeClass)}
+            onChange={(e) => onClassChange(Number(e.target.value))}
+          >
             {classOptions.map((item) => (
               <option key={item.value} value={item.value}>{item.label}</option>
             ))}
@@ -109,7 +134,7 @@ export function AssessmentRegistrationForm({ assessment }: { assessment: PublicA
         <div className="rounded-2xl border border-sage-warm-border bg-sage-cream p-4">
           <p className="text-sm font-black text-sage-secondary">বিষয় নির্বাচন করুন</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {assessment.subjects.map((subject) => (
+            {(classSubjects.length > 0 ? classSubjects : assessment.subjects).map((subject) => (
               <button
                 key={subject}
                 type="button"

@@ -18,13 +18,29 @@ export default async function StudentRoutinePage({ searchParams }: RoutinePagePr
   const selectedDayBn =
     studentDays.find((day) => day.bn === params.day)?.bn ?? todayBn;
   const dayClasses = routine.filter((item) => item.dayBn === selectedDayBn);
+  const batchLabel = [ctx.student.batch?.title, ctx.student.batch?.batchCode].filter(Boolean).join(" · ");
+  const routineNote = ctx.student.batch?.routineNote?.trim();
 
   return (
     <section className="space-y-6">
       <StudentPageHeader
         title="ক্লাস রুটিন"
-        description="আপনার ভর্তি করা বিষয় অনুযায়ী সাপ্তাহিক ক্লাসের সময়সূচি। দিন বেছে নিয়ে বিস্তারিত দেখুন।"
+        description={
+          batchLabel
+            ? `${batchLabel} — সাপ্তাহিক ক্লাসের সময়সূচি। দিন বেছে নিয়ে বিস্তারিত দেখুন।`
+            : "আপনার ব্যাচের সাপ্তাহিক ক্লাসের সময়সূচি। দিন বেছে নিয়ে বিস্তারিত দেখুন।"
+        }
       />
+      {routineNote ? (
+        <div className="rounded-xl border border-sage-red-100 bg-sage-red-50/60 px-4 py-3 text-sm font-medium text-sage-gray-700">
+          {routineNote}
+        </div>
+      ) : null}
+      {!routine.length ? (
+        <div className="rounded-xl border border-dashed border-sage-border bg-white px-4 py-8 text-center text-sm text-sage-gray-600">
+          এখনো এই ব্যাচের রুটিন সেট করা হয়নি। অ্যাডমিন প্যানেলে ব্যাচ → রুটিন থেকে বিষয়, দিন ও সময় যোগ করলে এখানে দেখা যাবে।
+        </div>
+      ) : null}
       <StudentRoutineDayTabs selectedDayBn={selectedDayBn} />
       <StudentRoutineTimeline classes={dayClasses} />
     </section>

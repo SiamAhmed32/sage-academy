@@ -69,8 +69,18 @@
 
 .signupPanel {
   right: 0;
-  padding: 0 42px 0 80px;
+  align-items: center;
+  padding: 0 52px 0 72px;
   pointer-events: none;
+}
+
+.signupPanel .slideItem {
+  width: min(100%, 384px);
+}
+
+.signupPanel h2.slideItem,
+.signupPanel p.slideItem {
+  text-align: center;
 }
 
 .wrapper.toggled .signinPanel {
@@ -231,6 +241,15 @@
     position: relative;
     padding: 28px 20px 34px;
     pointer-events: auto;
+  }
+
+  .signupPanel {
+    align-items: center;
+    padding: 28px 20px 34px;
+  }
+
+  .signupPanel .slideItem {
+    width: min(100%, 420px);
   }
 
   .signupPanel {

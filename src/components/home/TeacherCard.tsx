@@ -25,6 +25,7 @@ export function TeacherCard({ teacher, index }: TeacherCardProps) {
           src={teacher.image || "/images/placeholder-teacher.jpg"}
           alt={teacher.name}
           fill
+          unoptimized
           className="object-cover object-center"
         />
       </div>

@@ -6,15 +6,9 @@ import { NotFoundError } from "@/lib/errors";
 import { connectDB } from "@/lib/mongodb";
 import { adminRoles, requireRole } from "@/lib/rbac";
 import PromotionCard from "@/models/PromotionCard";
+import AcademicBatch from "@/models/AcademicBatch";
 import { uploadBatchImage } from "@/lib/upload-batch-image";
-function simpleSlugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with -
-    .replace(/^-+|-+$/g, ""); // Remove leading and trailing -
-}
+import { buildPublicSlug } from "@/lib/public-slug";
 
 type RouteContext = {
   params: Promise<Record<string, string>>;
@@ -50,7 +44,7 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     imageUrl = await uploadBatchImage(imageFile);
   }
 
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     title,
     badge,
     order,
@@ -62,8 +56,17 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     image: imageUrl,
   };
 
-  if (title !== card.title) {
-    updateData.slug = simpleSlugify(title);
+  if (title !== card.title || String(linkedBatch || "") !== String(card.linkedBatch || "")) {
+    const batch = linkedBatch
+      ? await AcademicBatch.findById(linkedBatch).select("batchCode classLevel").lean()
+      : null;
+
+    updateData.slug = buildPublicSlug({
+      title,
+      batchCode: batch?.batchCode,
+      classLevel: batch?.classLevel,
+      fallback: card.slug || `batch-${Date.now()}`,
+    });
   }
 
   const updatedCard = await PromotionCard.findByIdAndUpdate(id, updateData, { new: true });

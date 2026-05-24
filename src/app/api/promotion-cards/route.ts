@@ -2,15 +2,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import PromotionCard from "@/models/PromotionCard";
+import AcademicBatch from "@/models/AcademicBatch";
 import { requireRole, adminRoles } from "@/lib/rbac";
 import { uploadBatchImage } from "@/lib/upload-batch-image";
+import { buildPublicSlug } from "@/lib/public-slug";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await connectDB();
     const cards = await PromotionCard.find({}).sort({ order: 1, createdAt: -1 }).populate("linkedBatch");
     return NextResponse.json({ success: true, data: cards });
   } catch (error) {
+    console.error("Promotion cards fetch error:", error);
     return NextResponse.json({ success: false, message: "Failed to fetch promotion cards" }, { status: 500 });
   }
 }
@@ -36,7 +39,16 @@ export async function POST(req: NextRequest) {
     ].filter((f): f is string => typeof f === "string" && f.length > 0);
 
     const title = formData.get("title") as string;
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const linkedBatch = formData.get("linkedBatch")?.toString() || "";
+    const batch = linkedBatch
+      ? await AcademicBatch.findById(linkedBatch).select("batchCode classLevel").lean()
+      : null;
+    const slug = buildPublicSlug({
+      title,
+      batchCode: batch?.batchCode,
+      classLevel: batch?.classLevel,
+      fallback: `batch-${Date.now()}`,
+    });
 
     const payload = {
       title,
@@ -45,7 +57,7 @@ export async function POST(req: NextRequest) {
       badge: (formData.get("badge") as string) || "ভর্তি চলছে",
       features,
       overview: (formData.get("overview") as string)?.trim() || "",
-      linkedBatch: formData.get("linkedBatch") || null,
+      linkedBatch: linkedBatch || null,
       websiteVisible: formData.get("websiteVisible") === "on",
       featured: formData.get("featured") === "on",
       order: Number(formData.get("order") || 0),

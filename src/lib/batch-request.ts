@@ -53,6 +53,7 @@ export async function batchPayloadFromFormData(formData: FormData) {
     features: [feature1, feature2, feature3, feature4],
     subjects: parseSubjects(text(formData, "subjectsJson")),
     overview: text(formData, "overview"),
+    routineNote: text(formData, "routineNote"),
     status: text(formData, "status") || "ভর্তি চলছে",
     totalSeats: numberValue(formData, "totalSeats"),
     availableSeats: numberValue(formData, "availableSeats"),

@@ -3,7 +3,7 @@ import { BatchCard } from "@/components/home/BatchCard";
 import { Container } from "@/components/shared/Container";
 import { connectDB } from "@/lib/mongodb";
 import PromotionCard from "@/models/PromotionCard";
-import AcademicBatch from "@/models/AcademicBatch"; // Pre-load to avoid population errors
+import "@/models/AcademicBatch";
 
 async function getHomePromotionCards() {
   try {
@@ -15,7 +15,7 @@ async function getHomePromotionCards() {
     })
       .populate({
         path: "linkedBatch",
-        select: "status totalSeats availableSeats",
+        select: "status totalSeats availableSeats classLevel",
       })
       .sort({ order: 1, createdAt: -1 })
       .limit(6)
@@ -59,7 +59,7 @@ export async function BatchSection() {
         </div>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {cards.map((card: any) => (
+          {cards.map((card) => (
             <BatchCard 
               key={card._id.toString()} 
               card={card} 

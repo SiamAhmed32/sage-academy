@@ -14,6 +14,7 @@ import Notice from "@/models/Notice";
 import Payment from "@/models/Payment";
 import Student from "@/models/Student";
 import User from "@/models/User";
+import { buildWeeklyRoutineFromBatch, routineDayPairs } from "@/lib/routine-utils";
 
 const staffRoles = ["manager", "admin", "super_admin"];
 
@@ -28,19 +29,11 @@ type DashboardSubject = {
 type DashboardStudent = {
   _id: unknown;
   classLevel?: number;
-  batch?: { _id?: unknown; subjects?: DashboardSubject[] } | null;
+  batch?: { _id?: unknown; subjects?: DashboardSubject[]; routineNote?: string; title?: string; batchCode?: string } | null;
   selectedSubjects?: { subjectName?: string }[];
 };
 
-export const studentDays = [
-  { en: "Saturday", bn: "শনিবার" },
-  { en: "Sunday", bn: "রবিবার" },
-  { en: "Monday", bn: "সোমবার" },
-  { en: "Tuesday", bn: "মঙ্গলবার" },
-  { en: "Wednesday", bn: "বুধবার" },
-  { en: "Thursday", bn: "বৃহস্পতিবার" },
-  { en: "Friday", bn: "শুক্রবার" },
-] as const;
+export const studentDays = routineDayPairs;
 
 export const bnMonths = [
   "জানুয়ারি",
@@ -57,54 +50,34 @@ export const bnMonths = [
   "ডিসেম্বর",
 ];
 
-function timeValue(time: string) {
-  const parsed = Date.parse(`January 1, 2000 ${time}`);
-  return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
-}
-
 function phoneCandidates(phone?: string) {
   const normalized = phone ? normalizeBangladeshPhone(phone) : "";
   const intl = normalized.startsWith("0") ? `+880${normalized.slice(1)}` : "";
   const plainIntl = intl.replace("+", "");
-  return [...new Set([phone, normalized, intl, plainIntl].filter(Boolean))];
+  const localFromTenDigits = normalized.length === 10 && normalized.startsWith("1") ? `0${normalized}` : "";
+  return [...new Set([phone, normalized, localFromTenDigits, intl, plainIntl].filter(Boolean))];
 }
 
 export function buildStudentRoutine(student: DashboardStudent) {
-  const subjects = new Set(
-    (student.selectedSubjects ?? []).map((subject) =>
-      String(subject.subjectName ?? "").trim().toLowerCase()
-    )
-  );
-
-  return studentDays
-    .flatMap((day) =>
-      (student.batch?.subjects ?? [])
-        .filter((subject) => {
-          const subjectDays = subject.days ?? [];
-          const name = String(subject.subjectName ?? "").trim().toLowerCase();
-          return subjects.has(name) && (subjectDays.includes(day.en) || subjectDays.includes(day.bn));
-        })
-        .map((subject) => ({
-          day: day.en,
-          dayBn: day.bn,
-          subjectName: String(subject.subjectName ?? "বিষয়"),
-          teacherName: subject.teacher?.name ?? "শিক্ষক নির্ধারিত হয়নি",
-          startTime: subject.startTime ?? "",
-          endTime: subject.endTime ?? "",
-        }))
-    )
-    .sort((a, b) => {
-      const dayA = studentDays.findIndex((day) => day.en === a.day);
-      const dayB = studentDays.findIndex((day) => day.en === b.day);
-      return dayA - dayB || timeValue(a.startTime) - timeValue(b.startTime);
-    });
+  return buildWeeklyRoutineFromBatch(student.batch?.subjects, (subject, day) => ({
+    day: day.en,
+    dayBn: day.bn,
+    subjectName: String(subject.subjectName ?? "বিষয়"),
+    teacherName: subject.teacher?.name ?? "শিক্ষক নির্ধারিত হয়নি",
+    startTime: subject.startTime ?? "",
+    endTime: subject.endTime ?? "",
+  }));
 }
 
 async function findLinkedStudent(user: NonNullable<Awaited<ReturnType<typeof getCurrentAuthUser>>>) {
   if (user.linkedStudent) {
-    return Student.findOne({ _id: user.linkedStudent, isActive: true })
+    const linkedStudent = await Student.findOne({ _id: user.linkedStudent, isActive: true })
       .populate({ path: "batch", populate: { path: "subjects.teacher", select: "name" } })
       .lean();
+
+    if (linkedStudent) return linkedStudent;
+
+    await User.findByIdAndUpdate(user.id, { linkedStudent: null });
   }
 
   const phones = phoneCandidates(user.phone);

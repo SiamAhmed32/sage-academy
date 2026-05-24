@@ -15,7 +15,7 @@ export function StudentRoutineTimeline({ classes }: { classes: RoutineItem[] }) 
         <BookOpen className="mx-auto mb-3 h-10 w-10 text-sage-gray-300" />
         <h3 className="font-bold text-sage-secondary">এই দিনে কোনো ক্লাস নেই</h3>
         <p className="mt-1 text-sm text-sage-gray-500">
-          আপনার ভর্তি করা বিষয় অনুযায়ী এই দিনে ক্লাস নির্ধারিত নেই।
+          এই দিনে আপনার ব্যাচের কোনো ক্লাস সেট করা নেই। অ্যাডমিন যদি রুটিন এখনো আপডেট না করে থাকেন, পরে আবার দেখুন।
         </p>
       </div>
     );

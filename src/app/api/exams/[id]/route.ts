@@ -20,6 +20,7 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
   const existing = await Exam.findById(id);
   if (!existing) throw new NotFoundError("Exam not found");
   const parsed = updateExamSchema.parse(assessmentPayloadFromForm(formData));
+  if (!parsed.slug) delete parsed.slug;
   const imageFile = formData.get("imageFile");
   const image = imageFile instanceof File && imageFile.size > 0 ? await uploadAssessmentImage(imageFile) : parsed.image ?? existing.image ?? "";
   const update: Record<string, unknown> = {

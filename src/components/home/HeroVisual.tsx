@@ -13,69 +13,63 @@ export function HeroVisual({ activeTeacher }: HeroVisualProps) {
   const teacher = heroTeachers[activeTeacher];
 
   return (
-    <div className="relative isolate mx-auto hidden h-[calc(100svh-9rem)] min-h-[520px] w-full max-w-2xl lg:block">
-      {/* Floating stat card — top right */}
-      <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute right-4 top-4 z-40 rounded-2xl border border-white/30 bg-white/70 px-5 py-4 shadow-2xl shadow-black/10 backdrop-blur-xl"
-      >
-        <h3 className="text-3xl font-bold text-sage-secondary">১৫+</h3>
-        <p className="text-sm font-medium text-sage-gray-500">অভিজ্ঞ শিক্ষক</p>
-      </motion.div>
+    <div className="relative isolate mx-auto hidden h-[calc(100svh-11rem)] min-h-[500px] w-full max-w-xl items-center justify-end lg:flex">
+      <div className="absolute right-5 top-8 z-0 h-[82%] w-[82%] rounded-[3rem] border border-sage-red-100 bg-white/60" />
+      <div className="absolute right-12 top-14 z-0 h-[76%] w-[78%] rounded-[3rem] bg-sage-primary/10" />
 
-      {/* Floating stat card — mid left */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-44 left-0 z-40 rounded-2xl border border-white/30 bg-white/70 px-5 py-4 shadow-2xl shadow-black/10 backdrop-blur-xl"
-      >
-        <h3 className="text-3xl font-bold text-sage-secondary">সাপ্তাহিক</h3>
-        <p className="text-sm font-medium text-sage-gray-500">
-          পরীক্ষা ও মূল্যায়ন
-        </p>
-      </motion.div>
+      <div className="relative z-10 w-[94%] max-w-[500px]">
+        <div className="overflow-hidden rounded-[2.35rem] border border-sage-red-100 bg-sage-red-50 shadow-2xl shadow-sage-red-100/35">
+          <div className="relative aspect-[4/4.05] w-full overflow-hidden bg-sage-red-50">
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={`hero-teacher-image-${activeTeacher}`}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: "easeInOut" }}
+              >
+                <Image
+                  src={teacher.image}
+                  alt={teacher.name}
+                  fill
+                  priority={activeTeacher === 0}
+                  sizes="500px"
+                  className={teacher.imageClass}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-      {/* Background blobs */}
-      <div className="absolute right-0 top-10 z-0 h-[82%] max-h-[520px] w-[82%] max-w-[520px] rounded-full bg-sage-primary/10" />
-      <div className="absolute right-44 top-36 z-0 size-72 rounded-full bg-sage-secondary/10" />
-
-      <AnimatePresence mode="popLayout">
-        {/* Main image */}
-        <motion.div
-          key={`hero-image-${activeTeacher}`}
-          initial={{ opacity: 0, scale: 0.98, x: 40 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.98, x: -40 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute bottom-0 right-0 z-20 h-full max-h-[620px] w-[95%] max-w-[545px] overflow-hidden rounded-[3rem] bg-sage-red-50 shadow-2xl ring-1 ring-sage-red-100"
-        >
-          <Image
-            src={teacher.image}
-            alt={teacher.name}
-            fill
-            priority
-            sizes="545px"
-            className={teacher.imageClass}
-          />
-          {/* Subtle bottom gradient for text legibility */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/40 via-black/15 to-transparent" />
-        </motion.div>
-
-        {/* Teacher info card — glassmorphic overlay at bottom */}
-        <motion.div
-          key={`hero-card-${activeTeacher}`}
-          initial={{ opacity: 0, scale: 0.9, y: 24 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 24 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute bottom-6 right-6 z-50 w-80 overflow-hidden rounded-2xl border border-white/25 bg-white/15 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
-        >
-          <h3 className="text-xl font-bold text-white drop-shadow-sm">{teacher.name}</h3>
-          <p className="mt-1 font-semibold text-sage-red-100">{teacher.subject}</p>
-          <p className="mt-2 text-sm text-white/80">{teacher.experience}</p>
-        </motion.div>
-      </AnimatePresence>
+          <div className="relative min-h-[7.5rem] border-t border-sage-red-100 bg-white px-6 py-4">
+            <AnimatePresence initial={false} mode="sync">
+              <motion.div
+                key={`hero-teacher-info-${activeTeacher}`}
+                className="absolute inset-x-6 inset-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+              >
+                <div className="flex items-end justify-between gap-6">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-sage-gray-500">
+                      Faculty
+                    </p>
+                    <h3 className="mt-1.5 text-2xl font-bold text-sage-secondary">
+                      {teacher.name}
+                    </h3>
+                    <p className="mt-1 font-semibold text-sage-primary">{teacher.subject}</p>
+                  </div>
+                  <p className="max-w-40 text-right text-sm font-medium leading-6 text-sage-gray-600">
+                    {teacher.experience}
+                  </p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,9 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa6";
 import { HiOutlineUserGroup } from "react-icons/hi2";
+import { buildPublicSlug } from "@/lib/public-slug";
 
-export function BatchCard({ card }: { card: any }) {
+type BatchCardData = {
+  title: string;
+  image: string;
+  features: string[];
+  badge?: string;
+  slug?: string;
+  linkedBatch?: {
+    status?: string;
+    classLevel?: number | string;
+  } | null;
+};
+
+export function BatchCard({ card }: { card: BatchCardData }) {
   const { title, image, features, badge, linkedBatch, slug } = card;
+  const publicSlug = buildPublicSlug({
+    title,
+    classLevel: linkedBatch?.classLevel,
+    fallback: slug,
+  });
   
   // Real-time operational data from the linked internal batch
   const status = linkedBatch?.status || badge || "ভর্তি চলছে";
@@ -17,6 +35,7 @@ export function BatchCard({ card }: { card: any }) {
           src={image}
           alt={title}
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
@@ -52,7 +71,7 @@ export function BatchCard({ card }: { card: any }) {
 
         <div className="flex flex-wrap items-center gap-4">
           <Link
-            href={`/batches/${slug}`}
+            href={`/batches/${publicSlug}`}
             className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-semibold text-sage-secondary"
           >
             বিস্তারিত

@@ -26,6 +26,7 @@ import { uploadStudentImage } from "@/lib/upload-student-image";
 import { uploadPaymentProof } from "@/lib/upload-payment-proof";
 import { buildStudentId, getNextStudentSerial } from "@/lib/student-id";
 import { monthNameFromNumber, monthNumberFromName } from "@/lib/month-utils";
+import { normalizeBangladeshPhone } from "@/lib/bd-phone";
 import {
   billExpectedAmount,
   billStatus,
@@ -82,6 +83,36 @@ function bool(formData: FormData, key: string) {
 function numberValue(formData: FormData, key: string) {
   const value = Number(text(formData, key));
   return Number.isFinite(value) ? value : 0;
+}
+
+function phoneCandidates(...values: string[]) {
+  const candidates = values.flatMap((value) => {
+    const normalized = value ? normalizeBangladeshPhone(value) : "";
+    const intl = normalized.startsWith("0") ? `+880${normalized.slice(1)}` : "";
+    const plainIntl = intl.replace("+", "");
+    return [value, normalized, intl, plainIntl];
+  });
+
+  return [...new Set(candidates.map((item) => item.trim()).filter(Boolean))];
+}
+
+async function linkPortalUserByStudentContacts(studentId: unknown, ...phones: string[]) {
+  const candidates = phoneCandidates(...phones);
+  if (!candidates.length) return;
+
+  await User.updateMany(
+    {
+      role: { $in: ["student", "guardian"] },
+      isActive: true,
+      phone: { $in: candidates },
+      $or: [
+        { linkedStudent: null },
+        { linkedStudent: { $exists: false } },
+        { linkedStudent: studentId },
+      ],
+    },
+    { $set: { linkedStudent: studentId } }
+  );
 }
 
 type StudentSubjectPayload = {
@@ -582,6 +613,8 @@ export async function createStudentAction(
     await student.save();
   }
 
+  await linkPortalUserByStudentContacts(student._id, student.whatsapp, student.guardianPhone, student.phone);
+
   revalidatePath("/admin/students");
   return { ok: true };
 }
@@ -656,7 +689,16 @@ export async function updateStudentAction(
     updates.image = await uploadStudentImage(imageFile);
   }
 
-  await Student.findByIdAndUpdate(id, updates);
+  const updatedStudent = await Student.findByIdAndUpdate(id, updates, { new: true });
+  if (updatedStudent) {
+    await linkPortalUserByStudentContacts(
+      updatedStudent._id,
+      updatedStudent.whatsapp,
+      updatedStudent.guardianPhone,
+      updatedStudent.phone
+    );
+  }
+
   revalidatePath("/admin/students");
   revalidatePath(`/admin/students/${id}`);
   return { ok: true };

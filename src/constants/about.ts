@@ -50,9 +50,9 @@ export const aboutContent = {
     { label: "সাফল্যের হার", value: "৯৮%" },
   ],
   directorMessage: {
-    name: "মোহাম্মদ শাহজাহান",
+    name: "শরীফ ইসলাম",
     designation: "প্রতিষ্ঠাতা ও পরিচালক, SAGE Academy",
     message: "প্রিয় শিক্ষার্থী ও অভিভাবকবৃন্দ, SAGE Academy-তে আমরা বিশ্বাস করি প্রতিটি শিশু অনন্য। আমাদের দায়িত্ব তাদের সেই অনন্যতাকে খুঁজে বের করা এবং তাদের আগামীর চ্যালেঞ্জের জন্য প্রস্তুত করা। আপনাদের আস্থাই আমাদের এগিয়ে চলার অনুপ্রেরণা।",
-    image: "/hero/team1.jpg",
+    image: "/More about Sage/ai-ceo.png",
   },
 };

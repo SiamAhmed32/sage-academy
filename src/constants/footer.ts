@@ -26,7 +26,7 @@ export const footerContent = {
       href: "https://www.facebook.com/profile.php?id=61578740664623",
       label: "Facebook",
     },
-    { icon: FaYoutube, href: "#", label: "YouTube" },
+    { icon: FaYoutube, href: "https://www.youtube.com/@sageacademybd", label: "YouTube" },
     { icon: FaInstagram, href: "#", label: "Instagram" },
     { icon: FaLinkedinIn, href: "#", label: "LinkedIn" },
   ],

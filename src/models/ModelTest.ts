@@ -19,6 +19,15 @@ const RoutineEntrySchema = new Schema(
   { _id: false }
 );
 
+const ClassInfoSchema = new Schema(
+  {
+    classLevel: { type: Number, required: true, min: 4, max: 12 },
+    subjects: { type: [String], default: [] },
+    routine: { type: [RoutineEntrySchema], default: [] },
+  },
+  { _id: false }
+);
+
 const ModelTestSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -26,7 +35,6 @@ const ModelTestSchema = new Schema(
     image: { type: String, default: "", trim: true },
     classLevels: { type: [Number], required: true, default: [] },
     version: { type: String, enum: ["bangla", "english", "both"], default: "both" },
-    subjects: { type: [String], required: true, default: [] },
     schoolFocus: { type: [String], default: [] },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
@@ -34,7 +42,7 @@ const ModelTestSchema = new Schema(
     routineSubtitle: { type: String, default: "", trim: true },
     scheduleNote: { type: String, default: "", trim: true },
     fees: { type: [FeeSchema], default: [] },
-    routine: { type: [RoutineEntrySchema], default: [] },
+    classSpecificInfo: { type: [ClassInfoSchema], default: [] },
     features: { type: [String], required: true, default: [] },
     status: { type: String, enum: ["draft", "published", "hidden", "archived"], default: "draft" },
     featured: { type: Boolean, default: false },
@@ -45,7 +53,6 @@ const ModelTestSchema = new Schema(
 );
 
 ModelTestSchema.index({ status: 1, featured: 1, endDate: 1, order: 1 });
-ModelTestSchema.index({ slug: 1 }, { unique: true });
 
 const ModelTest = models.ModelTest || model("ModelTest", ModelTestSchema);
 

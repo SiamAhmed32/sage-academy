@@ -19,6 +19,7 @@ export type StudentProfileBatch = {
   title?: string;
   batchCode?: string;
   classLevel?: number;
+  routineNote?: string;
   subjects?: BatchRoutineSubject[];
 };
 

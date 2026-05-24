@@ -1,20 +1,17 @@
 import { z } from "zod";
 
+import { isValidBdMobileNormalized, normalizeBangladeshPhone } from "@/lib/bd-phone";
 import { leadAttributionSchema } from "@/schemas/lead-attribution";
 
 const optionalText = (max: number) =>
   z.string().trim().max(max, "Value is too long").optional();
 
-// More flexible regex: allows optional +88, 01 followed by 9 digits. 
-// Also allows spaces, dashes, or parentheses which we will strip during processing if needed.
-const bangladeshPhoneRegex = /^(?:\+?88)?01[3-9]\d{8}$/;
-
-const phoneSchema = z
+const phoneSchema = (label: string) => z
   .string()
   .trim()
-  .transform((val) => val.replace(/[\s-]/g, "")) // Strip spaces and dashes
-  .refine((val) => val === "" || bangladeshPhoneRegex.test(val), {
-    message: "সঠিক মোবাইল নম্বর দিন (১১ ডিজিট)",
+  .transform(normalizeBangladeshPhone)
+  .refine((val) => val === "" || isValidBdMobileNormalized(val), {
+    message: `${label} সঠিক নয়। ০১ দিয়ে শুরু হওয়া ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর দিন।`,
   });
 
 const optionalDate = z.preprocess(
@@ -37,8 +34,8 @@ export const admissionRequestBaseSchema = z.object({
   guardianName: optionalText(120).default(""),
   fatherName: optionalText(120).default(""),
   motherName: optionalText(120).default(""),
-  phone: phoneSchema.default(""),
-  studentWhatsapp: phoneSchema.default(""),
+  phone: phoneSchema("অভিভাবকের ফোন নম্বর").default(""),
+  studentWhatsapp: phoneSchema("হোয়াটসঅ্যাপ নম্বর").default(""),
   email: z.string().trim().email("Email is invalid").optional().or(z.literal("")).default(""),
   className: optionalText(80).default(""),
   schoolName: optionalText(160).default(""),

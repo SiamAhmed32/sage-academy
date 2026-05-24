@@ -2,9 +2,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { connectDB } from "@/lib/mongodb";
 import AcademicBatch from "@/models/AcademicBatch";
 import Teacher from "@/models/Teacher";
-import { BatchCreatePanel } from "@/components/admin/batches/BatchCreatePanel";
-import { BatchCreateForm } from "@/components/admin/batches/BatchCreateForm";
-// Note: We will need to update these components to handle AcademicBatch specifically
+import { BatchCreateButton } from "@/components/admin/batches/BatchCreateButton";
 import { BatchFilters } from "@/components/admin/batches/BatchFilters";
 import { BatchTable } from "@/components/admin/batches/BatchTable";
 
@@ -68,12 +66,10 @@ export default async function AcademicBatchesPage({ searchParams }: PageProps) {
     <div>
       <AdminPageHeader
         title="একাডেমিক ব্যাচ ম্যানেজমেন্ট"
-        description="কোচিংয়ের অভ্যন্তরীণ ব্যাচ, রুটিন এবং সিট সংখ্যা এখান থেকে নিয়ন্ত্রণ করুন।"
+        description="কোচিংয়ের অভ্যন্তরীণ ব্যাচ, রুটিন এবং সিট সংখ্যা এখান থেকে নিয়ন্ত্রণ করুন।"
       />
 
-      <BatchCreatePanel>
-        <BatchCreateForm teachers={teacherOptions} />
-      </BatchCreatePanel>
+      <BatchCreateButton />
       
       <BatchFilters q={q} classLevel={classLevel} genderGroup={genderGroup} status={status} />
       

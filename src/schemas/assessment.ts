@@ -26,13 +26,18 @@ export const assessmentRoutineEntrySchema = z.object({
   subject: text("Routine subject", 120),
 });
 
+export const assessmentClassInfoSchema = z.object({
+  classLevel: z.number().int().min(4).max(12),
+  subjects: textArray("Subjects", 20),
+  routine: z.array(assessmentRoutineEntrySchema).max(80).optional().default([]),
+});
+
 const assessmentBaseObject = z.object({
   title: text("Title", 180),
   slug: optionalText(180),
   image: optionalText(500),
   classLevels: z.array(z.number().int().min(4).max(12)).min(1).max(9),
   version: z.enum(assessmentVersionOptions).optional().default("both"),
-  subjects: textArray("Subjects", 20),
   schoolFocus: z.array(z.string().trim().min(1).max(140)).max(12).optional().default([]),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
@@ -40,7 +45,7 @@ const assessmentBaseObject = z.object({
   routineSubtitle: optionalText(160),
   scheduleNote: optionalText(800),
   fees: z.array(assessmentFeeSchema).max(8).optional().default([]),
-  routine: z.array(assessmentRoutineEntrySchema).max(80).optional().default([]),
+  classSpecificInfo: z.array(assessmentClassInfoSchema).max(9).optional().default([]),
   features: textArray("Features", 8),
   status: z.enum(assessmentStatusOptions).optional().default("draft"),
   featured: z.boolean().optional().default(false),

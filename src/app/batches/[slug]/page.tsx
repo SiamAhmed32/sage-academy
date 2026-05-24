@@ -1,12 +1,11 @@
-import { Metadata } from "next";
 export const dynamic = "force-dynamic";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { BatchDetailsView } from "@/components/batches/BatchDetailsView";
 import { batches } from "@/constants/batches";
 import { connectDB } from "@/lib/mongodb";
+import { buildPublicSlug } from "@/lib/public-slug";
 import PromotionCard from "@/models/PromotionCard";
-import AcademicBatch from "@/models/AcademicBatch";
 import type { BatchDetailsResponse } from "@/types/batch";
 
 type AcademicBatchPageProps = {
@@ -67,24 +66,118 @@ function buildStaticFallback(slug: string): {
   };
 }
 
+type PromotionCardLike = {
+  _id: unknown;
+  slug?: string;
+  title?: string;
+  image?: string;
+  features?: string[];
+  badge?: string;
+  order?: number;
+  overview?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
+
+function buildCardOnlyBatch(promotionCard: PromotionCardLike) {
+  return {
+    _id: String(promotionCard._id),
+    slug: promotionCard.slug,
+    title: promotionCard.title,
+    image: promotionCard.image,
+    shift: "",
+    features: promotionCard.features ?? [],
+    status: promotionCard.badge || "ভর্তি চলছে",
+    isActive: true,
+    order: promotionCard.order ?? 0,
+    overview: promotionCard.overview ?? "",
+    createdAt: promotionCard.createdAt ?? new Date().toISOString(),
+    updatedAt: promotionCard.updatedAt ?? new Date().toISOString(),
+    subjects: [],
+    totalSeats: 0,
+    availableSeats: 0,
+    version: "bangla",
+  };
+}
+
+function getRequestedClassLevel(slug: string) {
+  const match = slug.match(/^class-([4-9]|1[0-2])$/i);
+  return match?.[1] ?? "";
+}
+
+async function findPromotionCard(slug: string) {
+  const baseQuery = {
+    isActive: { $ne: false },
+    isArchived: { $ne: true },
+    websiteVisible: true,
+  };
+
+  const exactCard = await PromotionCard.findOne({
+    ...baseQuery,
+    slug: slug.toLowerCase(),
+  }).populate({
+    path: "linkedBatch",
+    populate: {
+      path: "subjects.teacher",
+      select: "name subject designation experience image quote socialLinks",
+    },
+  });
+
+  if (exactCard) return exactCard;
+
+  const requestedClassLevel = getRequestedClassLevel(slug);
+  if (!requestedClassLevel) return null;
+
+  const cards = await PromotionCard.find(baseQuery)
+    .sort({ order: 1, createdAt: -1 })
+    .populate({
+      path: "linkedBatch",
+      populate: {
+        path: "subjects.teacher",
+        select: "name subject designation experience image quote socialLinks",
+      },
+    });
+
+  return (
+    cards.find((card) => {
+      const linkedClassLevel =
+        typeof card.linkedBatch === "object" && card.linkedBatch
+          ? card.linkedBatch.classLevel
+          : "";
+
+      return (
+        buildPublicSlug({
+          title: card.title,
+          classLevel: linkedClassLevel,
+          fallback: card.slug,
+        }) === slug.toLowerCase()
+      );
+    }) ?? null
+  );
+}
+
 export default async function AcademicBatchDetailsPage({ params }: AcademicBatchPageProps) {
   const { slug } = await params;
 
   await connectDB();
 
-  // 1. Find the promotion card by slug
-  const promotionCard = await PromotionCard.findOne({
-    slug: slug.toLowerCase(),
-    isActive: { $ne: false },
-    isArchived: { $ne: true },
-    websiteVisible: true,
-  }).populate({
-    path: "linkedBatch",
-    populate: {
-      path: "subjects.teacher",
-      select: "name subject designation experience image quote socialLinks"
+  const promotionCard = await findPromotionCard(slug);
+
+  if (promotionCard) {
+    const linkedClassLevel =
+      typeof promotionCard.linkedBatch === "object" && promotionCard.linkedBatch
+        ? promotionCard.linkedBatch.classLevel
+        : "";
+    const canonicalSlug = buildPublicSlug({
+      title: promotionCard.title,
+      classLevel: linkedClassLevel,
+      fallback: promotionCard.slug,
+    });
+
+    if (canonicalSlug && canonicalSlug !== slug.toLowerCase()) {
+      redirect(`/batches/${canonicalSlug}`);
     }
-  });
+  }
 
   if (promotionCard && promotionCard.linkedBatch) {
     const batch = promotionCard.linkedBatch;
@@ -102,6 +195,27 @@ export default async function AcademicBatchDetailsPage({ params }: AcademicBatch
       JSON.stringify({
         promotionCard,
         batch,
+        related,
+      })
+    );
+
+    return <BatchDetailsView data={serialized} />;
+  }
+
+  if (promotionCard) {
+    const related = await PromotionCard.find({
+      _id: { $ne: promotionCard._id },
+      websiteVisible: true,
+      featured: true,
+    })
+      .sort({ order: 1, createdAt: 1 })
+      .limit(6)
+      .select("title slug image badge");
+
+    const serialized = JSON.parse(
+      JSON.stringify({
+        promotionCard,
+        batch: buildCardOnlyBatch(promotionCard),
         related,
       })
     );

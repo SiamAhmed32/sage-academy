@@ -19,6 +19,15 @@ const RoutineEntrySchema = new Schema(
   { _id: false }
 );
 
+const ClassInfoSchema = new Schema(
+  {
+    classLevel: { type: Number, required: true, min: 4, max: 12 },
+    subjects: { type: [String], default: [] },
+    routine: { type: [RoutineEntrySchema], default: [] },
+  },
+  { _id: false }
+);
+
 const ExamSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -27,7 +36,6 @@ const ExamSchema = new Schema(
     examType: { type: String, enum: ["Half Yearly", "Pre-Test", "Final", "Board Prep", "Regular Exam"], default: "Regular Exam" },
     classLevels: { type: [Number], required: true, default: [] },
     version: { type: String, enum: ["bangla", "english", "both"], default: "both" },
-    subjects: { type: [String], required: true, default: [] },
     schoolFocus: { type: [String], default: [] },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
@@ -35,7 +43,7 @@ const ExamSchema = new Schema(
     routineSubtitle: { type: String, default: "", trim: true },
     scheduleNote: { type: String, default: "", trim: true },
     fees: { type: [FeeSchema], default: [] },
-    routine: { type: [RoutineEntrySchema], default: [] },
+    classSpecificInfo: { type: [ClassInfoSchema], default: [] },
     features: { type: [String], required: true, default: [] },
     status: { type: String, enum: ["draft", "published", "hidden", "archived"], default: "draft" },
     featured: { type: Boolean, default: false },
@@ -46,7 +54,6 @@ const ExamSchema = new Schema(
 );
 
 ExamSchema.index({ status: 1, featured: 1, endDate: 1, order: 1 });
-ExamSchema.index({ slug: 1 }, { unique: true });
 
 const Exam = models.Exam || model("Exam", ExamSchema);
 

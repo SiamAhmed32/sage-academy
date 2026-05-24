@@ -36,7 +36,9 @@ export default async function StudentProfilePage({ params }: PageProps) {
   await ensureAllBillingMonthsForStudent(id, now);
 
   const [rawStudent, rawPayments] = await Promise.all([
-    Student.findById(id).populate("batch").lean(),
+    Student.findById(id)
+      .populate({ path: "batch", populate: { path: "subjects.teacher", select: "name" } })
+      .lean(),
     Payment.find({ student: id })
       .populate("student", "nameEnglish studentId")
       .populate("receivedBy", "name")
@@ -81,7 +83,16 @@ export default async function StudentProfilePage({ params }: PageProps) {
       </div>
 
       <StudentPaymentCenter student={student} payments={payments} monthlyTotal={monthlyTotal} />
-      <StudentRoutinePreview routine={routine} />
+      <StudentRoutinePreview
+        routine={routine}
+        studentName={student.nameBangla || student.nameEnglish}
+        studentNameEnglish={student.nameEnglish}
+        studentId={student.studentId}
+        batchTitle={student.batch?.title}
+        batchCode={student.batch?.batchCode}
+        classLevel={student.batch?.classLevel ?? student.classLevel}
+        routineNote={student.batch?.routineNote}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <StudentSubjectHistory student={student} />

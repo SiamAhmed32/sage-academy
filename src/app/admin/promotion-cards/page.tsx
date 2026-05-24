@@ -2,7 +2,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { connectDB } from "@/lib/mongodb";
 import PromotionCard from "@/models/PromotionCard";
 import AcademicBatch from "@/models/AcademicBatch";
-import { PromotionCardCreateForm } from "@/components/admin/promotion-cards/PromotionCardCreateForm";
+import { PromotionCardCreateButton } from "@/components/admin/promotion-cards/PromotionCardCreateButton";
 import { PromotionCardTable } from "@/components/admin/promotion-cards/PromotionCardTable";
 
 export default async function PromotionCardsPage() {
@@ -24,11 +24,8 @@ export default async function PromotionCardsPage() {
       <AdminPageHeader
         title="প্রমোশন কার্ড ম্যানেজমেন্ট"
         description="ওয়েবসাইটের হোমপেজে যে কার্ডগুলো দেখাবে, সেগুলো এখান থেকে তৈরি ও সাজান।"
+        action={<PromotionCardCreateButton batches={batchOptions} />}
       />
-
-      <div className="mb-8">
-        <PromotionCardCreateForm batches={batchOptions} />
-      </div>
 
       <PromotionCardTable 
         cards={JSON.parse(JSON.stringify(cards))} 

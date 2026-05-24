@@ -73,10 +73,15 @@ export default async function AdminStudentsPage({
     }
   }
 
+  const activeBatchQuery = {
+    isArchived: { $ne: true },
+    isActive: { $ne: false },
+  };
+
   const [students, batches, allActiveAcademicBatches] = await Promise.all([
     Student.find(query).populate("batch", "title batchCode").sort({ createdAt: -1 }).lean(),
-    AcademicBatch.find({ isActive: true }).sort({ order: 1 }).select("_id title batchCode").lean(),
-    AcademicBatch.find({ isActive: true }).sort({ order: 1 }).lean(),
+    AcademicBatch.find(activeBatchQuery).sort({ order: 1, classLevel: 1 }).select("_id title batchCode").lean(),
+    AcademicBatch.find(activeBatchQuery).sort({ order: 1, classLevel: 1 }).lean(),
   ]);
 
   return (

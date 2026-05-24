@@ -1,6 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { BatchCreateForm } from "@/components/admin/batches/BatchCreateForm";
-import { BatchCreatePanel } from "@/components/admin/batches/BatchCreatePanel";
+import { BatchCreateButton } from "@/components/admin/batches/BatchCreateButton";
 import { BatchFilters } from "@/components/admin/batches/BatchFilters";
 import { BatchTable } from "@/components/admin/batches/BatchTable";
 import { connectDB } from "@/lib/mongodb";
@@ -42,7 +41,7 @@ export default async function AdminBatchesPage({ searchParams }: PageProps) {
     ];
   }
   if (validClassLevels.includes(classLevel)) query.classLevel = Number(classLevel);
-  if (["male", "female"].includes(genderGroup)) query.genderGroup = genderGroup;
+  if (["male", "female", "combined"].includes(genderGroup)) query.genderGroup = genderGroup;
   if (status === "archived") {
     query.isArchived = true;
   } else {
@@ -67,14 +66,13 @@ export default async function AdminBatchesPage({ searchParams }: PageProps) {
     <div>
       <AdminPageHeader
         title="ব্যাচ ম্যানেজমেন্ট"
-        description="ব্যাচ তৈরি, খোঁজা, ফিল্টার, এডিট ও আর্কাইভ এখান থেকেই নিয়ন্ত্রণ করুন।"
+        description="ব্যাচ তৈরি, খোঁজা, ফিল্টার, এডিট ও আর্কাইভ এখান থেকেই নিয়ন্ত্রণ করুন।"
       />
 
-      <BatchCreatePanel>
-        <BatchCreateForm teachers={teacherOptions} />
-      </BatchCreatePanel>
+      <BatchCreateButton />
       <BatchFilters q={q} classLevel={classLevel} genderGroup={genderGroup} status={status} />
       <BatchTable batches={JSON.parse(JSON.stringify(batches))} teachers={teacherOptions} />
     </div>
   );
 }
+

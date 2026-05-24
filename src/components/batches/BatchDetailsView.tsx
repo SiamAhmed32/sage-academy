@@ -1,17 +1,18 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
-import type { BatchDetailsResponse } from "@/types/batch";
 import { BatchHero } from "./BatchHero";
 import { BatchTabs } from "./BatchTabs";
 import { BatchSidebar } from "./BatchSidebar";
 import { BatchRelated } from "./BatchRelated";
+import { buildPublicSlug } from "@/lib/public-slug";
+import type { BatchDetailsResponse } from "@/types/batch";
 
 type BatchDetailsViewProps = {
   data: {
-    promotionCard: any;
-    batch: any;
-    related: any[];
+    promotionCard: Record<string, unknown>;
+    batch: Record<string, unknown>;
+    related: BatchDetailsResponse["data"]["related"];
   };
 };
 
@@ -19,12 +20,7 @@ export function BatchDetailsView({ data }: BatchDetailsViewProps) {
   const { promotionCard, batch, related } = data;
 
   const resolveSlug = (title: string, slug?: string) => {
-    if (slug && slug !== "undefined") return slug;
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0980-\u09ff\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-") || encodeURIComponent(title);
+    return buildPublicSlug({ title, fallback: slug || encodeURIComponent(title) });
   };
 
   return (

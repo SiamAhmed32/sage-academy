@@ -31,7 +31,7 @@ export type PublicAssessment = {
   scheduleNote: string;
   fees: Array<{ classLevel?: number; label: string; sageStudentFee: number; outsideStudentFee: number }>;
   feePreview: string;
-  routine: Array<{ day: string; time: string; subject: string }>;
+  classSpecificInfo: Array<{ classLevel: number; subjects: string[]; routine: Array<{ day: string; time: string; subject: string }> }>;
   features: string[];
   status: string;
   featured: boolean;
@@ -87,18 +87,25 @@ export function serializeAssessment(doc: any, kind: AssessmentKind): PublicAsses
   const raw = typeof doc.toObject === "function" ? doc.toObject() : doc;
   const id = raw._id?.toString?.() ?? String(raw._id);
   const classLevels = (raw.classLevels || []).map((n: unknown) => Number(n)).filter(Boolean);
-  const subjects = raw.subjects || [];
+  const classSpecificInfo = (raw.classSpecificInfo || []).map((ci: any) => ({
+    classLevel: Number(ci.classLevel || 0),
+    subjects: ci.subjects || [],
+    routine: (ci.routine || []).map((entry: any) => ({
+      day: entry.day || "",
+      time: entry.time || "",
+      subject: entry.subject || "",
+    })).filter((entry: any) => entry.day && entry.time && entry.subject),
+  })).filter((ci: any) => ci.classLevel);
+
+  // Fallback flat subjects for backward compatibility (all unique subjects)
+  const subjects: string[] = [...new Set<string>(classSpecificInfo.flatMap((ci: any) => (ci.subjects || []) as string[]))];
+
   const fees = (raw.fees || []).map((fee: any) => ({
     classLevel: Number(fee.classLevel || 0) || undefined,
     label: fee.label || "",
     sageStudentFee: Number(fee.sageStudentFee || 0),
     outsideStudentFee: Number(fee.outsideStudentFee || 0),
   }));
-  const routine = (raw.routine || []).map((entry: any) => ({
-    day: entry.day || "",
-    time: entry.time || "",
-    subject: entry.subject || "",
-  })).filter((entry: any) => entry.day && entry.time && entry.subject);
 
   return {
     _id: id,
@@ -124,7 +131,7 @@ export function serializeAssessment(doc: any, kind: AssessmentKind): PublicAsses
     scheduleNote: raw.scheduleNote || "",
     fees,
     feePreview: feePreview(fees),
-    routine,
+    classSpecificInfo,
     features: raw.features || [],
     status: raw.status,
     featured: Boolean(raw.featured),
@@ -218,14 +225,18 @@ export function parseStructuredFees(formData: FormData) {
   return parseFees(formData.get("fees"));
 }
 
-export function parseRoutine(formData: FormData) {
-  return parseJsonArray<any>(formData.get("routineJson"))
-    .map((entry) => ({
-      day: String(entry.day || "").trim(),
-      time: String(entry.time || "").trim(),
-      subject: String(entry.subject || "").trim(),
+export function parseClassSpecificInfo(formData: FormData) {
+  return parseJsonArray<any>(formData.get("classSpecificInfoJson"))
+    .map((ci) => ({
+      classLevel: Number(ci.classLevel),
+      subjects: Array.isArray(ci.subjects) ? ci.subjects : [],
+      routine: Array.isArray(ci.routine) ? ci.routine.map((entry: any) => ({
+        day: String(entry.day || "").trim(),
+        time: String(entry.time || "").trim(),
+        subject: String(entry.subject || "").trim(),
+      })).filter((entry: any) => entry.day && entry.time && entry.subject) : [],
     }))
-    .filter((entry) => entry.day && entry.time && entry.subject);
+    .filter((ci) => ci.classLevel);
 }
 
 export function assessmentPayloadFromForm(formData: FormData): CreateModelTestInput | CreateExamInput {
@@ -235,7 +246,6 @@ export function assessmentPayloadFromForm(formData: FormData): CreateModelTestIn
     image: String(formData.get("image") ?? ""),
     classLevels: parseClassLevels(formData.get("classLevels")),
     version: (String(formData.get("version") || "both") as any),
-    subjects: parseCsvList(formData.get("subjects")),
     schoolFocus: parseCsvList(formData.get("schoolFocus")),
     startDate: new Date(String(formData.get("startDate") ?? "")),
     endDate: new Date(String(formData.get("endDate") ?? "")),
@@ -243,7 +253,7 @@ export function assessmentPayloadFromForm(formData: FormData): CreateModelTestIn
     routineSubtitle: String(formData.get("routineSubtitle") ?? ""),
     scheduleNote: String(formData.get("scheduleNote") ?? ""),
     fees: parseStructuredFees(formData),
-    routine: parseRoutine(formData),
+    classSpecificInfo: parseClassSpecificInfo(formData),
     features: parseCsvList(formData.get("features")),
     status: (String(formData.get("status") || "draft") as any),
     featured: formData.get("featured") === "on",

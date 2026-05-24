@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { heroHighlights, heroTeachers } from "@/constants/hero";
@@ -15,6 +15,11 @@ export function HeroSection() {
   const teacher = heroTeachers[activeTeacher];
 
   useEffect(() => {
+    heroTeachers.forEach((item) => {
+      const img = new window.Image();
+      img.src = item.image;
+    });
+
     const timer = setInterval(() => {
       setActiveTeacher((prev) => (prev + 1) % heroTeachers.length);
     }, 4500);
@@ -27,7 +32,7 @@ export function HeroSection() {
       <div className="absolute -left-28 -top-28 size-80 rounded-full bg-sage-primary/10 blur-3xl" />
       <div className="absolute -right-24 top-20 size-96 rounded-full bg-sage-secondary/10 blur-3xl" />
 
-      <Container className="relative grid min-h-[calc(100svh-5rem)] grid-cols-1 items-center gap-10 py-10 sm:py-14 lg:h-[calc(100svh-5rem)] lg:grid-cols-[1fr_0.9fr] lg:gap-8 lg:py-6">
+      <Container className="relative grid min-h-[calc(100svh-5rem)] grid-cols-1 items-center gap-10 py-10 sm:py-14 lg:min-h-[calc(100svh-5rem)] lg:grid-cols-[1fr_0.9fr] lg:gap-10 lg:py-12">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
@@ -71,15 +76,26 @@ export function HeroSection() {
         </motion.div>
 
         <div className="lg:hidden">
-          <div className="relative mx-auto aspect-[1/1] w-full max-w-xl overflow-hidden rounded-[2rem] bg-sage-white shadow-xl ring-1 ring-sage-red-100">
-            <Image
-              src={teacher.image}
-              alt={teacher.name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 500px"
-              className={teacher.imageClass}
-            />
+          <div className="relative mx-auto aspect-[1/1] w-full max-w-xl overflow-hidden rounded-[2rem] bg-sage-red-50 shadow-xl ring-1 ring-sage-red-100">
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={`hero-mobile-${activeTeacher}`}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: "easeInOut" }}
+              >
+                <Image
+                  src={teacher.image}
+                  alt={teacher.name}
+                  fill
+                  priority={activeTeacher === 0}
+                  sizes="(max-width: 1024px) 100vw, 500px"
+                  className={teacher.imageClass}
+                />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
