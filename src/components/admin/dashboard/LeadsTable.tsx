@@ -11,6 +11,8 @@ function whatsappUrl(phone: string) {
 function leadHref(type: DashboardLead["type"]) {
   if (type === "admission") return "/admin/admissions";
   if (type === "free_class") return "/admin/free-class-leads";
+  if (type === "assessment") return "/admin/assessment-registrations";
+  if (type === "quiz") return "/admin/quiz-leads";
   return "/admin/contacts";
 }
 
@@ -29,7 +31,11 @@ function LeadCard({ lead }: { lead: DashboardLead }) {
                 ? "ভর্তি"
                 : lead.source === "Free class"
                   ? "ফ্রি ক্লাস"
-                  : "যোগাযোগ"}
+                  : lead.source === "Assessment"
+                    ? "টেস্ট/Exam"
+                    : lead.source === "Quiz"
+                      ? "কুইজ"
+                      : "যোগাযোগ"}
             </span>
           </div>
           <p className="text-sm font-semibold text-sage-primary">
@@ -91,15 +97,27 @@ export function LeadsTable({ leads }: { leads: DashboardLead[] }) {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/admin/admissions"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-4 py-2 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
               ভর্তি
             </Link>
             <Link
               href="/admin/free-class-leads"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-sage-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-sage-secondary"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              ফ্রি ক্লাস লিড
+              ফ্রি ক্লাস
+            </Link>
+            <Link
+              href="/admin/assessment-registrations"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
+            >
+              টেস্ট/Exam
+            </Link>
+            <Link
+              href="/admin/quiz-leads"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-sage-primary px-3 py-1.5 text-xs font-bold text-white transition hover:bg-sage-secondary"
+            >
+              কুইজ
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>

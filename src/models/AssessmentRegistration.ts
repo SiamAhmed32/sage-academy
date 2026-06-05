@@ -6,6 +6,7 @@ const AssessmentRegistrationSchema = new Schema(
     assessmentId: { type: Schema.Types.ObjectId, required: true, refPath: "assessmentModel" },
     assessmentModel: { type: String, required: true, enum: ["ModelTest", "Exam"] },
     assessmentTitle: { type: String, required: true, trim: true },
+    assessmentType: { type: String, default: "", trim: true, maxlength: 80 },
     name: { type: String, required: true, trim: true, maxlength: 120 },
     phone: { type: String, required: true, trim: true, maxlength: 15 },
     classLabel: { type: String, required: true, trim: true, maxlength: 40 },
@@ -31,6 +32,7 @@ AssessmentRegistrationSchema.index({ phone: 1, assessmentKind: 1, assessmentId: 
 AssessmentRegistrationSchema.index({ status: 1, createdAt: -1 });
 AssessmentRegistrationSchema.index({ classLabel: 1, createdAt: -1 });
 AssessmentRegistrationSchema.index({ schoolName: 1, createdAt: -1 });
+AssessmentRegistrationSchema.index({ assessmentType: 1, createdAt: -1 });
 
 const AssessmentRegistration =
   models.AssessmentRegistration || model("AssessmentRegistration", AssessmentRegistrationSchema);

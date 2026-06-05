@@ -5,19 +5,19 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   {
-    label: "হোম",
+    label: "Home",
     href: "/",
   },
   {
-    label: "আমাদের সম্পর্কে",
+    label: "About Us",
     href: "/about",
   },
   {
-    label: "ব্যাচসমূহ",
+    label: "Batches",
     href: "/batches",
   },
   {
-    label: "শিক্ষকবৃন্দ",
+    label: "Faculty",
     href: "/teachers",
   },
 
@@ -25,11 +25,11 @@ export const navItems: NavItem[] = [
 
 export const navbarActions: NavItem[] = [
   {
-    label: "লগইন",
+    label: "Login",
     href: "/login",
   },
   {
-    label: "ভর্তি আবেদন",
+    label: "Admission",
     href: "/admission",
   },
 ];

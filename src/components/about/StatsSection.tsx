@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Container } from "@/components/shared/Container";
 import { aboutContent } from "@/constants/about";
+import CountUp from "@/components/ui/CountUp";
 
 export default function StatsSection() {
   return (
@@ -19,7 +20,14 @@ export default function StatsSection() {
               className="text-center"
             >
               <div className="text-4xl font-bold text-white sm:text-5xl">
-                {stat.value}
+                <CountUp
+                  from={0}
+                  to={stat.countTo}
+                  locale="bn-BD"
+                  duration={1.5}
+                  className="tabular-nums"
+                />
+                {stat.suffix}
               </div>
               <div className="mt-2 text-sm font-medium text-sage-red-100/80 sm:text-base">
                 {stat.label}

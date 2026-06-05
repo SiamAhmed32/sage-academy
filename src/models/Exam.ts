@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, deleteModel, model, models } from "mongoose";
 
 const FeeSchema = new Schema(
   {
@@ -33,7 +33,7 @@ const ExamSchema = new Schema(
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     image: { type: String, default: "", trim: true },
-    examType: { type: String, enum: ["Half Yearly", "Pre-Test", "Final", "Board Prep", "Regular Exam"], default: "Regular Exam" },
+    examType: { type: String, enum: ["Weekly Test", "Class Test", "Half Yearly", "Pre-Test", "Final", "Board Prep", "Regular Exam"], default: "Regular Exam" },
     classLevels: { type: [Number], required: true, default: [] },
     version: { type: String, enum: ["bangla", "english", "both"], default: "both" },
     schoolFocus: { type: [String], default: [] },
@@ -54,6 +54,10 @@ const ExamSchema = new Schema(
 );
 
 ExamSchema.index({ status: 1, featured: 1, endDate: 1, order: 1 });
+
+if (process.env.NODE_ENV !== "production" && models.Exam) {
+  deleteModel("Exam");
+}
 
 const Exam = models.Exam || model("Exam", ExamSchema);
 

@@ -9,6 +9,10 @@ import { Container } from "@/components/shared/Container";
 import { HeroActions } from "@/components/home/HeroActions";
 import { HeroStats } from "@/components/home/HeroStats";
 import { HeroVisual } from "@/components/home/HeroVisual";
+import SplitText from "@/components/ui/SplitText";
+
+const heroDescription =
+  "ষষ্ঠ থেকে দ্বাদশ শ্রেণির শিক্ষার্থীদের জন্য Conceptual Teaching, ছোট ব্যাচে ব্যক্তিগত যত্ন, নিয়মিত মূল্যায়ন এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মানসম্মত একাডেমিক সহায়তা।";
 
 export function HeroSection() {
   const [activeTeacher, setActiveTeacher] = useState(0);
@@ -22,44 +26,54 @@ export function HeroSection() {
 
     const timer = setInterval(() => {
       setActiveTeacher((prev) => (prev + 1) % heroTeachers.length);
-    }, 4500);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-sage-red-50 via-sage-white to-sage-red-100">
-      <div className="absolute -left-28 -top-28 size-80 rounded-full bg-sage-primary/10 blur-3xl" />
-      <div className="absolute -right-24 top-20 size-96 rounded-full bg-sage-secondary/10 blur-3xl" />
+    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#fffafa_0%,#ffffff_48%,#fff0f0_100%)]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sage-red-100 to-transparent" />
+      <div className="absolute left-0 top-24 h-72 w-full bg-[radial-gradient(ellipse_at_left,rgba(109,15,18,0.08),transparent_58%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-white/80 to-transparent" />
 
-      <Container className="relative grid min-h-[calc(100svh-5rem)] grid-cols-1 items-center gap-10 py-10 sm:py-14 lg:min-h-[calc(100svh-5rem)] lg:grid-cols-[1fr_0.9fr] lg:gap-10 lg:py-12">
+      <Container className="relative grid min-h-[calc(100svh-5rem)] grid-cols-1 items-center gap-9 py-9 sm:py-12 lg:grid-cols-[minmax(0,1fr)_minmax(430px,0.9fr)] lg:gap-12 lg:py-10">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="max-w-2xl"
+          className="max-w-3xl"
         >
-          <p className="mb-4 inline-flex rounded-full bg-sage-red-50 px-5 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
+          <p className="mb-4 inline-flex rounded-full border border-sage-red-100 bg-white/80 px-5 py-2 text-sm font-semibold text-sage-primary shadow-sm shadow-sage-red-100/40 backdrop-blur">
             বাংলা ও ইংলিশ ভার্সনের জন্য
           </p>
 
-          <h1 className="text-4xl font-bold leading-tight text-sage-secondary sm:text-5xl lg:text-7xl">
-            সঠিক গাইডলাইনে
-            <span className="block text-sage-primary">ভালো ফলাফলের</span>
-            প্রস্তুতি
+          <h1 className="max-w-3xl text-4xl font-bold leading-[1.12] text-sage-secondary sm:text-5xl lg:text-[4.45rem]">
+            শুধু ভালো ফল নয়,
+            <span className="block text-sage-primary">গড়ে তুলি আত্মবিশ্বাসী</span>
+            শিক্ষার্থী
           </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-8 text-sage-gray-700 sm:text-lg">
-            SAGE Academy-তে শ্রেণি ৫ থেকে ১২ পর্যন্ত একাডেমিক কেয়ার,
-            আলাদা ছেলে-মেয়ে ব্যাচ এবং অভিজ্ঞ শিক্ষকদের মাধ্যমে নিয়মিত পড়াশোনার
-            গাইডলাইন।
-          </p>
+          <SplitText
+            text={heroDescription}
+            tag="p"
+            splitType="words"
+            delay={28}
+            duration={0.55}
+            ease="power3.out"
+            from={{ opacity: 0, y: 18 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.2}
+            rootMargin="0px"
+            textAlign="left"
+            className="mt-6 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg"
+          />
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex max-w-2xl flex-wrap gap-2.5">
             {heroHighlights.map((item) => (
               <span
                 key={item}
-                className="rounded-full bg-sage-white px-4 py-2 text-sm font-medium text-sage-gray-700 shadow-sm ring-1 ring-sage-red-100"
+                className="rounded-full border border-sage-red-100 bg-white/88 px-4 py-2 text-sm font-semibold text-sage-gray-700 shadow-sm shadow-sage-red-100/25 backdrop-blur"
               >
                 {item}
               </span>
@@ -70,7 +84,7 @@ export function HeroSection() {
             <HeroActions />
           </div>
 
-          <div className="mt-10">
+          <div className="mt-9">
             <HeroStats />
           </div>
         </motion.div>

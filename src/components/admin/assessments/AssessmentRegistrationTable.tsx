@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { MessageCircle, Phone } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,7 @@ type Registration = {
   _id: string;
   assessmentKind: "modelTest" | "exam";
   assessmentTitle: string;
+  assessmentType?: string;
   name: string;
   phone: string;
   classLabel: string;
@@ -40,31 +41,9 @@ function waUrl(phone: string) {
 
 export function AssessmentRegistrationTable({ initialItems }: { initialItems: Registration[] }) {
   const [items, setItems] = useState(initialItems);
-  const [query, setQuery] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>(() =>
     Object.fromEntries(initialItems.map((item) => [item._id, item.adminNote || ""]))
   );
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) =>
-      [
-        item.assessmentTitle,
-        item.name,
-        item.phone,
-        item.classLabel,
-        item.schoolName,
-        item.status,
-        item.assessmentKind,
-        item.applicantType,
-        ...item.selectedSubjects,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [items, query]);
 
   async function update(id: string, payload: Record<string, string>) {
     try {
@@ -84,15 +63,6 @@ export function AssessmentRegistrationTable({ initialItems }: { initialItems: Re
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-sage-border bg-white p-4 shadow-sm">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="নাম, ফোন, স্কুল, পরীক্ষা, বিষয় বা স্ট্যাটাস দিয়ে খুঁজুন..."
-          className="h-11 w-full rounded-xl border border-sage-border bg-sage-red-50/30 px-4 text-sm outline-none focus:border-sage-primary"
-        />
-      </div>
-
       <div className="overflow-hidden rounded-2xl border border-sage-border bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-left text-sm">
@@ -107,11 +77,11 @@ export function AssessmentRegistrationTable({ initialItems }: { initialItems: Re
               </tr>
             </thead>
             <tbody className="divide-y divide-sage-border">
-              {filtered.map((item) => (
+              {items.map((item) => (
                 <tr key={item._id} className="align-top hover:bg-sage-red-50/20">
                   <td className="p-4">
                     <p className="text-base font-black text-sage-secondary">{item.assessmentTitle}</p>
-                    <p className="mt-1 text-xs font-bold text-sage-primary">{item.assessmentKind === "modelTest" ? "Model Test" : "Exam"}</p>
+                    <p className="mt-1 text-xs font-bold text-sage-primary">{item.assessmentType || (item.assessmentKind === "modelTest" ? "Model Test" : "Exam")}</p>
                     <p className="mt-1 text-xs text-sage-gray-500">{new Date(item.createdAt).toLocaleString("bn-BD")}</p>
                   </td>
                   <td className="p-4">
@@ -160,7 +130,7 @@ export function AssessmentRegistrationTable({ initialItems }: { initialItems: Re
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 ? (
+              {items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-12 text-center font-bold text-sage-gray-500">কোনো রেজিস্ট্রেশন পাওয়া যায়নি</td>
                 </tr>

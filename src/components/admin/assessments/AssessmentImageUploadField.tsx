@@ -51,16 +51,18 @@ export function AssessmentImageUploadField({ previewUrl, onPreviewChange, fallba
       </div>
 
       {hasPreview ? (
-        <div className="relative mt-4 aspect-[16/7] overflow-hidden rounded-2xl border border-sage-border bg-white">
-          <Image src={previewUrl} alt="Assessment image preview" fill unoptimized className="object-cover" />
-          <button
-            type="button"
-            onClick={removeImage}
-            className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white text-sage-primary shadow-lg"
-            aria-label="Remove image"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <div className="mt-4 max-w-md">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-sage-border bg-white shadow-sm">
+            <Image src={previewUrl} alt="Assessment image preview" fill unoptimized className="object-cover" />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white text-sage-primary shadow-lg"
+              aria-label="Remove image"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

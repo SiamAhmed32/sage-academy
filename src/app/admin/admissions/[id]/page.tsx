@@ -14,11 +14,12 @@ export const metadata: Metadata = {
   title: "Lead Details | SAGE Admin",
 };
 
-export default async function AdmissionDetailPage({ params }: { params: { id: string } }) {
+export default async function AdmissionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await connectDB();
 
   // CRITICAL FIX: Plain-ify the Mongoose object for Client Components
-  const rawRequest = await AdmissionRequest.findById(params.id).lean();
+  const rawRequest = await AdmissionRequest.findById(id).lean();
 
   if (!rawRequest) {
     notFound();

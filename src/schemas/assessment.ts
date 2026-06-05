@@ -5,7 +5,7 @@ import { bdPhoneSchema } from "@/lib/bd-phone";
 export const assessmentVersionOptions = ["bangla", "english", "both"] as const;
 export const assessmentStatusOptions = ["draft", "published", "hidden", "archived"] as const;
 export const assessmentLeadStatusOptions = ["new", "contacted", "confirmed", "attended", "cancelled", "invalid"] as const;
-export const examTypeOptions = ["Half Yearly", "Pre-Test", "Final", "Board Prep", "Regular Exam"] as const;
+export const examTypeOptions = ["Weekly Test", "Class Test", "Half Yearly", "Pre-Test", "Final", "Board Prep", "Regular Exam"] as const;
 export const applicantTypeOptions = ["sage", "outside"] as const;
 
 const text = (field: string, max = 160) => z.string().trim().min(1, `${field} is required`).max(max);

@@ -16,11 +16,23 @@ function money(value: number) {
   return `৳${Number(value || 0).toLocaleString("bn-BD")}`;
 }
 
+function examIntentText(assessment: PublicAssessment) {
+  if (assessment.kind !== "exam") return null;
+  if (assessment.examType === "Class Test") {
+    return "এই পেজের রেজিস্ট্রেশনটি ক্লাসভিত্তিক Class Test-এর জন্য। বিষয় নির্বাচন করলে টিম পরীক্ষার সময় ও প্রস্তুতির নির্দেশনা জানাবে।";
+  }
+  if (assessment.examType === "Weekly Test") {
+    return "এই পেজের রেজিস্ট্রেশনটি Weekly Test-এর জন্য। সপ্তাহের পড়া যাচাই, ফলাফল এবং ফলোআপের জন্য শিক্ষার্থীর তথ্য নেওয়া হচ্ছে।";
+  }
+  return `এই পেজের রেজিস্ট্রেশনটি ${assessment.examType || "Exam"}-এর জন্য।`;
+}
+
 export function AssessmentDetailClient({ assessment, badge }: { assessment: PublicAssessment; badge: string }) {
   const [activeClass, setActiveClass] = useState(assessment.classLevels[0] || 6);
   const classInfo = assessment.classSpecificInfo?.find(c => c.classLevel === activeClass) || { classLevel: activeClass, subjects: [] as string[], routine: [] as Array<{ day: string; time: string; subject: string }> };
   const subjects = classInfo.subjects;
   const activeRoutine = classInfo.routine;
+  const examIntent = examIntentText(assessment);
 
   return (
     <main className="bg-sage-cream">
@@ -59,6 +71,13 @@ export function AssessmentDetailClient({ assessment, badge }: { assessment: Publ
                       </span>
                     ))}
                   </div>
+                </div>
+              ) : null}
+
+              {examIntent ? (
+                <div className="mt-5 rounded-[1.5rem] border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                  <p className="text-sm font-black text-sage-gold">{assessment.examType || "Exam"}</p>
+                  <p className="mt-2 text-sm font-semibold leading-7 text-white/82">{examIntent}</p>
                 </div>
               ) : null}
             </div>

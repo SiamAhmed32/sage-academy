@@ -41,29 +41,30 @@ export function HeroVisual({ activeTeacher }: HeroVisualProps) {
             </AnimatePresence>
           </div>
 
-          <div className="relative min-h-[7.5rem] border-t border-sage-red-100 bg-white px-6 py-4">
+          <div className="relative min-h-[7.5rem] border-t border-sage-red-100 bg-white px-5 py-4 sm:px-6">
             <AnimatePresence initial={false} mode="sync">
               <motion.div
                 key={`hero-teacher-info-${activeTeacher}`}
-                className="absolute inset-x-6 inset-y-4"
+                className="absolute inset-x-5 inset-y-4 sm:inset-x-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
               >
-                <div className="flex items-end justify-between gap-6">
+                <div className="flex h-full items-end justify-between gap-6">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-sage-gray-500">
-                      Faculty
+                      Teachers
                     </p>
-                    <h3 className="mt-1.5 text-2xl font-bold text-sage-secondary">
+                    <h3 className="mt-1.5 text-2xl font-bold leading-8 text-sage-secondary">
                       {teacher.name}
                     </h3>
                     <p className="mt-1 font-semibold text-sage-primary">{teacher.subject}</p>
                   </div>
-                  <p className="max-w-40 text-right text-sm font-medium leading-6 text-sage-gray-600">
+
+                  <div className="inline-flex shrink-0 items-center rounded-full border border-sage-red-100 bg-sage-red-50 px-3.5 py-2 text-sm font-bold leading-5 text-sage-primary">
                     {teacher.experience}
-                  </p>
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
