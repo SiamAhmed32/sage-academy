@@ -6,6 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { BatchCard } from "@/components/home/BatchCard";
 import { cn } from "@/lib/utils";
 
+const MOBILE_CAROUSEL_QUERY = "(max-width: 767px)";
+const AUTOPLAY_DELAY_MS = 3500;
+
 export type HomeBatchCard = {
   id: string;
   title: string;
@@ -36,7 +39,15 @@ function toBatchCardProps(card: HomeBatchCard) {
 
 export function BatchCardsCarousel({ cards }: BatchCardsCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isMobileCarousel, setIsMobileCarousel] = useState(false);
+
+  const updateActiveIndex = useCallback((index: number) => {
+    activeIndexRef.current = index;
+    setActiveIndex(index);
+  }, []);
 
   const scrollToIndex = useCallback((index: number) => {
     const scroller = scrollerRef.current;
@@ -68,18 +79,47 @@ export function BatchCardsCarousel({ cards }: BatchCardsCarouselProps) {
         }
       });
 
-      setActiveIndex(closest);
+      updateActiveIndex(closest);
     };
 
     scroller.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => scroller.removeEventListener("scroll", onScroll);
-  }, [cards.length]);
+  }, [cards.length, updateActiveIndex]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_CAROUSEL_QUERY);
+    const syncMobileState = () => setIsMobileCarousel(mediaQuery.matches);
+
+    syncMobileState();
+    mediaQuery.addEventListener("change", syncMobileState);
+    return () => mediaQuery.removeEventListener("change", syncMobileState);
+  }, []);
+
+  useEffect(() => {
+    if (cards.length <= 1 || isPaused || !isMobileCarousel) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const intervalId = window.setInterval(() => {
+      const next = activeIndexRef.current === cards.length - 1 ? 0 : activeIndexRef.current + 1;
+      scrollToIndex(next);
+    }, AUTOPLAY_DELAY_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [cards.length, isMobileCarousel, isPaused, scrollToIndex]);
 
   if (cards.length === 0) return null;
 
   return (
-    <div className="mt-8">
+    <div
+      className="mt-8"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
       <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-sage-primary md:hidden">
         স্বাইপ করে পরের ব্যাচ দেখুন
       </p>

@@ -28,6 +28,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SAGE Academy",
   description: "Academic and admission care in Banasree.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

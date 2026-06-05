@@ -9,7 +9,6 @@ import { Container } from "@/components/shared/Container";
 import { HeroActions } from "@/components/home/HeroActions";
 import { HeroStats } from "@/components/home/HeroStats";
 import { HeroVisual } from "@/components/home/HeroVisual";
-import SplitText from "@/components/ui/SplitText";
 
 const heroDescription =
   "ষষ্ঠ থেকে দ্বাদশ শ্রেণির শিক্ষার্থীদের জন্য Conceptual Teaching, ছোট ব্যাচে ব্যক্তিগত যত্ন, নিয়মিত মূল্যায়ন এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে মানসম্মত একাডেমিক সহায়তা।";
@@ -48,26 +47,15 @@ export function HeroSection() {
             বাংলা ও ইংলিশ ভার্সনের জন্য
           </p>
 
-          <h1 className="max-w-3xl text-4xl font-bold leading-[1.12] text-sage-secondary sm:text-5xl lg:text-[4.45rem]">
+          <h1 className="max-w-3xl text-[2.55rem] font-bold leading-[1.16] text-sage-secondary [text-wrap:balance] sm:text-5xl sm:leading-[1.14] lg:text-[4.45rem] lg:leading-[1.1]">
             শুধু ভালো ফল নয়,
-            <span className="block text-sage-primary">গড়ে তুলি আত্মবিশ্বাসী</span>
+            <span className="block text-sage-primary [word-break:keep-all]">গড়ে তুলি আত্মবিশ্বাসী</span>
             শিক্ষার্থী
           </h1>
 
-          <SplitText
-            text={heroDescription}
-            tag="p"
-            splitType="words"
-            delay={28}
-            duration={0.55}
-            ease="power3.out"
-            from={{ opacity: 0, y: 18 }}
-            to={{ opacity: 1, y: 0 }}
-            threshold={0.2}
-            rootMargin="0px"
-            textAlign="left"
-            className="mt-6 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg"
-          />
+          <p className="mt-6 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg">
+            {heroDescription}
+          </p>
 
           <div className="mt-6 flex max-w-2xl flex-wrap gap-2.5">
             {heroHighlights.map((item) => (
@@ -90,26 +78,57 @@ export function HeroSection() {
         </motion.div>
 
         <div className="lg:hidden">
-          <div className="relative mx-auto aspect-[1/1] w-full max-w-xl overflow-hidden rounded-[2rem] bg-sage-red-50 shadow-xl ring-1 ring-sage-red-100">
-            <AnimatePresence initial={false}>
-              <motion.div
-                key={`hero-mobile-${activeTeacher}`}
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45, ease: "easeInOut" }}
-              >
-                <Image
-                  src={teacher.image}
-                  alt={teacher.name}
-                  fill
-                  priority={activeTeacher === 0}
-                  sizes="(max-width: 1024px) 100vw, 500px"
-                  className={teacher.imageClass}
-                />
-              </motion.div>
-            </AnimatePresence>
+          <div className="mx-auto w-full max-w-xl overflow-hidden rounded-[2rem] bg-white shadow-xl ring-1 ring-sage-red-100">
+            <div className="relative aspect-[1/1] w-full overflow-hidden bg-sage-red-50">
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={`hero-mobile-${activeTeacher}`}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.45, ease: "easeInOut" }}
+                >
+                  <Image
+                    src={teacher.image}
+                    alt={teacher.name}
+                    fill
+                    priority={activeTeacher === 0}
+                    sizes="(max-width: 1024px) 100vw, 500px"
+                    className={teacher.imageClass}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="relative min-h-[7.75rem] border-t border-sage-red-100 bg-white px-5 py-4">
+              <AnimatePresence initial={false} mode="sync">
+                <motion.div
+                  key={`hero-mobile-info-${activeTeacher}`}
+                  className="absolute inset-x-5 inset-y-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                >
+                  <div className="flex h-full items-end justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sage-gray-500">
+                        Teachers
+                      </p>
+                      <h3 className="mt-1 text-xl font-bold leading-7 text-sage-secondary">
+                        {teacher.name}
+                      </h3>
+                      <p className="mt-1 text-sm font-semibold text-sage-primary">{teacher.subject}</p>
+                    </div>
+
+                    <div className="inline-flex max-w-[9rem] shrink-0 items-center rounded-full border border-sage-red-100 bg-sage-red-50 px-3 py-2 text-xs font-bold leading-5 text-sage-primary">
+                      {teacher.experience}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
