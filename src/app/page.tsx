@@ -20,11 +20,11 @@ export default async function Home() {
       <BatchSection />
       <AssessmentCommandSection />
       <FreeClassSection />
-      <QuizSection user={user} />
+      {/* <QuizSection user={user} /> */}
       <WhyChooseSection />
-      <TeacherSection />
+      {/* <TeacherSection /> */}
       <TestimonialSection />
-      <OfflineLearningSection />
+      {/* <OfflineLearningSection /> */}
       <ContactSection />
     </main>
   );

@@ -15,6 +15,7 @@ type Mode = "login" | "signup";
 
 type AuthPanelProps = {
   initialMode?: Mode;
+  redirectTo?: string;
 };
 
 type ApiAuthJson = {
@@ -24,7 +25,7 @@ type ApiAuthJson = {
   data?: { user?: { phone?: string; role?: string } };
 };
 
-export function AuthPanel({ initialMode = "login" }: AuthPanelProps) {
+export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [isPending, setIsPending] = useState(false);
@@ -94,7 +95,8 @@ export function AuthPanel({ initialMode = "login" }: AuthPanelProps) {
       // Delay redirect slightly for toast visibility
       setTimeout(() => {
         const role = data.data?.user?.role;
-        router.push(["manager", "admin", "super_admin"].includes(String(role)) ? "/admin" : "/student");
+        const defaultPath = ["manager", "admin", "super_admin"].includes(String(role)) ? "/admin" : "/student";
+        router.push(redirectTo || defaultPath);
         router.refresh();
       }, 1000);
     } catch (err) {

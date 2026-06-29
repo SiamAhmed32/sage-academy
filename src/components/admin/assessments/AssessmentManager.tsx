@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
+import { AssessmentConfirmModal } from "./AssessmentConfirmModal";
 import { AssessmentFilters } from "./AssessmentFilters";
 import { AssessmentTable } from "./AssessmentTable";
 import { AssessmentFormModal } from "./AssessmentFormModal";
@@ -39,12 +40,24 @@ type Props = {
   items: AdminAssessmentItem[];
 };
 
+type ConfirmState = {
+  isOpen: boolean;
+  type: "delete" | "archive";
+  item: AdminAssessmentItem | null;
+};
+
 export function AssessmentManager({ type, items }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAssessmentItem | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
+  const [confirmState, setConfirmState] = useState<ConfirmState>({
+    isOpen: false,
+    type: "delete",
+    item: null,
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const isExam = type === "exam";
   const baseUrl = isExam ? "/api/exams" : "/api/model-tests";
@@ -59,6 +72,22 @@ export function AssessmentManager({ type, items }: Props) {
     });
   }, [items, query, statusFilter, classFilter]);
 
+  const confirmCopy = useMemo(() => {
+    const title = confirmState.item?.title || "";
+    if (confirmState.type === "archive") {
+      return {
+        title: "আর্কাইভ করতে চান?",
+        message: `"${title}" আর্কাইভ লিস্টে পাঠানো হবে। পরে প্রয়োজনে আবার এডিট বা রিস্টোর করা যাবে।`,
+        confirmLabel: "আর্কাইভ করুন",
+      };
+    }
+    return {
+      title: "চিরতরে মুছে ফেলতে চান?",
+      message: `"${title}" এবং এর সম্পর্কিত তথ্য স্থায়ীভাবে মুছে ফেলা হবে।`,
+      confirmLabel: "চিরতরে মুছুন",
+    };
+  }, [confirmState.item?.title, confirmState.type]);
+
   function openCreate() { setEditing(null); setModalOpen(true); }
   function openEdit(item: AdminAssessmentItem) { setEditing(item); setModalOpen(true); }
 
@@ -70,39 +99,82 @@ export function AssessmentManager({ type, items }: Props) {
     router.refresh();
   }
 
-  async function handleArchive(item: AdminAssessmentItem) {
-    if (!window.confirm(`"${item.title}" আর্কাইভ করবেন?`)) return;
+  function buildArchivePayload(item: AdminAssessmentItem) {
     const payload = new FormData();
-    payload.set("title", item.title); payload.set("image", item.image || ""); payload.set("slug", "");
-    payload.set("classLevels", item.classLevels.join(",")); payload.set("version", item.version);
+    payload.set("title", item.title);
+    payload.set("image", item.image || "");
+    payload.set("slug", "");
+    payload.set("classLevels", item.classLevels.join(","));
+    payload.set("version", item.version);
     payload.set("schoolFocus", item.schoolFocus.join("\n"));
-    payload.set("startDate", new Date(item.startDate).toISOString().slice(0, 10)); payload.set("endDate", new Date(item.endDate).toISOString().slice(0, 10));
-    payload.set("routineTitle", item.routineTitle || ""); payload.set("routineSubtitle", item.routineSubtitle || "");
-    payload.set("scheduleNote", item.scheduleNote || ""); payload.set("feesJson", JSON.stringify(item.fees));
-    payload.set("classSpecificInfoJson", JSON.stringify(item.classSpecificInfo || [])); payload.set("features", item.features.join("\n"));
-    payload.set("status", "archived"); payload.set("order", String(item.order || 0));
+    payload.set("startDate", new Date(item.startDate).toISOString().slice(0, 10));
+    payload.set("endDate", new Date(item.endDate).toISOString().slice(0, 10));
+    payload.set("routineTitle", item.routineTitle || "");
+    payload.set("routineSubtitle", item.routineSubtitle || "");
+    payload.set("scheduleNote", item.scheduleNote || "");
+    payload.set("feesJson", JSON.stringify(item.fees));
+    payload.set("classSpecificInfoJson", JSON.stringify(item.classSpecificInfo || []));
+    payload.set("features", item.features.join("\n"));
+    payload.set("status", "archived");
+    payload.set("order", String(item.order || 0));
     if (isExam) payload.set("examType", item.examType || "Regular Exam");
-    try {
-      const res = await fetch(`${baseUrl}/${item._id}`, { method: "PATCH", body: payload });
-      if (!res.ok) throw new Error();
-      toast.success("আর্কাইভ হয়েছে"); router.refresh();
-    } catch { toast.error("আর্কাইভ করা যায়নি"); }
+    return payload;
   }
 
-  async function handleRemove(item: AdminAssessmentItem) {
-    if (!window.confirm(`"${item.title}" চিরতরে মুছে ফেলবেন?`)) return;
+  async function archiveItem(item: AdminAssessmentItem) {
+    const res = await fetch(`${baseUrl}/${item._id}`, { method: "PATCH", body: buildArchivePayload(item) });
+    if (!res.ok) throw new Error();
+    toast.success("আর্কাইভ হয়েছে");
+    router.refresh();
+  }
+
+  async function removeItem(item: AdminAssessmentItem) {
+    const res = await fetch(`${baseUrl}/${item._id}?permanent=true`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    toast.success("ডিলিট হয়েছে");
+    router.refresh();
+  }
+
+  async function handleConfirmAction() {
+    if (!confirmState.item) return;
+    setIsProcessing(true);
     try {
-      const res = await fetch(`${baseUrl}/${item._id}?permanent=true`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      toast.success("ডিলিট হয়েছে"); router.refresh();
-    } catch { toast.error("ডিলিট করা যায়নি"); }
+      if (confirmState.type === "archive") {
+        await archiveItem(confirmState.item);
+      } else {
+        await removeItem(confirmState.item);
+      }
+      setConfirmState({ isOpen: false, type: "delete", item: null });
+    } catch {
+      toast.error(confirmState.type === "archive" ? "আর্কাইভ করা যায়নি" : "ডিলিট করা যায়নি");
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
     <div className="space-y-5">
       <AssessmentFilters query={query} onQueryChange={setQuery} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} classFilter={classFilter} onClassFilterChange={setClassFilter} onCreateClick={openCreate} isExam={isExam} />
-      <AssessmentTable items={filtered} isExam={isExam} onEdit={openEdit} onArchive={handleArchive} onRemove={handleRemove} />
+      <AssessmentTable
+        items={filtered}
+        isExam={isExam}
+        onEdit={openEdit}
+        onArchive={(item) => setConfirmState({ isOpen: true, type: "archive", item })}
+        onRemove={(item) => setConfirmState({ isOpen: true, type: "delete", item })}
+      />
       <AssessmentFormModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} editingItem={editing} isExam={isExam} onSave={handleSave} />
+      <AssessmentConfirmModal
+        title={confirmCopy.title}
+        message={confirmCopy.message}
+        confirmLabel={confirmCopy.confirmLabel}
+        type={confirmState.type}
+        isOpen={confirmState.isOpen}
+        isProcessing={isProcessing}
+        onClose={() => {
+          if (!isProcessing) setConfirmState({ isOpen: false, type: "delete", item: null });
+        }}
+        onConfirm={handleConfirmAction}
+      />
     </div>
   );
 }

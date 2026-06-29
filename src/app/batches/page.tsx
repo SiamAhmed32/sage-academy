@@ -10,13 +10,14 @@ async function getPromotionCards() {
     const cards = await PromotionCard.find({
       websiteVisible: true,
     })
-    .populate({
-      path: "linkedBatch",
-      select: "status totalSeats availableSeats classLevel genderGroup version",
-    })
-    .sort({ order: 1, createdAt: -1 })
-    .lean();
-    
+      .populate({
+        path: "linkedBatch",
+        select:
+          "status totalSeats availableSeats classLevel genderGroup version",
+      })
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+
     return cards;
   } catch (error) {
     console.error("Public batches fetch failed:", error);
@@ -38,12 +39,11 @@ export default async function BatchesPage() {
             একাডেমিক ব্যাচ ও ভর্তি তথ্য
           </p>
           <h1 className="mt-6 max-w-4xl text-4xl font-bold leading-tight text-sage-secondary sm:text-5xl lg:text-6xl">
-            আপনার সন্তানের জন্য সঠিক ব্যাচ নির্বাচন করুন
+            আপনার সুবিধামতো সময় অনুযায়ি ব্যাচ নির্বাচন করুন
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-sage-gray-700 sm:text-lg">
-            শ্রেণি, শিফট, ফিচার এবং ভর্তি স্ট্যাটাস অনুযায়ী ব্যাচ সার্চ ও ফিল্টার
-            করুন। প্রতিটি ব্যাচে রয়েছে পরিকল্পিত ক্লাস, পরীক্ষা, প্রগ্রেস ট্র্যাকিং
-            এবং অভিজ্ঞ শিক্ষকের গাইডলাইন।
+            শ্রেণি, সময় এবং ছেলে ও মেয়ে অনুযায়ী ব্যাচ সার্চ ও ফিল্টার করুন।
+            প্রয়োজনে যেকোন তথ্য জানতে সরাসরি যোগাযোগ করুন 09617576776।
           </p>
         </Container>
       </section>

@@ -40,10 +40,7 @@ export function WhyChooseSection() {
             </span>
             <h2 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
               {whyChooseContent.titleStart}{" "}
-              <span className="text-sage-red-100">
-                {whyChooseContent.titleAccent}
-              </span>
-              <span className="block mt-1">{whyChooseContent.titleEnd}</span>
+              <span className="text-sage-red-100">{whyChooseContent.titleAccent}</span>
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-sage-red-100/80 sm:text-lg">
               {whyChooseContent.description}

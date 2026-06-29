@@ -9,18 +9,25 @@ export const navItems: NavItem[] = [
     href: "/",
   },
   {
-    label: "About Us",
-    href: "/about",
-  },
-  {
     label: "Batches",
     href: "/batches",
   },
   {
-    label: "Faculty",
+    label: "Exams",
+    href: "/exams",
+  },
+  {
+    label: "Teachers",
     href: "/teachers",
   },
-
+  {
+    label: "About Us",
+    href: "/about",
+  },
+  {
+    label: "Contact Us",
+    href: "/contact",
+  },
 ];
 
 export const navbarActions: NavItem[] = [

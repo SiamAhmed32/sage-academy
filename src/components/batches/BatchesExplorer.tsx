@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Filter, Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { BatchCard } from "@/components/home/BatchCard";
 import { batches as homeBatches } from "@/constants/batches";
 import type { BatchItem } from "@/constants/batches";
 
-type SortOption = "order" | "newest" | "title";
-
 const PAGE_SIZE = 6;
+
+function getBatchKey(card: BatchItem & { _id?: unknown }, index: number) {
+  if (card._id) return String(card._id);
+  if (card.slug) return card.slug;
+  return `${card.title}-${index}`;
+}
 
 export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem[] }) {
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
-  const [sort, setSort] = useState<SortOption>("order");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
   const filteredBatches = useMemo(() => {
     const query = debouncedQ.toLowerCase();
 
-    let result = batches.filter((batch) => {
+    return batches.filter((batch) => {
       const matchesQuery = !query
         ? true
         : `${batch.title} ${batch.shift ?? ""} ${batch.features.join(" ")}`
@@ -44,15 +47,7 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
       const matchesClass = selectedClass ? batch.title === selectedClass : true;
       return matchesQuery && matchesClass;
     });
-
-    if (sort === "title") {
-      result = [...result].sort((a, b) => a.title.localeCompare(b.title, "bn"));
-    } else if (sort === "newest") {
-      result = [...result].reverse();
-    }
-
-    return result;
-  }, [batches, debouncedQ, selectedClass, sort]);
+  }, [batches, debouncedQ, selectedClass]);
 
   const total = filteredBatches.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -72,7 +67,7 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
       <Container className="relative">
         <div className="rounded-3xl border border-sage-red-100 bg-white/90 p-5 shadow-lg backdrop-blur sm:p-8">
           <div className="grid gap-4 lg:grid-cols-12">
-            <label className="lg:col-span-5">
+            <label className="lg:col-span-8">
               <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-sage-secondary">
                 <Search size={16} />
                 ব্যাচ খুঁজুন
@@ -88,7 +83,7 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
               />
             </label>
 
-            <label className="lg:col-span-3">
+            <label className="lg:col-span-4">
               <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-sage-secondary">
                 <Filter size={16} />
                 শ্রেণি
@@ -109,25 +104,6 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
                 ))}
               </select>
             </label>
-
-            <label className="lg:col-span-4">
-              <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-sage-secondary">
-                <ArrowRight size={16} />
-                সাজান
-              </span>
-              <select
-                value={sort}
-                onChange={(e) => {
-                  setSort(e.target.value as SortOption);
-                  setPage(1);
-                }}
-                className="h-12 w-full rounded-xl border border-sage-red-100 bg-white px-3 text-sm outline-none transition focus:border-sage-primary"
-              >
-                <option value="order">ডিফল্ট</option>
-                <option value="newest">নতুন ব্যাচ</option>
-                <option value="title">শ্রেণি অনুযায়ী</option>
-              </select>
-            </label>
           </div>
         </div>
 
@@ -137,7 +113,6 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
             onClick={() => {
               setQ("");
               setSelectedClass("");
-              setSort("order");
             }}
             className="rounded-full border border-sage-red-100 px-4 py-2 font-semibold text-sage-secondary transition hover:border-sage-primary hover:text-sage-primary"
           >
@@ -151,11 +126,8 @@ export function BatchesExplorer({ batches = homeBatches }: { batches?: BatchItem
           </div>
         ) : (
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {items.map((card: any) => (
-              <BatchCard
-                key={card._id}
-                card={card}
-              />
+            {items.map((card: BatchItem, index: number) => (
+              <BatchCard key={getBatchKey(card, index)} card={card} />
             ))}
           </div>
         )}

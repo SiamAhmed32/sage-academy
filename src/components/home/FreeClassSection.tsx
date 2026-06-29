@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 
 import { Container } from "@/components/shared/Container";
 import { freeClassOptions, freeClassSubjectSuggestions } from "@/constants/free-class";
+import { FREE_CLASS_OPEN_EVENT } from "@/lib/free-class-modal";
 import { cn } from "@/lib/utils";
 
 type MeUser = {
@@ -76,6 +77,18 @@ export function FreeClassSection() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const openModal = () => setOpen(true);
+    window.addEventListener(FREE_CLASS_OPEN_EVENT, openModal);
+    return () => window.removeEventListener(FREE_CLASS_OPEN_EVENT, openModal);
+  }, []);
+
+  useEffect(() => {
+    if (window.location.hash !== "#free-class") return;
+    setOpen(true);
+    history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   }, []);
 
   const onOpenChange = useCallback(
@@ -198,28 +211,34 @@ export function FreeClassSection() {
         <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
           {/* Copy + CTA (left on large screens) */}
           <div className="text-left">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p className="inline-flex items-center gap-2 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-primary/20 ring-1 ring-white/50">
               <Sparkles className="h-4 w-4 shrink-0 text-sage-gold" />
-              <span>একদিন · সম্পূর্ণ ফ্রি · শিক্ষক যাচাই</span>
+              <span>প্রথম ৩টি ক্লাস সম্পূর্ণ ফ্রি</span>
             </p>
+            {/* <p className="bn-pill text-sm font-bold text-sage-gray-600 sm:text-base">
+              শিক্ষক যাচাই
+            </p> */}
+          </div>
 
-            <h2 className="mt-7 max-w-3xl text-balance text-[2.6rem] font-black leading-[1.08] tracking-[-0.01em] text-sage-secondary sm:mt-8 sm:text-5xl lg:text-6xl">
-              আগে ক্লাসে বসুন,
-              <span className="relative mt-2 block w-fit text-sage-primary">
-                তারপর সিদ্ধান্ত নিন
-                <span className="absolute -bottom-2 left-0 h-3 w-full rounded-full bg-sage-gold/35" />
+            <h2 className="bn-headline mt-6 max-w-4xl text-[1.65rem] font-black text-sage-secondary sm:mt-7 sm:text-[2rem] md:text-[2.35rem] lg:text-[2.5rem] xl:text-[2.65rem] xl:leading-[1.38]">
+              <span className="text-sage-secondary">ভর্তি আগে ক্লাস করে দেখুন,</span>{" "}
+              <span className="relative inline text-sage-primary">
+                একটি ক্লাসেই পার্থক্য বুঝুন
+                <span className="absolute -bottom-1 left-0 h-2 w-full rounded-full bg-sage-gold/35" />
               </span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-sage-gray-700 sm:text-xl sm:leading-9">
-              একজন ভালো শিক্ষক শুধু পড়ান না, শিক্ষার্থীর ভয় কমান, অভ্যাস ঠিক করেন, আর লক্ষ্যটা পরিষ্কার করে দেন। SAGE Academy-তে সেই অভিজ্ঞতাই আগে দেখে নিন।
+             একজন ভালো শিক্ষক শুধু পড়ান না, শিক্ষার্থীর ভয় কমান, অভ্যাস ঠিক করেন, আর লক্ষ্যটা পরিষ্কার করে দেন। SAGE Academy-তে সেই অভিজ্ঞতাই আগে দেখে নিন।
+
             </p>
 
             <div className="mt-7 grid max-w-2xl grid-cols-3 overflow-hidden rounded-2xl border border-sage-warm-border bg-white shadow-sm">
               {[
-                ["লাইভ", "শিক্ষক"],
-                ["সিলেবাস", "ম্যাপিং"],
-                ["পরিকল্পনা", "পরামর্শ"],
+                ["ছোট", "ব্যাচ"],
+                ["প্রাক্টিস", "শীট"],
+                ["ক্লাস", " টেস্ট"],
               ].map(([top, bottom]) => (
                 <div key={top} className="border-r border-sage-warm-border px-3 py-4 text-center last:border-r-0 sm:px-5">
                   <p className="text-base font-black text-sage-secondary sm:text-xl">{top}</p>
@@ -230,7 +249,7 @@ export function FreeClassSection() {
 
             <ul className="mt-7 max-w-2xl space-y-3 sm:space-y-4">
               {[
-                { t: "প্রথম ক্লাসেই বোঝা যাবে শিক্ষক কীভাবে দুর্বল জায়গা ধরেন", Icon: Headphones },
+                { t: "একটি টপিক ভালো ভাবে বুঝতে কমপক্ষে ৩টি ফ্রি ক্লাস করুন", Icon: Headphones },
                 { t: "শ্রেণি ও বিষয়ের উপর ভিত্তি করে ছোট কিন্তু স্পষ্ট শেখার পরিকল্পনা", Icon: PenLine },
                 { t: "ভর্তি নেওয়ার আগে অভিভাবক ও শিক্ষার্থী দুজনেরই নিশ্চিন্ত সিদ্ধান্ত", Icon: CheckCircle2 },
               ].map(({ t, Icon }, i) => (

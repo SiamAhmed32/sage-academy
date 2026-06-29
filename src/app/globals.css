@@ -47,7 +47,7 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-hind-siliguri);
+  --font-sans: var(--font-noto-sans-bengali), var(--font-hind-siliguri), sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -181,5 +181,62 @@
   button:disabled,
   [role="button"][aria-disabled="true"] {
     cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .bn-headline {
+    line-height: 1.3;
+    padding-block: 0.08em;
+    overflow: visible;
+    letter-spacing: 0;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings: "liga" 1, "clig" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .bn-headline-subline {
+    line-height: 1.3;
+    margin-top: 0.12em;
+    padding-block: 0.08em;
+    overflow: visible;
+    letter-spacing: 0;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings: "liga" 1, "clig" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .bn-text {
+    line-height: 1.65;
+    padding-block: 0.04em;
+    overflow: visible;
+  }
+
+  .bn-pill {
+    line-height: 1.55;
+    overflow: visible;
+  }
+
+  html[data-exam-focus] footer,
+  html[data-exam-focus] .scroll-to-top-fab,
+  body:has(.exam-focus-route) footer,
+  body:has(.exam-focus-route) .scroll-to-top-fab {
+    display: none !important;
+  }
+
+  html[data-exam-focus] main,
+  body:has(.exam-focus-route) main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    min-height: calc(100dvh - 5rem);
+  }
+
+  body:has(.exam-focus-route) {
+    overflow-x: hidden;
   }
 }

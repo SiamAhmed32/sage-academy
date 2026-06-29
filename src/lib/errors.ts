@@ -71,3 +71,11 @@ export class PhoneRequiredError extends AppError {
     this.name = "PhoneRequiredError";
   }
 }
+
+/** 429 — rate limit exceeded */
+export class TooManyRequestsError extends AppError {
+  constructor(message = "Too many requests. Please try again later.") {
+    super(message, 429, "TOO_MANY_REQUESTS");
+    this.name = "TooManyRequestsError";
+  }
+}

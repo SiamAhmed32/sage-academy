@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Quote,
   Shield,
+  Trophy,
   Users,
 } from "lucide-react";
 
@@ -48,6 +49,7 @@ export const adminNavGroups = [
     items: [
       { label: "কুইজ প্রশ্ন", href: "/admin/quizzes", icon: BookOpen },
       { label: "মডেল টেস্ট", href: "/admin/model-tests", icon: ClipboardCheck },
+      { label: "Exam Hub", href: "/admin/exam-hub", icon: Trophy },
       { label: "Exam", href: "/admin/exams", icon: CalendarDays },
       { label: "প্রমোশন কার্ড", href: "/admin/promotion-cards", icon: Layout },
       { label: "টেস্টিমোনিয়াল", href: "/admin/testimonials", icon: Quote },

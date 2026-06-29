@@ -34,6 +34,6 @@ export const homeContactPoints = [
 ];
 
 export const homeContactMeta = [
-  { label: "ফোন", value: "+880 1700-000000" },
+  { label: "ফোন", value: "+88 01629106190" },
   { label: "সময়", value: "সকাল ৯টা - রাত ৮টা" },
 ];

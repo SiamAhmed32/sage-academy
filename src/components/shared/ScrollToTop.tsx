@@ -32,7 +32,7 @@ export function ScrollToTop() {
   }, []);
 
   return (
-    <div className="fixed bottom-8 right-8 z-50">
+    <div className="scroll-to-top-fab fixed bottom-8 right-8 z-50">
       <AnimatePresence>
         {isVisible && (
           <motion.button

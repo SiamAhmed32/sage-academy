@@ -1,3 +1,17 @@
+export const heroCopy = {
+  badge: "বনশ্রীর শীর্ষ একাডেমিক কোচিং সেন্টার",
+  headlineLine1: "শুধু পরীক্ষার প্রস্তুতি নয়,",
+  headlineLine2: "গড়ে উঠুক আত্ববিশ্বাসী শিক্ষার্থী।",
+  description:
+    "সহজ ব্যাখ্যা, নিয়মিত অনুশীলন ও সাপ্তাহিক পরীক্ষার মাধ্যমে প্রতিটি কনসেপ্ট শেখা হয়ে উঠুক আরো স্পষ্ট।",
+};
+
+export const heroHighlights = [
+  "ছেলে-মেয়ে আলাদা ব্যাচ",
+  "নিয়মিত সাপ্তাহিক পরিক্ষা",
+  "কনসেপ্ট ক্লিয়ার ক্লাস",
+];
+
 export const heroTeachers = [
   {
     name: "রাহাদ স্যার",
@@ -73,26 +87,19 @@ export const heroTeachers = [
 
 export const heroStats = [
   {
-    value: "২০০০+",
-    countTo: 2000,
+    value: "1০০০+",
+    countTo: 1000,
     suffix: "+",
     label: "শিক্ষার্থী",
-    icon: "graduate",
   },
   {
-    value: "৬-১২",
-    label: "শ্রেণি",
-    icon: "book",
+    value: "১২+",
+    countTo: 12,
+    suffix: "+",
+    label: "অভিজ্ঞ শিক্ষক",
   },
   {
     value: "সাপ্তাহিক",
-    label: "মূল্যায়ন",
-    icon: "exam",
+    label: "পরীক্ষা",
   },
-];
-
-export const heroHighlights = [
-  "Conceptual Teaching",
-  "ছোট ব্যাচে ব্যক্তিগত যত্ন",
-  "সাপ্তাহিক পরীক্ষা ও মূল্যায়ন",
 ];

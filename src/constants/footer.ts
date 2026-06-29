@@ -6,7 +6,7 @@ export const footerContent = {
     { label: "Home", href: "/" },
     { label: "About Us", href: "/about" },
     { label: "Batches", href: "/batches" },
-    { label: "Faculty", href: "/teachers" },
+    { label: "Teachers", href: "/teachers" },
     { label: "Results", href: "/results" },
   ],
   supportLinks: [

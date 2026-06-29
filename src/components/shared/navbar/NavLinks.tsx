@@ -18,7 +18,10 @@ export function NavLinks({ direction = "row", onNavigate }: NavLinksProps) {
   return (
     <ul className={cn("flex gap-1", isColumn ? "flex-col" : "items-center")}>
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive =
+          item.href === "/"
+            ? pathname === "/"
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <li key={item.href}>
