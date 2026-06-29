@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/home/HeroSection";
+import { HeroImagePreloads } from "@/components/home/HeroImagePreloads";
 import { TeacherSection } from "@/components/home/TeacherSection";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { WhyChooseSection } from "@/components/home/WhyChooseSection";
@@ -16,6 +17,7 @@ export default async function Home() {
 
   return (
     <main>
+      <HeroImagePreloads />
       <HeroSection />
       <BatchSection />
       <AssessmentCommandSection />

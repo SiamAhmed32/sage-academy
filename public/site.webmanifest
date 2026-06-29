@@ -1,14 +1,28 @@
 {
   "name": "SAGE Academy",
   "short_name": "SAGE Academy",
+  "description": "Academic and admission care in Banasree.",
+  "start_url": "/",
   "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "theme_color": "#7f0d12",
+  "theme_color": "#6D0F12",
   "background_color": "#ffffff",
   "display": "standalone"
 }

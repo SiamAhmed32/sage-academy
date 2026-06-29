@@ -15,9 +15,9 @@ export function HeroSection() {
   const [activeTeacher, setActiveTeacher] = useState(0);
 
   useEffect(() => {
-    heroTeachers.forEach((item) => {
+    heroTeachers.slice(0, 4).forEach((item) => {
       const img = new window.Image();
-      img.src = item.image;
+      img.src = encodeURI(item.image);
     });
 
     const timer = setInterval(() => {
