@@ -7,7 +7,7 @@ const roles = [
   },
   {
     title: "Admin",
-    details: "Admission, contact, batch, teacher, testimonial এবং website content manage করবে।",
+    details: "Super admin এর মতো প্রায় সব admin panel access পাবে। User role (super admin ছাড়া) পরিবর্তন, admission, batch, teacher, content সব manage করতে পারবে।",
   },
   {
     title: "Manager",

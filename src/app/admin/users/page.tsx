@@ -1,9 +1,9 @@
-import { updateUserRoleAction } from "@/app/admin/actions";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { UserRoleRow } from "@/components/admin/users/UserRoleRow";
 import { userRoleOptions } from "@/constants/admin";
 import type { AuthRole } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
-import { requireAdminPageUser } from "@/lib/rbac";
+import { canManageUsers, assignableUserRoles, requireAdminPageUser } from "@/lib/rbac";
 import User from "@/models/User";
 import Link from "next/link";
 
@@ -83,13 +83,24 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
     User.countDocuments(query),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const canEditRoles = currentUser.role === "super_admin";
+  const canEditRoles = canManageUsers(currentUser.role);
+  const assignableRoles = assignableUserRoles(currentUser.role);
+  const roleOptionsForEditor = userRoleOptions
+    .filter((option) => assignableRoles.includes(option.value as AuthRole))
+    .map((option) => ({
+      value: option.value as AuthRole,
+      label: option.label,
+    }));
 
   return (
     <div>
       <AdminPageHeader
         title="ইউজার ও রোল"
-        description="Super admin ছাড়া কেউ role পরিবর্তন করতে পারবে না।"
+        description={
+          canEditRoles
+            ? "Admin ও Super admin user role ও active status পরিবর্তন করতে পারবে। Super admin role শুধু super admin দিতে পারবে।"
+            : "Role পরিবর্তনের জন্য admin বা super admin access লাগবে।"
+        }
       />
 
       <div className="mb-5 rounded-xl border border-sage-border bg-white p-4">
@@ -157,36 +168,27 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-sage-border">
-            {users.map((user) => (
-              <tr key={user._id.toString()}>
-                <td className="p-4 font-bold text-sage-secondary">{user.name}</td>
-                <td className="p-4">{user.email}</td>
-                <td className="p-4">{user.phone || "N/A"}</td>
-                <td className="p-4">
-                  <form id={`user-${user._id}`} action={updateUserRoleAction}>
-                    <input type="hidden" name="id" value={user._id.toString()} />
-                    <select
-                      name="role"
-                      defaultValue={user.role}
-                      disabled={!canEditRoles}
-                      className="h-9 rounded-lg border border-sage-border px-3"
-                    >
-                      {userRoleOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </form>
-                </td>
-                <td className="p-4">
-                  <input form={`user-${user._id}`} name="isActive" type="checkbox" defaultChecked={user.isActive} disabled={!canEditRoles} />
-                </td>
-                <td className="p-4">
-                  <button form={`user-${user._id}`} disabled={!canEditRoles} className="rounded-lg bg-sage-primary px-4 py-2 font-bold text-white disabled:opacity-40">
-                    সেভ
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {users.map((user) => {
+              const userRole = user.role as AuthRole;
+              const isProtectedSuperAdmin =
+                userRole === "super_admin" && currentUser.role !== "super_admin";
+
+              return (
+                <UserRoleRow
+                  key={user._id.toString()}
+                  user={{
+                    id: user._id.toString(),
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    role: userRole,
+                    isActive: user.isActive,
+                  }}
+                  roleOptions={roleOptionsForEditor}
+                  isEditable={canEditRoles && !isProtectedSuperAdmin}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>

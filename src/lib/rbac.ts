@@ -7,8 +7,26 @@ import type { AuthRole, AuthUser } from "@/lib/auth";
 export const staffRoles: AuthRole[] = ["manager", "admin", "super_admin"];
 export const adminRoles: AuthRole[] = ["admin", "super_admin"];
 
+export const allAuthRoles: AuthRole[] = [
+  "student",
+  "guardian",
+  "manager",
+  "admin",
+  "super_admin",
+];
+
 export function canManageUsers(role: AuthRole) {
-  return role === "super_admin";
+  return role === "admin" || role === "super_admin";
+}
+
+export function assignableUserRoles(role: AuthRole): AuthRole[] {
+  if (role === "super_admin") {
+    return allAuthRoles;
+  }
+  if (role === "admin") {
+    return ["student", "guardian", "manager", "admin"];
+  }
+  return [];
 }
 
 export function canDeleteRecords(role: AuthRole) {

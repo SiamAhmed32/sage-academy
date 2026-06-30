@@ -7,7 +7,6 @@ import { getAuthCookieConfig } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import {
   adminRoles,
-  canManageUsers,
   requireRole,
   staffRoles,
 } from "@/lib/rbac";
@@ -531,26 +530,6 @@ export async function updateTestimonialVisibilityAction(formData: FormData) {
     isFeatured: bool(formData, "isFeatured"),
   });
   revalidatePath("/admin/testimonials");
-}
-
-export async function updateUserRoleAction(formData: FormData) {
-  const currentUser = await requireRole(["super_admin"]);
-  if (!canManageUsers(currentUser.role)) return;
-
-  const targetUserId = text(formData, "id");
-  const nextRole = text(formData, "role");
-  const nextIsActive = bool(formData, "isActive");
-
-  if (targetUserId === currentUser.id && (nextRole !== "super_admin" || !nextIsActive)) {
-    return;
-  }
-
-  await connectDB();
-  await User.findByIdAndUpdate(targetUserId, {
-    role: nextRole,
-    isActive: nextIsActive,
-  });
-  revalidatePath("/admin/users");
 }
 
 export async function createStudentAction(
