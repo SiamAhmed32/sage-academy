@@ -7,15 +7,12 @@ import { useRouter } from "next/navigation";
 import { Archive, Trash2, RotateCcw } from "lucide-react";
 import { PromotionCardEditModal } from "./PromotionCardEditModal";
 import type { PromotionCard } from "./types";
+import type { SerializedPromotionCard } from "@/lib/promotion-card-serialize";
 
 type BatchOption = { _id: string; title: string; batchCode: string };
 
-type PopulatedPromotionCard = Omit<PromotionCard, 'linkedBatch'> & {
-  linkedBatch?: BatchOption;
-};
-
 interface PromotionCardTableRowProps {
-  card: PopulatedPromotionCard;
+  card: SerializedPromotionCard;
   batches: BatchOption[];
 }
 
@@ -37,13 +34,19 @@ export function PromotionCardTableRow({ card, batches }: PromotionCardTableRowPr
         method = "PATCH";
         const formData = new FormData();
         formData.append("isArchived", "false");
-        formData.append("websiteVisible", "true"); // Auto show on website when restored
-        
+        formData.append("websiteVisible", "on");
+
         const res = await fetch(url, { method, body: formData });
-        if (!res.ok) throw new Error("অ্যাকশনটি সফল হয়নি");
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.message || "অ্যাকশনটি সফল হয়নি");
+        }
       } else {
         const res = await fetch(url, { method });
-        if (!res.ok) throw new Error("অ্যাকশনটি সফল হয়নি");
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.message || "অ্যাকশনটি সফল হয়নি");
+        }
       }
 
       toast.success(
@@ -92,9 +95,12 @@ export function PromotionCardTableRow({ card, batches }: PromotionCardTableRowPr
         </td>
         <td className="max-w-xs p-4">
           <div className="flex flex-wrap gap-1">
-            {card.features.map((f, i) => (
-              <span key={i} className="rounded-md bg-sage-white px-2 py-0.5 text-[10px] ring-1 ring-sage-red-100">
-                {f}
+            {(card.features ?? []).map((feature, index) => (
+              <span
+                key={`${card._id}-feature-${index}`}
+                className="rounded-md bg-sage-white px-2 py-0.5 text-[10px] ring-1 ring-sage-red-100"
+              >
+                {feature}
               </span>
             ))}
           </div>

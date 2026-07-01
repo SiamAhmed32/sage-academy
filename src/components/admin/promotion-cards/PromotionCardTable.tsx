@@ -3,27 +3,16 @@
 import { useMemo, useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { PromotionCardTableRow } from "./PromotionCardTableRow";
+import type { SerializedPromotionCard } from "@/lib/promotion-card-serialize";
 
-type PromotionCard = {
-  _id: string;
-  title: string;
-  image: string;
-  badge: string;
-  features: string[];
-  overview?: string;
-  linkedBatch?: { _id: string; title: string; batchCode: string };
-  websiteVisible: boolean;
-  featured: boolean;
-  order: number;
-  isArchived: boolean;
-};
+type BatchOption = { _id: string; title: string; batchCode: string };
 
-export function PromotionCardTable({ 
-  cards, 
-  batches 
-}: { 
-  cards: PromotionCard[];
-  batches: { _id: string; title: string; batchCode: string }[];
+export function PromotionCardTable({
+  cards,
+  batches,
+}: {
+  cards: SerializedPromotionCard[];
+  batches: BatchOption[];
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "visible" | "hidden" | "featured">("all");
@@ -32,18 +21,26 @@ export function PromotionCardTable({
 
   const filteredCards = useMemo(() => {
     return cards.filter((card) => {
-      const matchesSearch = card.title.toLowerCase().includes(search.toLowerCase());
+      const title = card.title?.toLowerCase() ?? "";
+      const matchesSearch = title.includes(search.toLowerCase());
       const matchesView = view === "active" ? !card.isArchived : card.isArchived;
-      const matchesFilter = 
-        filter === "all" ? true :
-        filter === "visible" ? card.websiteVisible :
-        filter === "hidden" ? !card.websiteVisible :
-        filter === "featured" ? card.featured : true;
-      const matchesBatch = 
-        batchFilter === "all" ? true :
-        batchFilter === "none" ? !card.linkedBatch :
-        card.linkedBatch?._id === batchFilter;
-      
+      const matchesFilter =
+        filter === "all"
+          ? true
+          : filter === "visible"
+            ? card.websiteVisible
+            : filter === "hidden"
+              ? !card.websiteVisible
+              : filter === "featured"
+                ? card.featured
+                : true;
+      const matchesBatch =
+        batchFilter === "all"
+          ? true
+          : batchFilter === "none"
+            ? !card.linkedBatch
+            : card.linkedBatch?._id === batchFilter;
+
       return matchesSearch && matchesView && matchesFilter && matchesBatch;
     });
   }, [cards, search, filter, view, batchFilter]);
