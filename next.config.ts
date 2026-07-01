@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
         destination: "/admin/promotion-cards",
         permanent: true,
       },
+      {
+        source: "/assessments",
+        destination: "/exams",
+        permanent: false,
+      },
+      {
+        source: "/assessments/model-tests",
+        destination: "/exams",
+        permanent: false,
+      },
+      {
+        source: "/assessments/exams",
+        destination: "/exams",
+        permanent: false,
+      },
     ];
   },
   images: {

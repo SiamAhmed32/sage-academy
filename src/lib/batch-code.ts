@@ -21,6 +21,13 @@ export function buildBatchSlug(batchCode: string) {
   return batchCode.trim().toLowerCase();
 }
 
+export function withBatchSlug<T extends { batchCode: string; slug?: string }>(data: T) {
+  return {
+    ...data,
+    slug: data.slug?.trim().toLowerCase() || buildBatchSlug(data.batchCode),
+  };
+}
+
 export function getBatchTitle(classLevel: number) {
   return getClassLabel(classLevel);
 }

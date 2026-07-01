@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/mongodb";
 import AcademicBatch from "@/models/AcademicBatch";
 import { requireRole, adminRoles } from "@/lib/rbac";
 import { batchPayloadFromFormData } from "@/lib/batch-request";
+import { backfillMissingBatchSlugs } from "@/lib/batch-slug";
+import { withBatchSlug } from "@/lib/batch-code";
+import { ConflictError } from "@/lib/errors";
 import { createAcademicBatchSchema } from "@/schemas/academic-batch";
 
 export async function GET(req: NextRequest) {
@@ -24,7 +27,20 @@ export async function POST(req: NextRequest) {
     const body = await batchPayloadFromFormData(formData);
     const validatedData = createAcademicBatchSchema.parse(body);
 
-    const newBatch = await AcademicBatch.create(validatedData);
+    await backfillMissingBatchSlugs();
+
+    const existing = await AcademicBatch.findOne({ batchCode: validatedData.batchCode });
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `এই ব্যাচ কোড (${validatedData.batchCode}) ইতিমধ্যে ব্যবহার করা হয়েছে।`,
+        },
+        { status: 409 }
+      );
+    }
+
+    const newBatch = await AcademicBatch.create(withBatchSlug(validatedData));
     return NextResponse.json({ success: true, data: newBatch });
   } catch (error) {
     console.error("Academic batch creation error:", error);

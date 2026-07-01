@@ -14,6 +14,13 @@ const AcademicBatchSchema = new Schema(
       trim: true,
       uppercase: true,
     },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
     overview: {
       type: String,
       default: "নিয়মিত ক্লাস, সাপ্তাহিক পরীক্ষা, প্রিন্টেড শিট এবং একাডেমিক মনিটরিংয়ের মাধ্যমে এই ব্যাচ সাজানো হয়েছে।",

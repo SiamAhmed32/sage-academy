@@ -9,6 +9,7 @@
     "dev:fresh": "npm run dev:clean && next dev",
     "dev:fresh:webpack": "npm run dev:clean && next dev --webpack",
     "build": "next build",
+    "generate:favicons": "node scripts/generate-favicons.mjs",
     "start": "next start",
     "lint": "eslint"
   },
@@ -53,6 +54,8 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.35.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

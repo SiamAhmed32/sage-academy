@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CalendarDays, Clock3, MapPin, Sparkles, Trophy, Users } from "lucide-react";

@@ -32,18 +32,34 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sageacademybd.com";
+
 export const metadata: Metadata = {
-  title: "SAGE Academy",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "SAGE Academy",
+    template: "%s | SAGE Academy",
+  },
   description: "Academic and admission care in Banasree.",
+  applicationName: "SAGE Academy",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/favicon-32x32.png",
+    shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    siteName: "SAGE Academy",
+    locale: "bn_BD",
+    type: "website",
+    url: siteUrl,
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "SAGE Academy" }],
   },
 };
 

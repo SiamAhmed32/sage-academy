@@ -8,7 +8,7 @@ import { OfflineLearningSection } from "@/components/home/OfflineLearningSection
 import { QuizSection } from "@/components/quiz/QuizSection";
 import { ContactSection } from "@/components/home/ContactSection";
 import { FreeClassSection } from "@/components/home/FreeClassSection";
-import { AssessmentCommandSection } from "@/components/assessments/AssessmentCommandSection";
+import { ExamHubHomeSection } from "@/components/exam-hub/ExamHubHomeSection";
 import { getOptionalSessionFromCookies } from "@/lib/auth";
 
 export default async function Home() {
@@ -20,7 +20,9 @@ export default async function Home() {
       <HeroImagePreloads />
       <HeroSection />
       <BatchSection />
-      <AssessmentCommandSection />
+      <ExamHubHomeSection />
+      {/* Legacy model-test / exam registration hub — use Exam Hub (/exams) instead */}
+      {/* <AssessmentCommandSection /> */}
       <FreeClassSection />
       {/* <QuizSection user={user} /> */}
       <WhyChooseSection />

@@ -5,6 +5,8 @@ import { throwValidation } from "@/app/api/batches/shared";
 import { withApiHandler } from "@/lib/api-handler";
 import { successResponse } from "@/lib/api-response";
 import { batchPayloadFromFormData } from "@/lib/batch-request";
+import { backfillMissingBatchSlugs } from "@/lib/batch-slug";
+import { withBatchSlug } from "@/lib/batch-code";
 import { ConflictError } from "@/lib/errors";
 import { connectDB } from "@/lib/mongodb";
 import { adminRoles, requireRole } from "@/lib/rbac";
@@ -142,7 +144,9 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     throw new ConflictError(`এই শ্রেণির (${validatedData.batchCode}) জন্য ব্যাচটি ইতিমধ্যে তৈরি করা হয়েছে।`);
   }
 
-  const batch = await AcademicBatch.create(validatedData);
+  await backfillMissingBatchSlugs();
+
+  const batch = await AcademicBatch.create(withBatchSlug(validatedData));
 
   return successResponse(batch, "AcademicBatch created successfully", 201);
 });

@@ -45,6 +45,14 @@ export function AssessmentDetailClient({ assessment, badge }: { assessment: Publ
         <div className="absolute -left-20 bottom-0 h-[400px] w-[400px] rounded-full bg-sage-primary/15 blur-[100px]" />
 
         <Container className="relative">
+          <div className="mb-6 rounded-2xl border border-sage-gold/30 bg-sage-gold/10 px-4 py-3 text-sm leading-6 text-white/90">
+            এটি পুরনো Assessment সিস্টেমের পেজ। নতুন সাপ্তাহিক/মাসিক ও অনলাইন পরীক্ষার জন্য{" "}
+            <Link href="/exams" className="font-bold text-sage-gold underline-offset-2 hover:underline">
+              Exam Hub
+            </Link>{" "}
+            ব্যবহার করুন।
+          </div>
+
           <Link href="/assessments" className="inline-flex items-center gap-2 text-sm font-bold text-sage-gold transition hover:text-white">
             <ArrowLeft className="h-4 w-4" />
             সব প্রোগ্রামে ফিরুন

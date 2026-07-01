@@ -2,10 +2,12 @@ import mongoose from "mongoose";
 import { ZodError } from "zod";
 
 import { BadRequestError, NotFoundError, ValidationError } from "@/lib/errors";
+import { buildBatchSlug } from "@/lib/batch-code";
 
 export type AcademicBatchPayload = {
   title?: string;
   batchCode?: string;
+  slug?: string;
   classLevel?: number;
   genderGroup?: "male" | "female" | "combined";
   version?: "bangla" | "english";
@@ -50,7 +52,11 @@ export function buildAcademicBatchUpdate(body: AcademicBatchPayload): AcademicBa
   const update: AcademicBatchPayload = {};
 
   if (body.title !== undefined) update.title = body.title.trim();
-  if (body.batchCode !== undefined) update.batchCode = body.batchCode.trim().toUpperCase();
+  if (body.batchCode !== undefined) {
+    update.batchCode = body.batchCode.trim().toUpperCase();
+    update.slug = buildBatchSlug(update.batchCode);
+  }
+  if (body.slug !== undefined) update.slug = body.slug.trim().toLowerCase();
   if (body.classLevel !== undefined) update.classLevel = body.classLevel;
   if (body.genderGroup !== undefined) update.genderGroup = body.genderGroup;
   if (body.version !== undefined) update.version = body.version;
