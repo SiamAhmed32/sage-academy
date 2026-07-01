@@ -28,13 +28,13 @@ async function getHomePromotionCards() {
     await connectDB();
     const cards = await PromotionCard.find({
       websiteVisible: true,
-      featured: true,
+      isArchived: { $ne: true },
     })
       .populate({
         path: "linkedBatch",
         select: "status totalSeats availableSeats classLevel",
       })
-      .sort({ order: 1, createdAt: -1 })
+      .sort({ featured: -1, order: 1, createdAt: -1 })
       .limit(6)
       .lean<PromotionCardDoc[]>();
 
@@ -70,7 +70,7 @@ function serializeCard(card: PromotionCardDoc): HomeBatchCard {
     id: card._id.toString(),
     title: card.title,
     image: card.image,
-    features: card.features,
+    features: Array.isArray(card.features) ? card.features : [],
     badge: card.badge,
     slug: card.slug,
     linkedBatch,
