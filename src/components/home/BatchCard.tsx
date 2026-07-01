@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa6";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 
+import { PendingLink } from "@/components/shared/PendingLink";
 import { cn } from "@/lib/utils";
 import { buildPublicSlug } from "@/lib/public-slug";
 
@@ -23,25 +23,28 @@ export function BatchCard({ card }: { card: BatchCardData }) {
   const publicSlug = buildPublicSlug({
     title,
     classLevel: linkedBatch?.classLevel,
-    fallback: slug,
+    fallback: slug?.trim() || "batch",
   });
+  const detailsHref = `/batches/${publicSlug}`;
 
   const status = linkedBatch?.status || badge || "ভর্তি চলছে";
   const seatsInfo = "ছেলে ও মেয়েদের আলাদা ব্যাচ";
 
   return (
     <article className="group overflow-hidden rounded-[1.5rem] border border-sage-red-100 bg-sage-white shadow-sm transition-all hover:shadow-xl">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-sage-red-50 md:aspect-[1.4/1]">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          unoptimized
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-      </div>
+      <PendingLink href={detailsHref} className="block">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-sage-red-50 md:aspect-[1.4/1]">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        </div>
+      </PendingLink>
 
       <div className="space-y-4 p-4 md:space-y-5 md:p-7">
         <div className="flex items-start justify-between gap-3 border-b border-sage-red-100 pb-3 md:pb-4">
@@ -74,20 +77,22 @@ export function BatchCard({ card }: { card: BatchCardData }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 md:gap-4">
-          <Link
-            href={`/batches/${publicSlug}`}
+          <PendingLink
+            href={detailsHref}
+            pendingLabel="লোড হচ্ছে..."
             className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-sage-secondary md:px-5 md:py-3"
           >
             বিস্তারিত
-          </Link>
+          </PendingLink>
 
-          <Link
+          <PendingLink
             href="/admission"
+            pendingLabel="যাচ্ছে..."
             className="inline-flex items-center gap-2 rounded-full bg-sage-primary px-4 py-2.5 text-sm font-semibold text-sage-white md:px-5 md:py-3"
           >
             ভর্তি আবেদন
             <FaArrowRight size={14} />
-          </Link>
+          </PendingLink>
         </div>
       </div>
     </article>

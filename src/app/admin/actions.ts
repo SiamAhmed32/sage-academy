@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { getAuthCookieConfig } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
+import { revalidatePromotionCardPublicPages, revalidateTeacherPublicPages, revalidateTestimonialPublicPages } from "@/lib/revalidate-public";
 import {
   adminRoles,
   requireRole,
@@ -373,7 +374,7 @@ export async function createBatchAction(formData: FormData) {
 
   await AcademicBatch.create(payload);
   revalidatePath("/admin/batches");
-  revalidatePath("/batches");
+  revalidatePromotionCardPublicPages();
   redirect("/admin/batches");
 }
 
@@ -450,7 +451,7 @@ export async function updateAcademicBatchAction(formData: FormData) {
   );
 
   revalidatePath("/admin/batches");
-  revalidatePath("/batches");
+  revalidatePromotionCardPublicPages();
   redirect("/admin/batches");
 }
 
@@ -467,7 +468,7 @@ export async function archiveAcademicBatchAction(formData: FormData) {
   });
 
   revalidatePath("/admin/batches");
-  revalidatePath("/batches");
+  revalidatePromotionCardPublicPages();
   redirect("/admin/batches");
 }
 
@@ -484,7 +485,7 @@ export async function restoreAcademicBatchAction(formData: FormData) {
   });
 
   revalidatePath("/admin/batches");
-  revalidatePath("/batches");
+  revalidatePromotionCardPublicPages();
 }
 
 export async function updateTeacherVisibilityAction(formData: FormData) {
@@ -494,6 +495,7 @@ export async function updateTeacherVisibilityAction(formData: FormData) {
     isFeatured: bool(formData, "isFeatured"),
   });
   revalidatePath("/admin/teachers");
+  revalidateTeacherPublicPages();
 }
 
 export async function submitTeacherOrderFormAction(formData: FormData): Promise<void> {
@@ -520,6 +522,7 @@ export async function updateTeacherOrderAction(formData: FormData) {
 
   await Teacher.findByIdAndUpdate(id, { order });
   revalidatePath("/admin/teachers");
+  revalidateTeacherPublicPages();
   return { ok: true };
 }
 
@@ -530,6 +533,7 @@ export async function updateTestimonialVisibilityAction(formData: FormData) {
     isFeatured: bool(formData, "isFeatured"),
   });
   revalidatePath("/admin/testimonials");
+  revalidateTestimonialPublicPages();
 }
 
 export async function createStudentAction(

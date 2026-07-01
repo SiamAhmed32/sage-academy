@@ -4,9 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { BatchCardsCarousel, type HomeBatchCard } from "@/components/home/BatchCardsCarousel";
 import { Container } from "@/components/shared/Container";
 import { toBanglaDigits } from "@/constants/class-levels";
-import { connectDB } from "@/lib/mongodb";
-import PromotionCard from "@/models/PromotionCard";
-import "@/models/AcademicBatch";
+import { getHomePromotionCards, getVisiblePromotionCardCount } from "@/lib/promotion-cards";
 
 type PromotionCardDoc = {
   _id: { toString(): string };
@@ -22,40 +20,6 @@ type PromotionCardDoc = {
       }
     | null;
 };
-
-async function getHomePromotionCards() {
-  try {
-    await connectDB();
-    const cards = await PromotionCard.find({
-      websiteVisible: true,
-      isArchived: { $ne: true },
-    })
-      .populate({
-        path: "linkedBatch",
-        select: "status totalSeats availableSeats classLevel",
-      })
-      .sort({ featured: -1, order: 1, createdAt: -1 })
-      .limit(6)
-      .lean<PromotionCardDoc[]>();
-
-    return cards;
-  } catch (error) {
-    console.error("Home promotion cards fetch failed:", error);
-    return [];
-  }
-}
-
-async function getTotalVisibleBatchCount() {
-  try {
-    await connectDB();
-    return PromotionCard.countDocuments({
-      websiteVisible: true,
-      isArchived: { $ne: true },
-    });
-  } catch {
-    return 0;
-  }
-}
 
 function serializeCard(card: PromotionCardDoc): HomeBatchCard {
   const linkedBatch =
@@ -78,7 +42,17 @@ function serializeCard(card: PromotionCardDoc): HomeBatchCard {
 }
 
 export async function BatchSection() {
-  const [cards, totalCount] = await Promise.all([getHomePromotionCards(), getTotalVisibleBatchCount()]);
+  let cards: PromotionCardDoc[] = [];
+  let totalCount = 0;
+
+  try {
+    [cards, totalCount] = await Promise.all([
+      getHomePromotionCards() as Promise<PromotionCardDoc[]>,
+      getVisiblePromotionCardCount(),
+    ]);
+  } catch (error) {
+    console.error("Home promotion cards fetch failed:", error);
+  }
 
   if (!cards || cards.length === 0) return null;
 

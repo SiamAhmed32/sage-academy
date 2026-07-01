@@ -7,16 +7,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
+import { buildPublicSlug } from "@/lib/public-slug";
 import type { BatchDetailsResponse } from "@/types/batch";
 
 type RelatedBatch = BatchDetailsResponse["data"]["related"][number];
 
 type BatchRelatedProps = {
   related: RelatedBatch[];
-  resolveSlug: (title: string, slug?: string) => string;
 };
 
-export function BatchRelated({ related, resolveSlug }: BatchRelatedProps) {
+function relatedBatchHref(item: RelatedBatch) {
+  const classLevel =
+    item.linkedBatch && typeof item.linkedBatch === "object"
+      ? item.linkedBatch.classLevel
+      : null;
+
+  return `/batches/${buildPublicSlug({
+    title: item.title,
+    classLevel,
+    fallback: item.slug,
+  })}`;
+}
+
+export function BatchRelated({ related }: BatchRelatedProps) {
   const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
@@ -67,7 +80,7 @@ export function BatchRelated({ related, resolveSlug }: BatchRelatedProps) {
           >
             {orderedBatches.slice(0, 3).map((item, index) => (
               <div key={item._id} className={`${index > 0 ? "hidden md:block" : ""} ${index > 1 ? "md:hidden lg:block" : ""}`}>
-                <BatchCard item={item} resolveSlug={resolveSlug} />
+                <BatchCard item={item} />
               </div>
             ))}
           </motion.div>
@@ -88,9 +101,9 @@ function NavButton({ icon: Icon, onClick }: { icon: LucideIcon; onClick: () => v
   );
 }
 
-function BatchCard({ item, resolveSlug }: { item: any; resolveSlug: BatchRelatedProps["resolveSlug"] }) {
+function BatchCard({ item }: { item: RelatedBatch }) {
   return (
-    <Link href={`/batches/${resolveSlug(item.title, item.slug)}`} className="group block overflow-hidden rounded-2xl border border-sage-red-100 bg-white transition hover:border-sage-primary">
+    <Link href={relatedBatchHref(item)} className="group block overflow-hidden rounded-2xl border border-sage-red-100 bg-white transition hover:border-sage-primary">
       <div className="relative h-52 w-full overflow-hidden">
         <Image src={item.image || "/BatchImages/CAP26a.jpeg"} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-110" />
       </div>

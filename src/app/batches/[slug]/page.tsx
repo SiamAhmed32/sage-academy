@@ -1,12 +1,14 @@
-export const dynamic = "force-dynamic";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { BatchDetailsView } from "@/components/batches/BatchDetailsView";
 import { batches } from "@/constants/batches";
-import { connectDB } from "@/lib/mongodb";
-import { buildPublicSlug } from "@/lib/public-slug";
-import PromotionCard from "@/models/PromotionCard";
+import {
+  findPromotionCardBySlug,
+  findRelatedPromotionCards,
+} from "@/lib/promotion-card-details";
 import type { BatchDetailsResponse } from "@/types/batch";
+
+export const revalidate = 60;
 
 type AcademicBatchPageProps = {
   params: Promise<{ slug: string }>;
@@ -100,122 +102,21 @@ function buildCardOnlyBatch(promotionCard: PromotionCardLike) {
   };
 }
 
-function getRequestedClassLevel(slug: string) {
-  const match = slug.match(/^class-([4-9]|1[0-2])$/i);
-  return match?.[1] ?? "";
-}
-
-async function findPromotionCard(slug: string) {
-  const baseQuery = {
-    isActive: { $ne: false },
-    isArchived: { $ne: true },
-    websiteVisible: true,
-  };
-
-  const exactCard = await PromotionCard.findOne({
-    ...baseQuery,
-    slug: slug.toLowerCase(),
-  }).populate({
-    path: "linkedBatch",
-    populate: {
-      path: "subjects.teacher",
-      select: "name subject designation experience image quote socialLinks",
-    },
-  });
-
-  if (exactCard) return exactCard;
-
-  const requestedClassLevel = getRequestedClassLevel(slug);
-  if (!requestedClassLevel) return null;
-
-  const cards = await PromotionCard.find(baseQuery)
-    .sort({ order: 1, createdAt: -1 })
-    .populate({
-      path: "linkedBatch",
-      populate: {
-        path: "subjects.teacher",
-        select: "name subject designation experience image quote socialLinks",
-      },
-    });
-
-  return (
-    cards.find((card) => {
-      const linkedClassLevel =
-        typeof card.linkedBatch === "object" && card.linkedBatch
-          ? card.linkedBatch.classLevel
-          : "";
-
-      return (
-        buildPublicSlug({
-          title: card.title,
-          classLevel: linkedClassLevel,
-          fallback: card.slug,
-        }) === slug.toLowerCase()
-      );
-    }) ?? null
-  );
-}
-
 export default async function AcademicBatchDetailsPage({ params }: AcademicBatchPageProps) {
   const { slug } = await params;
-
-  await connectDB();
-
-  const promotionCard = await findPromotionCard(slug);
+  const promotionCard = await findPromotionCardBySlug(slug);
 
   if (promotionCard) {
-    const linkedClassLevel =
-      typeof promotionCard.linkedBatch === "object" && promotionCard.linkedBatch
-        ? promotionCard.linkedBatch.classLevel
-        : "";
-    const canonicalSlug = buildPublicSlug({
-      title: promotionCard.title,
-      classLevel: linkedClassLevel,
-      fallback: promotionCard.slug,
-    });
-
-    if (canonicalSlug && canonicalSlug !== slug.toLowerCase()) {
-      redirect(`/batches/${canonicalSlug}`);
-    }
-  }
-
-  if (promotionCard && promotionCard.linkedBatch) {
-    const batch = promotionCard.linkedBatch;
-    
-    const related = await PromotionCard.find({
-      _id: { $ne: promotionCard._id },
-      websiteVisible: true,
-      featured: true,
-    })
-      .sort({ order: 1, createdAt: 1 })
-      .limit(6)
-      .select("title slug image badge");
+    const related = await findRelatedPromotionCards(promotionCard._id);
+    const batch =
+      promotionCard.linkedBatch && typeof promotionCard.linkedBatch === "object"
+        ? promotionCard.linkedBatch
+        : buildCardOnlyBatch(promotionCard);
 
     const serialized = JSON.parse(
       JSON.stringify({
         promotionCard,
         batch,
-        related,
-      })
-    );
-
-    return <BatchDetailsView data={serialized} />;
-  }
-
-  if (promotionCard) {
-    const related = await PromotionCard.find({
-      _id: { $ne: promotionCard._id },
-      websiteVisible: true,
-      featured: true,
-    })
-      .sort({ order: 1, createdAt: 1 })
-      .limit(6)
-      .select("title slug image badge");
-
-    const serialized = JSON.parse(
-      JSON.stringify({
-        promotionCard,
-        batch: buildCardOnlyBatch(promotionCard),
         related,
       })
     );

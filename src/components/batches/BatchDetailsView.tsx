@@ -1,11 +1,9 @@
-"use client";
-
 import { Container } from "@/components/shared/Container";
+import { BatchBreadcrumb } from "./BatchBreadcrumb";
 import { BatchHero } from "./BatchHero";
 import { BatchTabs } from "./BatchTabs";
 import { BatchSidebar } from "./BatchSidebar";
 import { BatchRelated } from "./BatchRelated";
-import { buildPublicSlug } from "@/lib/public-slug";
 import type { BatchDetailsResponse } from "@/types/batch";
 
 type BatchDetailsViewProps = {
@@ -18,23 +16,23 @@ type BatchDetailsViewProps = {
 
 export function BatchDetailsView({ data }: BatchDetailsViewProps) {
   const { promotionCard, batch, related } = data;
-
-  const resolveSlug = (title: string, slug?: string) => {
-    return buildPublicSlug({ title, fallback: slug || encodeURIComponent(title) });
-  };
+  const displayTitle =
+    (typeof promotionCard.title === "string" && promotionCard.title) ||
+    (typeof batch.title === "string" && batch.title) ||
+    "SAGE Academy batch";
 
   return (
     <main className="bg-sage-white">
+      <BatchBreadcrumb title={displayTitle} />
+
       <section className="py-12 sm:py-16">
         <Container>
           <div className="grid gap-12 lg:grid-cols-[1fr_380px]">
-            {/* Left Content Column */}
             <div className="space-y-10">
               <BatchHero promotionCard={promotionCard} batch={batch} />
               <BatchTabs promotionCard={promotionCard} batch={batch} />
             </div>
 
-            {/* Sidebar Column */}
             <div className="relative">
               <BatchSidebar promotionCard={promotionCard} batch={batch} />
             </div>
@@ -42,7 +40,7 @@ export function BatchDetailsView({ data }: BatchDetailsViewProps) {
         </Container>
       </section>
 
-      <BatchRelated related={related} resolveSlug={resolveSlug} />
+      <BatchRelated related={related} />
     </main>
   );
 }

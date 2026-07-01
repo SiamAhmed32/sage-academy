@@ -12,11 +12,14 @@ import { createTeacherSchema } from "@/schemas/teacher";
 export const GET = withApiHandler(async () => {
   await connectDB();
 
-  const teachers = await Teacher.find().sort({
-    isFeatured: -1,
-    order: 1,
-    createdAt: 1,
-  });
+  const teachers = await Teacher.find()
+    .select("name subject designation experience quote image isFeatured order createdAt updatedAt")
+    .sort({
+      isFeatured: -1,
+      order: 1,
+      createdAt: 1,
+    })
+    .lean();
 
   return successResponse(teachers, "Teachers fetched successfully");
 });

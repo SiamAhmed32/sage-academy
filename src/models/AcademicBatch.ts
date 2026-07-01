@@ -1,4 +1,5 @@
 import { Schema, model, models } from "mongoose";
+import "./Teacher";
 
 const AcademicBatchSchema = new Schema(
   {

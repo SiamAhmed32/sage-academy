@@ -3,10 +3,10 @@ import { BrandLogo } from "@/components/shared/navbar/BrandLogo";
 import { MobileNavbar } from "@/components/shared/navbar/MobileNavbar";
 import { NavbarActions } from "@/components/shared/navbar/NavbarActions";
 import { NavLinks } from "@/components/shared/navbar/NavLinks";
-import { getCurrentAuthUser } from "@/lib/auth-session";
+import { getNavbarAuthUser } from "@/lib/auth-session";
 
 export async function Navbar() {
-  const user = await getCurrentAuthUser();
+  const user = await getNavbarAuthUser();
 
   return (
     <header className="sticky top-0 z-50 border-b border-sage-red-100 bg-sage-white/95 backdrop-blur-md">

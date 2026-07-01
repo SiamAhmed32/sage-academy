@@ -3,23 +3,19 @@ import { ArrowRight } from "lucide-react";
 
 import { ExamProgramCard } from "@/components/exam-hub/ExamProgramCard";
 import { Container } from "@/components/shared/Container";
-import { serializePublicProgram } from "@/lib/exam-hub";
-import { connectDB } from "@/lib/mongodb";
-import ExamProgram from "@/models/ExamProgram";
+import type { PublicExamProgram } from "@/lib/exam-hub";
+import { getHomeExamPrograms } from "@/lib/exam-hub-programs";
 
 export async function ExamHubHomeSection() {
-  await connectDB();
+  let serialized: PublicExamProgram[] = [];
 
-  const programs = await ExamProgram.find({ status: "published" })
-    .sort({ featured: -1, order: 1, startDate: 1 })
-    .limit(4)
-    .lean();
+  try {
+    serialized = await getHomeExamPrograms();
+  } catch (error) {
+    console.error("Home exam programs fetch failed:", error);
+  }
 
-  if (programs.length === 0) return null;
-
-  const serialized = programs.map((program) =>
-    serializePublicProgram(program as Record<string, unknown>)
-  );
+  if (serialized.length === 0) return null;
 
   return (
     <section className="border-y border-sage-border bg-gradient-to-b from-sage-red-50/80 to-sage-white py-16 sm:py-20">

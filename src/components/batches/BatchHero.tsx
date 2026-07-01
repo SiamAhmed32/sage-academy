@@ -1,12 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ChevronRight, Users } from "lucide-react";
-
-import { Container } from "@/components/shared/Container";
-import { batches } from "@/constants/batches";
+import { Users } from "lucide-react";
 
 type BatchHeroProps = {
   promotionCard: {
@@ -25,48 +18,20 @@ type BatchHeroProps = {
 };
 
 export function BatchHero({ promotionCard, batch }: BatchHeroProps) {
-  const batchTitle = batch.title || promotionCard.title || "SAGE Academy batch";
-  const staticImage = useMemo(() => {
-    return batches.find(
-      (item) =>
-        item.slug === promotionCard.slug ||
-        item.slug === batch.slug ||
-        item.title === batchTitle ||
-        item.title === promotionCard.title
-    )?.image;
-  }, [batch.slug, batchTitle, promotionCard.slug, promotionCard.title]);
-
-  const fallbackImage = staticImage || batch.image || "/BatchImages/CAP26a.jpeg";
-  const preferredImage = staticImage || promotionCard.image || batch.image || fallbackImage;
-  const [imageSrc, setImageSrc] = useState(preferredImage);
+  const displayTitle = promotionCard.title || batch.title || "SAGE Academy batch";
+  const imageSrc = promotionCard.image || batch.image || "/BatchImages/CAP26a.jpeg";
 
   return (
     <>
-      <div className="border-b border-sage-red-100/50 bg-sage-red-50/50 py-4">
-        <Container>
-          <div className="flex items-center gap-2 text-xs font-medium text-sage-gray-500">
-            <Link href="/" className="hover:text-sage-primary">হোম</Link>
-            <ChevronRight size={12} />
-            <Link href="/batches" className="hover:text-sage-primary">ব্যাচসমূহ</Link>
-            <ChevronRight size={12} />
-            <span className="text-sage-secondary">{batchTitle}</span>
-          </div>
-        </Container>
-      </div>
-
       <div className="relative aspect-video w-full overflow-hidden rounded-3xl border border-sage-red-100 shadow-xl shadow-sage-red-100/20">
         <Image
           src={imageSrc}
-          alt={batchTitle}
+          alt={displayTitle}
           fill
           priority
+          unoptimized
           sizes="(max-width: 1024px) 100vw, 65vw"
           className="object-cover"
-          onError={() => {
-            if (imageSrc !== fallbackImage) {
-              setImageSrc(fallbackImage);
-            }
-          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-sage-secondary/70 via-sage-secondary/10 to-transparent" />
         <div className="absolute bottom-6 left-8">
@@ -77,11 +42,9 @@ export function BatchHero({ promotionCard, batch }: BatchHeroProps) {
       </div>
 
       <div className="mt-10">
-        <p className="mb-3 text-sm font-bold text-sage-primary">
-          SAGE Academy Academic Batch
-        </p>
+        <p className="mb-3 text-sm font-bold text-sage-primary">SAGE Academy Academic Batch</p>
         <h1 className="text-4xl font-extrabold leading-tight text-sage-secondary sm:text-5xl">
-          {batchTitle}
+          {displayTitle}
         </h1>
 
         <div className="mt-6 flex flex-wrap items-center gap-5 text-sm font-semibold text-sage-gray-600">

@@ -11,6 +11,8 @@ import { FreeClassSection } from "@/components/home/FreeClassSection";
 import { ExamHubHomeSection } from "@/components/exam-hub/ExamHubHomeSection";
 import { getOptionalSessionFromCookies } from "@/lib/auth";
 
+export const revalidate = 60;
+
 export default async function Home() {
   const session = await getOptionalSessionFromCookies();
   const user = session ? { id: session.sub, name: session.name } : null;
@@ -20,7 +22,7 @@ export default async function Home() {
       <HeroImagePreloads />
       <HeroSection />
       <BatchSection />
-      <ExamHubHomeSection />
+      {/* <ExamHubHomeSection /> */}
       {/* Legacy model-test / exam registration hub — use Exam Hub (/exams) instead */}
       {/* <AssessmentCommandSection /> */}
       <FreeClassSection />

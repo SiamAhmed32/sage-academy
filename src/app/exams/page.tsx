@@ -1,8 +1,9 @@
 import { ExamHubExplorer } from "@/components/exam-hub/ExamHubExplorer";
 import { ExamHubHero } from "@/components/exam-hub/ExamHubHero";
-import { serializePublicProgram } from "@/lib/exam-hub";
-import { connectDB } from "@/lib/mongodb";
-import ExamProgram from "@/models/ExamProgram";
+import { getPublishedExamPrograms } from "@/lib/exam-hub-programs";
+import type { PublicExamProgram } from "@/lib/exam-hub";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "Exam Hub | SAGE Academy",
@@ -10,12 +11,13 @@ export const metadata = {
 };
 
 export default async function ExamsPage() {
-  await connectDB();
-  const programs = await ExamProgram.find({ status: "published" })
-    .sort({ featured: -1, order: 1, startDate: 1 })
-    .lean();
+  let serialized: PublicExamProgram[] = [];
 
-  const serialized = programs.map((program) => serializePublicProgram(program as Record<string, unknown>));
+  try {
+    serialized = await getPublishedExamPrograms();
+  } catch (error) {
+    console.error("Exams page fetch failed:", error);
+  }
 
   return (
     <main className="bg-sage-white">

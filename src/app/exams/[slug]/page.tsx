@@ -1,18 +1,21 @@
 import { notFound } from "next/navigation";
 
 import { ExamDetailClient } from "@/components/exam-hub/ExamDetailClient";
-import { activeExamQuestionQuery, serializePublicProgram } from "@/lib/exam-hub";
+import { activeExamQuestionQuery } from "@/lib/exam-hub";
+import { getPublishedExamProgramBySlug } from "@/lib/exam-hub-programs";
+import { serializePublicProgram } from "@/lib/exam-hub";
 import { getCurrentAuthUser } from "@/lib/auth-session";
 import { connectDB } from "@/lib/mongodb";
-import ExamProgram from "@/models/ExamProgram";
 import ExamQuestion from "@/models/ExamQuestion";
+
+export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  await connectDB();
   const { slug } = await params;
-  const program = await ExamProgram.findOne({ slug, status: "published" }).select("title subtitle").lean();
+  const program = await getPublishedExamProgramBySlug(slug);
+
   return {
     title: program ? `${program.title} | SAGE Exam Hub` : "Exam | SAGE Academy",
     description: program?.subtitle || "Exam details and registration",
@@ -20,13 +23,15 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function ExamDetailPage({ params }: Props) {
-  await connectDB();
   const { slug } = await params;
-  const program = await ExamProgram.findOne({ slug, status: "published" }).lean();
+  const program = await getPublishedExamProgramBySlug(slug);
   if (!program) notFound();
 
-  const questionCount = await ExamQuestion.countDocuments(activeExamQuestionQuery(program._id));
-  const user = await getCurrentAuthUser();
+  await connectDB();
+  const [questionCount, user] = await Promise.all([
+    ExamQuestion.countDocuments(activeExamQuestionQuery(program._id)),
+    getCurrentAuthUser(),
+  ]);
 
   return (
     <ExamDetailClient

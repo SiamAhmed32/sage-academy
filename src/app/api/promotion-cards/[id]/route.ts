@@ -7,6 +7,7 @@ import { BadRequestError, NotFoundError } from "@/lib/errors";
 import { connectDB } from "@/lib/mongodb";
 import { buildPublicSlug } from "@/lib/public-slug";
 import { adminRoles, requireRole } from "@/lib/rbac";
+import { revalidatePromotionCardPublicPages } from "@/lib/revalidate-public";
 import { uploadBatchImage } from "@/lib/upload-batch-image";
 import AcademicBatch from "@/models/AcademicBatch";
 import PromotionCard from "@/models/PromotionCard";
@@ -63,9 +64,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
       runValidators: true,
     });
 
+    revalidatePromotionCardPublicPages();
     revalidatePath("/admin/promotion-cards");
     revalidatePath("/admin/promotion_cards");
-    revalidatePath("/");
 
     return successResponse(updatedCard, "Promotion card status updated successfully");
   }
@@ -138,9 +139,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     runValidators: true,
   });
 
+  revalidatePromotionCardPublicPages();
   revalidatePath("/admin/promotion-cards");
   revalidatePath("/admin/promotion_cards");
-  revalidatePath("/");
 
   return successResponse(updatedCard, "Promotion card updated successfully");
 });
@@ -155,9 +156,9 @@ export const DELETE = withApiHandler(async (req: NextRequest, context: RouteCont
     const deleted = await PromotionCard.findByIdAndDelete(id);
     if (!deleted) throw new NotFoundError("Promotion card not found");
 
+    revalidatePromotionCardPublicPages();
     revalidatePath("/admin/promotion-cards");
     revalidatePath("/admin/promotion_cards");
-    revalidatePath("/");
 
     return successResponse(deleted, "Promotion card deleted permanently");
   }
@@ -174,9 +175,9 @@ export const DELETE = withApiHandler(async (req: NextRequest, context: RouteCont
   );
   if (!archived) throw new NotFoundError("Promotion card not found");
 
+  revalidatePromotionCardPublicPages();
   revalidatePath("/admin/promotion-cards");
   revalidatePath("/admin/promotion_cards");
-  revalidatePath("/");
 
   return successResponse(archived, "Promotion card archived successfully");
 });

@@ -1,42 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { 
-  Users, 
-  CalendarCheck, 
-  BookOpenCheck, 
-  Headset, 
-  PhoneCall
+import {
+  Users,
+  CalendarCheck,
+  BookOpenCheck,
+  Headset,
+  PhoneCall,
 } from "lucide-react";
 
 import { Container } from "@/components/shared/Container";
 import { TeacherProfileCard } from "@/components/teachers/TeacherProfileCard";
 import type { Teacher } from "@/types/teacher";
 
-export function TeachersShowcase() {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+type TeachersShowcaseProps = {
+  teachers: Teacher[];
+};
 
-  useEffect(() => {
-    async function fetchTeachers() {
-      try {
-        const response = await fetch("/api/teachers");
-        const data = await response.json();
-        if (data.success) {
-          setTeachers(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch teachers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchTeachers();
-  }, []);
-
+export function TeachersShowcase({ teachers }: TeachersShowcaseProps) {
   return (
     <main className="bg-background selection:bg-secondary selection:text-white">
       {/* Hero Section */}
@@ -150,11 +132,7 @@ export function TeachersShowcase() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {isLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-80 animate-pulse rounded-2xl bg-white shadow-sm" />
-              ))
-            ) : teachers.length > 0 ? (
+            {teachers.length > 0 ? (
               teachers.map((teacher, index) => (
                 <TeacherProfileCard key={teacher._id} teacher={teacher} index={index} />
               ))
@@ -163,8 +141,7 @@ export function TeachersShowcase() {
                 কোনো শিক্ষক তথ্য পাওয়া যায়নি।
               </div>
             )}
-          </div>
-        </Container>
+          </div>        </Container>
       </section>
 
       {/* Final CTA */}

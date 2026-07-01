@@ -59,7 +59,12 @@ export type BatchDetailsResponse = {
   message: string;
   data: {
     batch: Batch;
-    related: Array<Pick<Batch, "_id" | "slug" | "title" | "image" | "status" | "shift">>;
+    related: Array<
+      Pick<Batch, "_id" | "slug" | "title" | "image" | "status" | "shift"> & {
+        badge?: string;
+        linkedBatch?: { classLevel?: number | string } | null;
+      }
+    >;
   };
 };
 
