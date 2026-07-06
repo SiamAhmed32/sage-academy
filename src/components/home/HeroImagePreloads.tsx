@@ -1,17 +1,17 @@
-import { heroTeachers } from "@/constants/hero";
+import { heroGallerySlides } from "@/constants/hero";
 
 const PRELOAD_COUNT = 3;
 
 export function HeroImagePreloads() {
   return (
     <>
-      {heroTeachers.slice(0, PRELOAD_COUNT).map((teacher) => (
+      {heroGallerySlides.slice(0, PRELOAD_COUNT).map((slide) => (
         <link
-          key={teacher.image}
+          key={slide.image}
           rel="preload"
           as="image"
-          href={encodeURI(teacher.image)}
-          fetchPriority={teacher.image === heroTeachers[0]?.image ? "high" : "low"}
+          href={encodeURI(slide.image)}
+          fetchPriority={slide.image === heroGallerySlides[0]?.image ? "high" : "low"}
         />
       ))}
     </>

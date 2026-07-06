@@ -1,10 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, CheckCircle2, Gift, GraduationCap, Headphones, Loader2, PenLine, Sparkles, X } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  BookOpenCheck,
+  CheckCircle2,
+  Gift,
+  GraduationCap,
+  Headphones,
+  Loader2,
+  PenLine,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 import { Container } from "@/components/shared/Container";
@@ -22,6 +35,87 @@ type MeUser = {
 
 function digitsOnly(raw: string, max = 11) {
   return raw.replace(/\D/g, "").slice(0, max);
+}
+
+function FreeClassEyebrow({ className }: { className?: string }) {
+  return (
+    <p
+      className={cn(
+        "inline-flex items-center gap-2 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-primary/20 ring-1 ring-white/50",
+        className
+      )}
+    >
+      <Sparkles className="h-4 w-4 shrink-0 text-sage-gold" />
+      <span>আগে অভিজ্ঞতা, তারপর ভর্তি</span>
+    </p>
+  );
+}
+
+function FreeClassPhoto({ mobile = false }: { mobile?: boolean }) {
+  const photoFrame = (
+    <div className={cn("relative overflow-hidden bg-sage-secondary", mobile ? "rounded-[1.2rem]" : "rounded-[1.35rem]")}>
+      <div
+        className={cn(
+          "relative w-full",
+          mobile ? "aspect-[16/11] min-h-[220px]" : "aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4] lg:min-h-[min(560px,64vh)]"
+        )}
+      >
+        <Image
+          src="/v1NewImages/Fres class.webp"
+          alt="SAGE Academy লাইব্রেরিতে শিক্ষক ও শিক্ষার্থীর গাইডলাইন সেশন"
+          fill
+          className="object-cover object-[48%_center] saturate-[1.03]"
+          sizes="(max-width: 1024px) 100vw, 48vw"
+          priority={false}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-sage-secondary/60 via-sage-secondary/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      </div>
+
+      <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-xs font-black tracking-wider text-white shadow-lg backdrop-blur-xl sm:left-5 sm:top-5">
+        SAGE LIVE CLASS
+      </div>
+    </div>
+  );
+
+  if (mobile) {
+    return (
+      <div className="relative mx-auto w-full max-w-xl">
+        <div className="pointer-events-none absolute -right-2 -top-2 z-0 h-14 w-14 rounded-2xl bg-sage-gold shadow-md shadow-sage-gold/30" />
+        <div className="relative z-10 overflow-hidden rounded-[1.65rem] border border-white bg-sage-primary p-2 shadow-xl shadow-sage-secondary/20 ring-1 ring-sage-warm-border/70">
+          {photoFrame}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-[2rem] border border-white bg-sage-primary p-3 shadow-2xl shadow-sage-secondary/25 sm:p-4">
+      {photoFrame}
+    </div>
+  );
+}
+
+function FreeClassFeatureChips({ className }: { className?: string }) {
+  return (
+    <div className={cn("grid gap-3 sm:grid-cols-3", className)}>
+      {[
+        { label: "Foundation", Icon: BookOpen },
+        { label: "Mentorship", Icon: GraduationCap },
+        { label: "Confidence", Icon: Sparkles },
+      ].map(({ label, Icon }) => (
+        <div
+          key={label}
+          className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/80 px-4 py-3 shadow-lg shadow-sage-secondary/10 backdrop-blur-lg transition hover:bg-white hover:shadow-xl"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage-primary text-white shadow-md shadow-sage-primary/25">
+            <Icon className="h-5 w-5" />
+          </span>
+          <span className="text-sm font-black text-sage-secondary">{label}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function FreeClassSection() {
@@ -208,51 +302,47 @@ export function FreeClassSection() {
       <div className="pointer-events-none absolute bottom-12 right-8 hidden h-32 w-32 rotate-45 rounded-[2rem] bg-sage-primary/10 lg:block" />
 
       <Container className="relative">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-          {/* Copy + CTA (left on large screens) */}
-          <div className="text-left">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p className="inline-flex items-center gap-2 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-primary/20 ring-1 ring-white/50">
-              <Sparkles className="h-4 w-4 shrink-0 text-sage-gold" />
-              <span>প্রথম ৩টি ক্লাস সম্পূর্ণ ফ্রি</span>
-            </p>
-            {/* <p className="bn-pill text-sm font-bold text-sage-gray-600 sm:text-base">
-              শিক্ষক যাচাই
-            </p> */}
-          </div>
+        <FreeClassEyebrow className="mb-6 lg:hidden" />
 
-            <h2 className="bn-headline mt-6 max-w-4xl text-[1.65rem] font-black text-sage-secondary sm:mt-7 sm:text-[2rem] md:text-[2.35rem] lg:text-[2.5rem] xl:text-[2.65rem] xl:leading-[1.38]">
-              <span className="text-sage-secondary">ভর্তি আগে ক্লাস করে দেখুন,</span>{" "}
+        <div className="mb-8 lg:hidden">
+          <FreeClassPhoto mobile />
+        </div>
+
+        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
+          {/* Copy + CTA — below image on mobile, left on desktop */}
+          <div className="text-left lg:order-1">
+            <div className="mb-6 hidden lg:block">
+              <FreeClassEyebrow />
+            </div>
+
+            <h2 className="bn-headline max-w-4xl text-[1.65rem] font-black text-sage-secondary sm:text-[2rem] md:text-[2.35rem] lg:text-[2.5rem] xl:text-[2.65rem] xl:leading-[1.38]">
+              <span className="text-sage-secondary">ভর্তির আগে </span>
               <span className="relative inline text-sage-primary">
-                একটি ক্লাসেই পার্থক্য বুঝুন
+                ২টি ফ্রি ক্লাস করুন
                 <span className="absolute -bottom-1 left-0 h-2 w-full rounded-full bg-sage-gold/35" />
               </span>
+              <span className="text-sage-secondary">, তারপর সিদ্ধান্ত নিন।</span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-sage-gray-700 sm:text-xl sm:leading-9">
-             একজন ভালো শিক্ষক শুধু পড়ান না, শিক্ষার্থীর ভয় কমান, অভ্যাস ঠিক করেন, আর লক্ষ্যটা পরিষ্কার করে দেন। SAGE Academy-তে সেই অভিজ্ঞতাই আগে দেখে নিন।
-
+              ভর্তির সিদ্ধান্ত হোক আত্মবিশ্বাসের সঙ্গে। তাই শিক্ষক, পড়ানোর ধরন ও ক্লাসের পরিবেশ নিজেই দেখে তারপর ভর্তি হোন।
             </p>
 
             <div className="mt-7 grid max-w-2xl grid-cols-3 overflow-hidden rounded-2xl border border-sage-warm-border bg-white shadow-sm">
-              {[
-                ["ছোট", "ব্যাচ"],
-                ["প্রাক্টিস", "শীট"],
-                ["ক্লাস", " টেস্ট"],
-              ].map(([top, bottom]) => (
-                <div key={top} className="border-r border-sage-warm-border px-3 py-4 text-center last:border-r-0 sm:px-5">
-                  <p className="text-base font-black text-sage-secondary sm:text-xl">{top}</p>
-                  <p className="mt-1 text-xs font-bold text-sage-gray-500 sm:text-sm">{bottom}</p>
+              {["ছোট ব্যাচ", "বিষয়ভিত্তিক ভর্তি", "ডাউট সলভ ক্লাস"].map((label) => (
+                <div key={label} className="flex items-center justify-center border-r border-sage-warm-border px-2 py-4 text-center last:border-r-0 sm:px-4">
+                  <p className="text-xs font-black leading-snug text-sage-secondary sm:text-sm">{label}</p>
                 </div>
               ))}
             </div>
 
             <ul className="mt-7 max-w-2xl space-y-3 sm:space-y-4">
               {[
-                { t: "একটি টপিক ভালো ভাবে বুঝতে কমপক্ষে ৩টি ফ্রি ক্লাস করুন", Icon: Headphones },
-                { t: "শ্রেণি ও বিষয়ের উপর ভিত্তি করে ছোট কিন্তু স্পষ্ট শেখার পরিকল্পনা", Icon: PenLine },
-                { t: "ভর্তি নেওয়ার আগে অভিভাবক ও শিক্ষার্থী দুজনেরই নিশ্চিন্ত সিদ্ধান্ত", Icon: CheckCircle2 },
-              ].map(({ t, Icon }, i) => (
+                { t: "একটি টপিক ভালোভাবে বুঝতে অন্তত ২টি ফ্রি ক্লাস করুন।", Icon: Headphones },
+                { t: "শিক্ষক, পড়ানোর ধরন ও ক্লাসের পরিবেশ নিজেই যাচাই করুন।", Icon: PenLine },
+                { t: "ফ্রি অনলাইন পরীক্ষায় ভর্তি ছাড়াই নিজের প্রস্তুতি যাচাই করুন।", Icon: BookOpenCheck },
+                { t: "তারপর নিশ্চিন্তে ভর্তি হওয়ার সিদ্ধান্ত নিন।", Icon: CheckCircle2 },
+              ].map(({ t, Icon }) => (
                 <li
                   key={t}
                   className="group flex gap-3 rounded-2xl border border-sage-warm-border bg-white/95 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sage-gold hover:shadow-md sm:px-5 sm:py-4"
@@ -265,13 +355,13 @@ export function FreeClassSection() {
               ))}
             </ul>
 
-            <div className="mt-8 sm:mt-9">
+            <div className="mt-8 flex flex-col gap-3 sm:mt-9 lg:flex-row lg:flex-nowrap lg:items-center">
               <button
                 type="button"
                 disabled={!sessionReady}
                 onClick={() => sessionReady && setOpen(true)}
                 className={cn(
-                  "inline-flex h-14 min-h-[3.5rem] w-full max-w-md items-center justify-center gap-2 rounded-2xl px-7 text-base font-black text-white shadow-xl transition sm:w-auto",
+                  "inline-flex h-14 min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-2xl px-7 text-base font-black text-white shadow-xl transition lg:w-auto lg:shrink-0 lg:px-5 lg:text-sm xl:px-7 xl:text-base",
                   sessionReady
                     ? "bg-sage-secondary shadow-sage-secondary/25 hover:scale-[1.02] hover:bg-sage-primary active:scale-[0.99]"
                     : "cursor-not-allowed bg-sage-gray-300 shadow-none"
@@ -289,6 +379,16 @@ export function FreeClassSection() {
                   </>
                 )}
               </button>
+
+              <Link
+                href="/exams"
+                className="group inline-flex h-14 min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-2xl border-2 border-sage-primary/20 bg-white px-7 text-base font-black text-sage-primary shadow-sm transition hover:border-sage-primary hover:bg-sage-primary hover:text-white lg:w-auto lg:shrink-0 lg:px-5 lg:text-sm xl:px-7 xl:text-base"
+              >
+                <BookOpen className="h-5 w-5 shrink-0 transition group-hover:text-white" />
+                ফ্রি অনলাইন পরীক্ষা দেখুন
+                <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
 
               {mounted &&
                 createPortal(
@@ -577,65 +677,17 @@ export function FreeClassSection() {
                   </AnimatePresence>,
                   document.body
                 )}
-            </div>
           </div>
 
-          {/* Premium academy visual */}
-          <div className="relative mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-none">
-            <div className="absolute -left-5 top-9 hidden h-[82%] w-[72%] -rotate-6 rounded-[2.2rem] bg-sage-secondary lg:block" />
-            <div className="absolute -right-4 -top-4 hidden h-28 w-28 rounded-[2rem] bg-sage-gold shadow-lg shadow-sage-gold/20 sm:block" />
-            <div className="absolute -bottom-5 left-10 hidden h-24 w-24 rounded-full border-[16px] border-sage-gold/45 sm:block" />
+          {/* Desktop visual — right column only */}
+          <div className="relative mx-auto hidden w-full max-w-2xl lg:order-2 lg:mx-0 lg:block lg:max-w-none">
+            <div className="absolute -left-5 top-9 h-[82%] w-[72%] -rotate-6 rounded-[2.2rem] bg-sage-secondary" />
+            <div className="absolute -right-4 -top-4 h-28 w-28 rounded-[2rem] bg-sage-gold shadow-lg shadow-sage-gold/20" />
+            <div className="absolute -bottom-5 left-10 h-24 w-24 rounded-full border-[16px] border-sage-gold/45" />
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-sage-primary p-3 shadow-2xl shadow-sage-secondary/25 sm:p-4">
-              <div className="relative overflow-hidden rounded-[1.35rem] bg-sage-secondary">
-                <div className="relative aspect-[4/3] w-full sm:aspect-[16/11] lg:aspect-[5/4] lg:min-h-[min(560px,64vh)]">
-                  <Image
-                    src="/sagePictures/libraryP.jpg"
-                    alt="SAGE Academy লাইব্রেরিতে শিক্ষক ও শিক্ষার্থীর গাইডলাইন সেশন"
-                    fill
-                    className="object-cover object-[48%_center] saturate-[1.03]"
-                    sizes="(max-width: 1024px) 100vw, 48vw"
-                    priority={false}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-sage-secondary/60 via-sage-secondary/10 to-transparent" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                </div>
+            <FreeClassPhoto />
 
-                {/* SAGE LIVE CLASS — dark glass pill */}
-                <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-xs font-black tracking-wider text-white shadow-lg backdrop-blur-xl sm:left-5 sm:top-5">
-                  SAGE LIVE CLASS
-                </div>
-
-                {/* Senior teacher note — frosted dark glass card */}
-                <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/15 bg-black/35 p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:bottom-5 sm:left-5 sm:right-auto sm:max-w-[360px] sm:p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-sage-gold">Senior teacher note</p>
-                  <p className="mt-2 text-lg font-black leading-snug text-white">
-                    “যে ক্লাসে প্রশ্ন করার সাহস বাড়ে, সেই ক্লাসেই শেখা শুরু হয়।”
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative mt-4 grid gap-3 sm:grid-cols-3">
-              {[
-                { label: "Foundation", Icon: BookOpen },
-                { label: "Mentorship", Icon: GraduationCap },
-                { label: "Confidence", Icon: Sparkles },
-              ].map(({ label, Icon }) => (
-                <div key={label} className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/80 px-4 py-3 shadow-lg shadow-sage-secondary/10 backdrop-blur-lg transition hover:bg-white hover:shadow-xl">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage-primary text-white shadow-md shadow-sage-primary/25">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="text-sm font-black text-sage-secondary">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* 1:1 floating stat — dark glass */}
-            <div className="absolute -right-2 top-28 hidden w-32 overflow-hidden rounded-2xl border border-white/20 bg-black/30 p-3 text-center shadow-2xl shadow-black/20 backdrop-blur-xl xl:block">
-              <p className="text-2xl font-black text-white">১:১</p>
-              <p className="mt-1 text-xs font-bold leading-4 text-white/75">দুর্বল জায়গা ধরার গাইডলাইন</p>
-            </div>
+            <FreeClassFeatureChips className="relative mt-4" />
           </div>
         </div>
       </Container>

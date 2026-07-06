@@ -121,7 +121,7 @@ export function BatchCardsCarousel({ cards }: BatchCardsCarouselProps) {
       onTouchEnd={() => setIsPaused(false)}
     >
       <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-sage-primary md:hidden">
-        স্বাইপ করে পরের ব্যাচ দেখুন
+        সোয়াইপ করে পরের ব্যাচ দেখুন
       </p>
 
       <div

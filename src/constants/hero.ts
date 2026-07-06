@@ -1,5 +1,5 @@
 export const heroCopy = {
-  badge: "বনশ্রীর শীর্ষ একাডেমিক কোচিং সেন্টার",
+  badge: "বনশ্রীর বিশ্বস্ত একাডেমিক কোচিং সেন্টার",
   headlineLine1: "শুধু পরীক্ষার প্রস্তুতি নয়,",
   headlineLine2: "গড়ে উঠুক আত্ববিশ্বাসী শিক্ষার্থী।",
   description:
@@ -12,77 +12,145 @@ export const heroHighlights = [
   "কনসেপ্ট ক্লিয়ার ক্লাস",
 ];
 
-export const heroTeachers = [
+export type HeroGallerySlide = {
+  image: string;
+  imageClass?: string;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  badge: string;
+};
+
+export const heroAcademySlides: HeroGallerySlide[] = [
   {
-    name: "রাহাদ স্যার",
-    subject: "Bangla Teacher",
-    experience: "নিয়মিত অনুশীলন ও পরীক্ষা সহায়তা",
+    image: "/v1NewImages/group pic.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "প্রাণবন্ত শেখার পরিবেশ",
+    subtitle: "একসাথে পড়াশোনা, একসাথে এগিয়ে চলা",
+    badge: "একাডেমিক কমিউনিটি",
+  },
+  {
+    image: "/v1NewImages/Fres class.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "Free Class",
+    title: "ফ্রি ক্লাসে যোগ দিন",
+    subtitle: "নিজে দেখে নিন আমাদের ক্লাস ও শিক্ষণ পদ্ধতি",
+    badge: "বিনামূল্যে অভিজ্ঞতা",
+  },
+  {
+    image: "/v1NewImages/prize to jayan.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "Achievement",
+    title: "সাফল্য উদযাপন",
+    subtitle: "শিক্ষার্থীদের অর্জনকে আমরা সম্মান করি",
+    badge: "পুরস্কার ও সাফল্য",
+  },
+  {
+    image: "/v1NewImages/Hero section.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "Campus",
+    title: "আধুনিক ক্লাসরুম",
+    subtitle: "আরামদায়ক ও শৃঙ্খলিত শিক্ষাঙ্গন",
+    badge: "ক্লাসরুম ভিত্তিক কেয়ার",
+  },
+  // {
+  //   image: "/v1NewImages/Hero section(1).webp",
+  //   imageClass: "object-cover object-center",
+  //   eyebrow: "SAGE Life",
+  //   title: "দৈনন্দিন একাডেমিক জীবন",
+  //   subtitle: "নিয়মিত ক্লাস, পরীক্ষা ও একাডেমিক গাইডলাইন",
+  //   badge: "নিয়মিত কার্যক্রম",
+  // },
+];
+
+export const heroTeacherSlides: HeroGallerySlide[] = [
+  {
     image: "/More about Sage/rahadTeacher2.jpg",
     imageClass: "object-cover object-center",
+    eyebrow: "Teachers",
+    title: "রাহাদ স্যার",
+    subtitle: "Bangla Teacher",
+    badge: "নিয়মিত অনুশীলন ও পরীক্ষা সহায়তা",
   },
   {
-    name: "Anisha Islam",
-    subject: "BGS TEACHER",
-    experience: "১০+ বছরের অভিজ্ঞতা",
     image: "/More about Sage/Anisha Islam.jpeg",
     imageClass: "object-cover object-[72%_center]",
+    eyebrow: "Teachers",
+    title: "Anisha Islam",
+    subtitle: "BGS Teacher",
+    badge: "১০+ বছরের অভিজ্ঞতা",
   },
   {
-    name: "Juwel",
-    subject: "English TEACHER",
-    experience: "১০+ বছরের অভিজ্ঞতা",
     image: "/More about Sage/juwel.jpeg",
     imageClass: "object-cover object-[72%_center]",
+    eyebrow: "Teachers",
+    title: "Juwel",
+    subtitle: "English Teacher",
+    badge: "১০+ বছরের অভিজ্ঞতা",
   },
   {
-    name: "Sajjatul Islam Shohan",
-    subject: "Physics Teacher",
-    experience: "১০+ বছরের অভিজ্ঞতা",
     image: "/More about Sage/Sajjatul Islam Shohan_physics.jpeg",
     imageClass: "object-cover object-[72%_center]",
+    eyebrow: "Teachers",
+    title: "Sajjatul Islam Shohan",
+    subtitle: "Physics Teacher",
+    badge: "১০+ বছরের অভিজ্ঞতা",
   },
+  // {
+  //   image: "/More about Sage/Fardin Rahman.jpeg",
+  //   imageClass: "object-cover object-[72%_center]",
+  //   eyebrow: "Teachers",
+  //   title: "Fardin Rahman",
+  //   subtitle: "Chemistry Teacher",
+  //   badge: "১০+ বছরের অভিজ্ঞতা",
+  // },
+  // {
+  //   image: "/More about Sage/ai-ceo.png",
+  //   imageClass: "object-cover object-[72%_center]",
+  //   eyebrow: "Teachers",
+  //   title: "অভিজ্ঞ শিক্ষক",
+  //   subtitle: "গণিত বিভাগ",
+  //   badge: "১০+ বছরের অভিজ্ঞতা",
+  // },
+  // {
+  //   image: "/More about Sage/Ai-teacher.png",
+  //   imageClass: "object-cover object-[72%_center]",
+  //   eyebrow: "Teachers",
+  //   title: "অভিজ্ঞ শিক্ষক",
+  //   subtitle: "গণিত বিভাগ",
+  //   badge: "১০+ বছরের অভিজ্ঞতা",
+  // },
   {
-    name: "Fardin Rahman",
-    subject: "Chemistry TEACHER",
-    experience: "১০+ বছরের অভিজ্ঞতা",
-    image: "/More about Sage/Fardin Rahman.jpeg",
-    imageClass: "object-cover object-[72%_center]",
-  },
-  {
-    name: "অভিজ্ঞ শিক্ষক",
-    subject: "গণিত বিভাগ",
-    experience: "১০+ বছরের অভিজ্ঞতা",
-    image: "/More about Sage/ai-ceo.png",
-    imageClass: "object-cover object-[72%_center]",
-  },
-  {
-    name: "অভিজ্ঞ শিক্ষক",
-    subject: "গণিত বিভাগ",
-    experience: "১০+ বছরের অভিজ্ঞতা",
-    image: "/More about Sage/Ai-teacher.png",
-    imageClass: "object-cover object-[72%_center]",
-  },
-  {
-    name: "ফাহাদ স্যার",
-    subject: "একাডেমিক মেন্টর",
-    experience: "বোর্ড ফোকাসড ক্লাস গাইডলাইন",
     image: "/More about Sage/rahadTeacher.jpg",
     imageClass: "object-cover object-center",
+    eyebrow: "Teachers",
+    title: "ফাহাদ স্যার",
+    subtitle: "একাডেমিক মেন্টর",
+    badge: "বোর্ড ফোকাসড ক্লাস গাইডলাইন",
   },
   {
-    name: "অভিজ্ঞ শিক্ষক",
-    subject: "গণিত বিভাগ",
-    experience: "১০+ বছরের অভিজ্ঞতা",
     image: "/hero/team1.jpg",
     imageClass: "object-cover object-[72%_center]",
+    eyebrow: "Teachers",
+    title: "অভিজ্ঞ শিক্ষক",
+    subtitle: "গণিত বিভাগ",
+    badge: "১০+ বছরের অভিজ্ঞতা",
   },
-  {
-    name: "একাডেমিক মেন্টর",
-    subject: "বিজ্ঞান বিভাগ",
-    experience: "বোর্ড পরীক্ষার গাইডলাইন",
-    image: "/sagePictures/libraryP.jpg",
-    imageClass: "object-cover object-center",
-  },
+  // {
+  //   image: "/sagePictures/libraryP.jpg",
+  //   imageClass: "object-cover object-center",
+  //   eyebrow: "Teachers",
+  //   title: "একাডেমিক মেন্টর",
+  //   subtitle: "বিজ্ঞান বিভাগ",
+  //   badge: "বোর্ড পরীক্ষার গাইডলাইন",
+  // },
+];
+
+/** Academy photos first, then all teacher slides */
+export const heroGallerySlides: HeroGallerySlide[] = [
+  ...heroAcademySlides,
+  ...heroTeacherSlides,
 ];
 
 export const heroStats = [

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import { heroCopy, heroHighlights, heroTeachers } from "@/constants/hero";
+import { heroCopy, heroGallerySlides, heroHighlights } from "@/constants/hero";
 import { Container } from "@/components/shared/Container";
 import { HeroActions } from "@/components/home/HeroActions";
 import { HeroStats } from "@/components/home/HeroStats";
@@ -12,16 +12,16 @@ import { HeroVisual } from "@/components/home/HeroVisual";
 const HIGHLIGHT_ICONS = ["✦", "◈", "✧"];
 
 export function HeroSection() {
-  const [activeTeacher, setActiveTeacher] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
-    heroTeachers.slice(0, 4).forEach((item) => {
+    heroGallerySlides.slice(0, 3).forEach((item) => {
       const img = new window.Image();
       img.src = encodeURI(item.image);
     });
 
     const timer = setInterval(() => {
-      setActiveTeacher((prev) => (prev + 1) % heroTeachers.length);
+      setActiveSlide((prev) => (prev + 1) % heroGallerySlides.length);
     }, 5000);
 
     return () => clearInterval(timer);
@@ -57,10 +57,15 @@ export function HeroSection() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/60 to-transparent" />
 
       {/* Top border */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sage-red-100 to-transparent" />
+      <div className="absolute inset-x-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-sage-red-100 to-transparent lg:block" />
 
-      <Container className="relative grid grid-cols-1 items-center gap-10 py-10 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(430px,0.9fr)] lg:gap-12 lg:py-14">
-        {/* ───── LEFT SIDE ───── */}
+      {/* Mobile: full-width hero image first (edge to edge) */}
+      <div className="relative z-10 lg:hidden">
+        <HeroVisual activeIndex={activeSlide} />
+      </div>
+
+      <Container className="relative grid grid-cols-1 items-center gap-8 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(430px,0.9fr)] lg:gap-12 lg:py-14">
+        {/* ───── TEXT ───── */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,7 +114,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.28, duration: 0.6 }}
-            className="bn-text mt-6 max-w-[52ch] text-[20px] leading-8 text-sage-gray-700 sm:mt-7 sm:text-[1.25rem]"
+            className="bn-text mt-6 hidden max-w-[52ch] text-[20px] leading-8 text-sage-gray-700 sm:mt-7 sm:text-[1.25rem] lg:block"
           >
             {heroCopy.description}
           </motion.p>
@@ -152,9 +157,9 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* ───── RIGHT SIDE ───── */}
-        <div className="pb-8 lg:pb-10">
-          <HeroVisual activeTeacher={activeTeacher} />
+        {/* ───── DESKTOP IMAGE ───── */}
+        <div className="hidden pb-8 lg:block lg:pb-10">
+          <HeroVisual activeIndex={activeSlide} />
         </div>
       </Container>
 

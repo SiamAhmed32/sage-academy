@@ -9,9 +9,7 @@ import { TestimonialCard, type DynamicTestimonial } from "./TestimonialCard";
 
 const sectionContent = {
   badge: "অভিভাবক ও শিক্ষার্থীদের মতামত",
-  titleStart: "যারা আমাদের সাথে",
-  titleAccent: "পড়েছে",
-  titleEnd: "তাদের অভিজ্ঞতা",
+  titleStart: "আমাদের শিক্ষার্থীদের অভিজ্ঞতা",
   description:
     "নিয়মিত ক্লাস, পরীক্ষা ও গাইডলাইনের ধারাবাহিকতায় শিক্ষার্থী ও অভিভাবকদের আস্থা তৈরি করাই আমাদের লক্ষ্য।",
 };
@@ -56,13 +54,8 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
             <div className="inline-flex items-center gap-3 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-secondary/15">
               {sectionContent.badge}
             </div>
-            <h2 className="mt-5 max-w-4xl text-4xl font-black leading-[1.06] text-sage-secondary sm:text-5xl lg:text-[4.25rem]">
-              {sectionContent.titleStart}{" "}
-              <span className="relative inline-block text-sage-primary">
-                {sectionContent.titleAccent}
-                <span className="absolute -bottom-2 left-0 h-3 w-full rounded-full bg-sage-gold/40" />
-              </span>{" "}
-              {sectionContent.titleEnd}
+            <h2 className="mt-5 max-w-4xl text-4xl font-black leading-[1.06] text-sage-secondary sm:text-5xl lg:text-[3.25rem]">
+              {sectionContent.titleStart}
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg">
               {sectionContent.description}

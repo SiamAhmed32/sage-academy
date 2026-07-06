@@ -21,11 +21,11 @@ export default async function Home() {
     <main>
       <HeroImagePreloads />
       <HeroSection />
+      <FreeClassSection />
       <BatchSection />
       {/* <ExamHubHomeSection /> */}
       {/* Legacy model-test / exam registration hub — use Exam Hub (/exams) instead */}
       {/* <AssessmentCommandSection /> */}
-      <FreeClassSection />
       {/* <QuizSection user={user} /> */}
       <WhyChooseSection />
       {/* <TeacherSection /> */}
