@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CalendarDays, Clock3, MapPin, Sparkles, Trophy, Users } from "lucide-react";
@@ -9,41 +10,60 @@ import { accessTypeLabels, deliveryModeLabels, offlineTypeLabels } from "@/const
 import type { PublicExamProgram } from "@/lib/exam-hub";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+function MetaRow({
+  icon,
+  children,
+  hidden = false,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+  hidden?: boolean;
+}) {
+  return (
+    <div className={cn("flex min-h-6 items-start gap-2.5 text-sm text-sage-gray-700", hidden && "invisible")}>
+      <span className="mt-0.5 shrink-0 text-sage-primary">{icon}</span>
+      <span className="leading-6">{children}</span>
+    </div>
+  );
+}
 
 export function ExamProgramCard({ program, index = 0 }: { program: PublicExamProgram; index?: number }) {
   const isOnline = program.deliveryMode === "online";
   const isPaid = program.requiresPayment;
+  const description = program.description?.trim() || "বিস্তারিত তথ্য দেখতে পরীক্ষার পেজে যান।";
 
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.45 }}
     >
-      <Card
+      <article
         className={cn(
-          "group h-full overflow-hidden border-0 bg-white shadow-lg shadow-sage-primary/5 ring-1 ring-sage-border transition hover:-translate-y-1 hover:shadow-xl hover:shadow-sage-primary/10",
+          "group flex h-full flex-col overflow-hidden rounded-[1.35rem] bg-white shadow-lg shadow-sage-primary/5 ring-1 ring-sage-border transition hover:-translate-y-1 hover:shadow-xl hover:shadow-sage-primary/10",
           program.featured && "ring-2 ring-sage-gold/60"
         )}
       >
-        <div
-          className={cn(
-            "relative h-2 w-full",
-            isOnline ? "bg-gradient-to-r from-sage-primary to-sage-primary-hover" : "bg-gradient-to-r from-sage-gold to-amber-500"
-          )}
-        />
         {program.image ? (
-          <div className="relative h-44 w-full overflow-hidden">
-            <Image src={program.image} alt={program.title} fill className="object-cover transition duration-500 group-hover:scale-105" unoptimized />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+          <div className="relative h-40 w-full shrink-0 overflow-hidden bg-sage-red-50 sm:h-44">
+            <Image
+              src={program.image}
+              alt={program.title}
+              fill
+              className="object-cover transition duration-500 group-hover:scale-105"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
           </div>
         ) : null}
-        <CardHeader className="gap-3 pb-2">
+
+        <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
           <div className="flex flex-wrap items-center gap-2">
             {program.featured ? (
-              <Badge className="bg-sage-gold-soft text-sage-gold-muted border-sage-gold/30">
+              <Badge className="border-sage-gold/30 bg-sage-gold-soft text-sage-gold-muted">
                 <Sparkles className="size-3" />
                 Featured
               </Badge>
@@ -66,85 +86,77 @@ export function ExamProgramCard({ program, index = 0 }: { program: PublicExamPro
               <Badge variant="outline">Upcoming / Ended</Badge>
             )}
           </div>
-          <CardTitle className="bn-headline text-xl font-bold text-sage-secondary">{program.title}</CardTitle>
-          {program.subtitle ? (
-            <p className="bn-text text-sm text-sage-gray-500">{program.subtitle}</p>
-          ) : null}
-        </CardHeader>
 
-        <CardContent className="space-y-3">
-          <p className="bn-text line-clamp-3 text-sm leading-7 text-sage-gray-700">
-            {program.description || "বিস্তারিত তথ্য দেখতে পরীক্ষার পেজে যান।"}
+          <h3 className="bn-headline mt-3 line-clamp-2 min-h-[3.25rem] text-xl font-bold leading-8 text-sage-secondary">
+            {program.title}
+          </h3>
+
+          {program.subtitle ? (
+            <p className="bn-text mt-1 line-clamp-1 text-sm text-sage-gray-500">{program.subtitle}</p>
+          ) : (
+            <div className="mt-1 min-h-5" aria-hidden="true" />
+          )}
+
+          <p className="bn-text mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-7 text-sage-gray-700">
+            {description}
           </p>
-          <div className="grid gap-2 text-sm text-sage-gray-700">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="size-4 text-sage-primary" />
-              <span>{program.dateLabel}</span>
-            </div>
+
+          <div className="mt-4 grid min-h-[5.75rem] gap-2">
+            <MetaRow icon={<CalendarDays className="size-4" />}>{program.dateLabel}</MetaRow>
             {isOnline ? (
               <>
-                <div className="flex items-center gap-2">
-                  <Clock3 className="size-4 text-sage-primary" />
-                  <span>{program.durationMinutes} min · {program.totalMarks} marks</span>
-                </div>
-                {program.showLeaderboard ? (
-                  <div className="flex items-center gap-2">
-                    <Trophy className="size-4 text-sage-primary" />
-                    <span>Leaderboard enabled</span>
-                  </div>
-                ) : null}
+                <MetaRow icon={<Clock3 className="size-4" />}>
+                  {program.durationMinutes} min · {program.totalMarks} marks
+                </MetaRow>
+                <MetaRow icon={<Trophy className="size-4" />} hidden={!program.showLeaderboard}>
+                  Leaderboard enabled
+                </MetaRow>
               </>
             ) : (
               <>
-                {program.examTime ? (
-                  <div className="flex items-center gap-2">
-                    <Clock3 className="size-4 text-amber-700" />
-                    <span>{program.examTime}</span>
-                  </div>
-                ) : null}
-                {program.venue ? (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-4 text-sage-primary" />
-                    <span className="line-clamp-1">{program.venue}</span>
-                  </div>
-                ) : null}
-                <div className="flex items-center gap-2">
-                  <Users className="size-4 text-sage-primary" />
-                  <span>{program.classLabel}</span>
-                </div>
+                <MetaRow icon={<Clock3 className="size-4 text-amber-700" />} hidden={!program.examTime}>
+                  {program.examTime || "—"}
+                </MetaRow>
+                <MetaRow icon={<MapPin className="size-4" />} hidden={!program.venue}>
+                  <span className="line-clamp-1">{program.venue || "—"}</span>
+                </MetaRow>
+                <MetaRow icon={<Users className="size-4" />}>{program.classLabel}</MetaRow>
               </>
             )}
           </div>
-          {isPaid && isOnline ? (
-            <div className="rounded-xl bg-sage-red-50 px-3 py-2 text-sm font-semibold text-sage-primary">
-              Fee: ৳{program.feeAmount}
-            </div>
-          ) : isOnline ? (
-            <div className="rounded-xl bg-sage-success-soft px-3 py-2 text-sm font-semibold text-emerald-700">
-              Free registration
-            </div>
-          ) : (
-            <div className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
-              Center exam · info only
-            </div>
-          )}
-        </CardContent>
 
-        <CardFooter className={cn("border-t border-sage-border/70", isOnline ? "bg-sage-cream/40" : "bg-amber-50/50")}>
-          <Button
-            asChild
-            className={cn(
-              "h-11 w-full rounded-xl font-bold",
-              isOnline ? "bg-sage-primary hover:bg-sage-secondary" : "bg-amber-700 hover:bg-amber-800"
+          <div className="mt-4 min-h-[2.75rem]">
+            {isPaid && isOnline ? (
+              <div className="rounded-xl bg-sage-red-50 px-3 py-2 text-sm font-semibold text-sage-primary">
+                Fee: ৳{program.feeAmount}
+              </div>
+            ) : isOnline ? (
+              <div className="rounded-xl bg-sage-success-soft px-3 py-2 text-sm font-semibold text-emerald-700">
+                Free registration
+              </div>
+            ) : (
+              <div className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+                Center exam · info only
+              </div>
             )}
-          >
-            <Link href={`/exams/${program.slug}`}>
-              {isOnline ? "View exam" : "View schedule & details"}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
+          </div>
+
+          <div className="mt-auto pt-5">
+            <Button
+              asChild
+              className={cn(
+                "h-11 w-full rounded-xl font-bold shadow-sm",
+                isOnline ? "bg-sage-primary hover:bg-sage-secondary" : "bg-amber-700 hover:bg-amber-800"
+              )}
+            >
+              <Link href={`/exams/${program.slug}`}>
+                {isOnline ? "View exam" : "View schedule & details"}
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </article>
     </motion.div>
   );
 }

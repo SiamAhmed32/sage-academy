@@ -43,7 +43,7 @@ export async function ExamHubHomeSection() {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid auto-rows-fr gap-6 md:grid-cols-2 xl:grid-cols-4">
           {serialized.map((program, index) => (
             <ExamProgramCard key={program.slug} program={program} index={index} />
           ))}

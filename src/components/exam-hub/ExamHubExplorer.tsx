@@ -129,7 +129,7 @@ function ExamGrid({ items, empty }: { items: PublicExamProgram[]; empty: string 
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((program, index) => (
         <ExamProgramCard key={program._id} program={program} index={index} />
       ))}

@@ -61,13 +61,15 @@ export function TeachersShowcase({ teachers }: TeachersShowcaseProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="w-full md:w-1/2 relative h-[300px] sm:h-[400px] lg:h-[450px] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(109,15,18,0.15)] ring-1 ring-sage-red-100"
+              className="w-full md:w-1/2 overflow-hidden rounded-3xl bg-sage-red-50/50 shadow-[0_20px_50px_rgba(109,15,18,0.15)] ring-1 ring-sage-red-100"
             >
               <Image 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYkaITCX_sF6IcmHGNGDQThf-yTXAvZ7GxOSa0ataUqc90A82GW8WCVC3-GLxt1a4LFuiIXpRMTnKTPagJAG08aZEHbFvlYfPcrfcAMM2RC0KI7A0G-HHDalIXQrvMNaWvjne3yglUe2AhoChg_nkfvS0RwmGWPq6hj2gAA9f7W3irlmXwNgaVqJuZeni4yUqra2Ozu7FfObtUWB4qBxafRJuUrFgZD_kalyPfYmyCkHY9ly1lhGkqci9D5vo-9W0HS1Xlqk346wc"
+                src="/v1NewImages/group pic.webp"
                 alt="SAGE Academy Teachers"
-                fill
-                className="object-cover"
+                width={1536}
+                height={1024}
+                className="h-auto w-full"
+                sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
             </motion.div>
