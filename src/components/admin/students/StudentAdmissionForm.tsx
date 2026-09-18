@@ -7,7 +7,12 @@ import { createStudentAction, updateStudentAction } from "@/app/admin/actions";
 import { StudentImageUpload } from "@/components/admin/students/StudentImageUpload";
 import { StudentSubjectFeeSelector } from "@/components/admin/students/StudentSubjectFeeSelector";
 import { SubjectChangeEffectiveFields } from "@/components/admin/students/SubjectChangeEffectiveFields";
-import { classLevelOptions, toBanglaDigits } from "@/constants/class-levels";
+import {
+  adminClassLevelOptions,
+  adminGenderLabels,
+  adminVersionLabels,
+  getAdminClassLabel,
+} from "@/constants/admin-display";
 
 type BatchSubjectRow = {
   subjectName: string;
@@ -25,7 +30,7 @@ export type AdminBatchRow = {
   subjects: BatchSubjectRow[];
 };
 
-type EditStudentRow = {
+export type EditStudentRow = {
   _id: { toString(): string };
   presentAddress?: string;
   permanentAddress?: string;
@@ -46,7 +51,7 @@ type EditStudentRow = {
   guardianPhone?: string;
   note?: string;
   image?: { url?: string };
-  batch?: { _id?: { toString(): string } } | string;
+  batch?: { _id?: { toString(): string } } | string | null;
   selectedSubjects?: Array<{
     subjectName: string;
     monthlyFee: number;
@@ -79,7 +84,7 @@ export type AdmissionPrefill = {
 
 function parseClassLevelFromLabel(className?: string): number | undefined {
   if (!className?.trim()) return undefined;
-  const normalized = className.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
+  const normalized = className.replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit))); // admin-language-allow: parses persisted applicant input
   const m = normalized.match(/\d+/);
   const wordMap: Record<string, number> = {
     five: 5,
@@ -90,15 +95,15 @@ function parseClassLevelFromLabel(className?: string): number | undefined {
     ten: 10,
     eleven: 11,
     twelve: 12,
-    পঞ্চম: 5,
-    ষষ্ঠ: 6,
-    ষষ্ঠী: 6,
-    সপ্তম: 7,
-    অষ্টম: 8,
-    নবম: 9,
-    দশম: 10,
-    একাদশ: 11,
-    দ্বাদশ: 12,
+    পঞ্চম: 5, // admin-language-allow: parses persisted applicant input
+    ষষ্ঠ: 6, // admin-language-allow: parses persisted applicant input
+    ষষ্ঠী: 6, // admin-language-allow: parses persisted applicant input
+    সপ্তম: 7, // admin-language-allow: parses persisted applicant input
+    অষ্টম: 8, // admin-language-allow: parses persisted applicant input
+    নবম: 9, // admin-language-allow: parses persisted applicant input
+    দশম: 10, // admin-language-allow: parses persisted applicant input
+    একাদশ: 11, // admin-language-allow: parses persisted applicant input
+    দ্বাদশ: 12, // admin-language-allow: parses persisted applicant input
   };
 
   const n = m
@@ -122,10 +127,10 @@ interface StudentAdmissionFormProps {
 }
 
 const tabOptions = [
-  { id: "primary", label: "প্রাথমিক তথ্য" },
-  { id: "academic", label: "একাডেমিক ও ব্যাচ" },
-  { id: "guardian", label: "অভিভাবকের তথ্য" },
-  { id: "other", label: "ঠিকানা ও অন্যান্য" },
+  { id: "primary", label: "Basic Information" },
+  { id: "academic", label: "Academic and Batch" },
+  { id: "guardian", label: "Guardian Information" },
+  { id: "other", label: "Address and Other Details" },
 ];
 
 export function StudentAdmissionForm({ batches, student, prefillData, onCancel }: StudentAdmissionFormProps) {
@@ -190,17 +195,17 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
     // Custom validation for required fields across all tabs
     if (!formData.get("nameEnglish") || !formData.get("whatsapp")) {
       setActiveTab("primary");
-      toast.error("প্রাথমিক তথ্যের ফিল্ডগুলো পূরণ করুন।");
+      toast.error("Complete the required basic information.");
       return;
     }
     if (!formData.get("admissionYear") || !formData.get("classLevel") || !formData.get("batch")) {
       setActiveTab("academic");
-      toast.error("একাডেমিক তথ্য ও ব্যাচ নির্বাচন করুন।");
+      toast.error("Complete the academic information and select a batch.");
       return;
     }
     if (!formData.get("guardianPhone")) {
       setActiveTab("guardian");
-      toast.error("অভিভাবকের ফোন নম্বর দিন।");
+      toast.error("Enter the guardian's phone number.");
       return;
     }
     
@@ -211,14 +216,14 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
           toast.error(res.message);
           return;
         }
-        toast.success("তথ্য সংরক্ষিত হয়েছে।");
+        toast.success("Student information saved.");
       } else {
         const res = await createStudentAction(formData);
         if (!res.ok) {
           toast.error(res.message);
           return;
         }
-        toast.success("শিক্ষার্থী ভর্তি সম্পন্ন।");
+        toast.success("Student enrollment completed.");
       }
       if (onCancel) onCancel();
     });
@@ -255,7 +260,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
             className="absolute right-4 top-4 flex items-center gap-1 rounded-lg bg-sage-red-50 px-3 py-1.5 text-xs font-bold text-sage-primary transition hover:bg-sage-primary hover:text-white"
           >
             <X size={14} />
-            বন্ধ করুন
+            Close
           </button>
         )}
 
@@ -272,31 +277,31 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
           {/* PRIMARY INFO */}
           <div className={`md:col-span-3 grid gap-6 md:grid-cols-2 ${activeTab === 'primary' ? 'block' : 'hidden'}`}>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">ইংরেজিতে নাম (Name in English) *</label>
+              <label className="text-xs font-bold text-sage-secondary">Name in English *</label>
               <input name="nameEnglish" defaultValue={defaultNameEnglish} placeholder="Parvej Khan" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">বাংলায় নাম (Name in Bangla)</label>
-              <input name="nameBangla" defaultValue={defaultNameBangla} placeholder="পারভেজ খান" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
+              <label className="text-xs font-bold text-sage-secondary">Name in Bangla</label>
+              <input name="nameBangla" defaultValue={defaultNameBangla} placeholder="Enter the student's Bangla name" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">স্টুডেন্ট হোয়াটসঅ্যাপ (WhatsApp Number) *</label>
+              <label className="text-xs font-bold text-sage-secondary">Student WhatsApp Number *</label>
               <input name="whatsapp" defaultValue={defaultWhatsapp} placeholder="01XXXXXXXXX" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">জেন্ডার (Gender)</label>
+              <label className="text-xs font-bold text-sage-secondary">Gender</label>
               <select name="gender" defaultValue={defaultGender} className="h-11 rounded-lg border border-sage-border px-3">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                {["male", "female", "other"].map((value) => (
+                  <option key={value} value={value}>{adminGenderLabels[value]}</option>
+                ))}
               </select>
             </div>
             <div className="grid gap-2 md:col-span-2">
-              <label className="text-xs font-bold text-sage-secondary">ভার্সন (Version)</label>
+              <label className="text-xs font-bold text-sage-secondary">Academic Version</label>
               <select name="version" defaultValue={defaultVersion} className="h-11 rounded-lg border border-sage-border px-3">
-                <option value="bangla">Bangla</option>
-                <option value="english">English</option>
-                <option value="other">Other</option>
+                {["bangla", "english", "other"].map((value) => (
+                  <option key={value} value={value}>{adminVersionLabels[value]}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -305,11 +310,11 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
           <div className={`md:col-span-3 space-y-6 ${activeTab === 'academic' ? 'block' : 'hidden'}`}>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">ভর্তির বছর (Admission Year) *</label>
+                <label className="text-xs font-bold text-sage-secondary">Admission Year *</label>
                 <input name="admissionYear" defaultValue={defaultAdmissionYear} className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">শ্রেণি *</label>
+                <label className="text-xs font-bold text-sage-secondary">Class *</label>
                 <select
                   name="classLevel"
                   value={selectedClassLevel}
@@ -323,26 +328,26 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
                   }}
                   className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none"
                 >
-                  <option value="">নির্বাচন করুন</option>
-                  {classLevelOptions.map(opt => (
+                  <option value="">Select a class</option>
+                  {adminClassLevelOptions.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">শাখা (Section)</label>
+                <label className="text-xs font-bold text-sage-secondary">Section</label>
                 <input name="section" defaultValue={defaultSection} placeholder="e.g. A" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">রোল</label>
+                <label className="text-xs font-bold text-sage-secondary">Roll</label>
                 <input name="roll" defaultValue={defaultRoll} placeholder="e.g. 01" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">স্কুল/কলেজের নাম (School/College Name)</label>
+                <label className="text-xs font-bold text-sage-secondary">School/College Name</label>
                 <input name="schoolName" defaultValue={defaultSchoolName} placeholder="School or College" className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">ভর্তির তারিখ (Admission Date)</label>
+                <label className="text-xs font-bold text-sage-secondary">Admission Date</label>
                 <input name="admissionDate" type="date" defaultValue={defaultAdmissionDate} className="h-11 rounded-lg border border-sage-border px-3 focus:ring-1 focus:ring-sage-primary outline-none" />
               </div>
             </div>
@@ -352,7 +357,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
               <div className="grid gap-2">
                 <label className="text-xs font-bold text-sage-secondary flex items-center gap-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded bg-sage-primary text-white">★</span> 
-                  ব্যাচ নির্বাচন (Select Batch) *
+                  Select Batch *
                 </label>
                 <select 
                   name="batch" 
@@ -370,7 +375,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
                   )}
                   {eligibleBatches.map((batch) => (
                     <option key={batch._id.toString()} value={batch._id.toString()}>
-                      {batch.title} | {batch.genderGroup === "female" ? "মেয়েদের" : "ছেলেদের"} | ক্লাস {toBanglaDigits(batch.classLevel)}
+                      {batch.title} | {batch.genderGroup === "female" ? "Female" : "Male"} | {batch.classLevel ? getAdminClassLabel(batch.classLevel) : "Class not set"}
                     </option>
                   ))}
                 </select>
@@ -402,19 +407,19 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
           {/* GUARDIAN INFO */}
           <div className={`md:col-span-3 grid gap-6 md:grid-cols-2 ${activeTab === 'guardian' ? 'block' : 'hidden'}`}>
             <div className="grid gap-2 md:col-span-2">
-              <label className="text-xs font-bold text-sage-secondary">পিতার নাম (Father&apos;s Name)</label>
+              <label className="text-xs font-bold text-sage-secondary">Father&apos;s Name</label>
               <input name="fatherName" defaultValue={defaultFatherName} placeholder="Father's Name" className="h-11 rounded-lg border border-sage-border px-3" />
             </div>
             <div className="grid gap-2 md:col-span-2">
-              <label className="text-xs font-bold text-sage-secondary">মাতার নাম (Mother&apos;s Name)</label>
+              <label className="text-xs font-bold text-sage-secondary">Mother&apos;s Name</label>
               <input name="motherName" defaultValue={defaultMotherName} placeholder="Mother's Name" className="h-11 rounded-lg border border-sage-border px-3" />
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">অন্য অভিভাবকের নাম (Other Guardian)</label>
+              <label className="text-xs font-bold text-sage-secondary">Other Guardian</label>
               <input name="guardianName" defaultValue={defaultGuardianName} placeholder="Other Guardian Name" className="h-11 rounded-lg border border-sage-border px-3" />
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">অভিভাবকের ফোন (Guardian Phone) *</label>
+              <label className="text-xs font-bold text-sage-secondary">Guardian Phone *</label>
               <input name="guardianPhone" defaultValue={defaultGuardianPhone} placeholder="01XXXXXXXXX" className="h-11 rounded-lg border border-sage-border px-3" />
             </div>
           </div>
@@ -423,7 +428,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
           <div className={`md:col-span-3 space-y-6 ${activeTab === 'other' ? 'block' : 'hidden'}`}>
             <div className="flex items-center justify-between border-b border-sage-border pb-2">
               <h3 className="font-bold text-sage-secondary flex items-center gap-2">
-                🏠 ঠিকানা (Address)
+                🏠 Address
               </h3>
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input 
@@ -437,7 +442,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">বর্তমান ঠিকানা (Present Address)</label>
+                <label className="text-xs font-bold text-sage-secondary">Present Address</label>
                 <textarea 
                   name="presentAddress" 
                   value={presentAddress}
@@ -447,7 +452,7 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
                 />
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-bold text-sage-secondary">স্থায়ী ঠিকানা (Permanent Address)</label>
+                <label className="text-xs font-bold text-sage-secondary">Permanent Address</label>
                 <textarea 
                   name="permanentAddress" 
                   value={permanentAddress}
@@ -460,15 +465,15 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
             </div>
 
             <div className="border-b border-sage-border pb-2 pt-4">
-              <h3 className="font-bold text-sage-secondary">অতিরিক্ত তথ্য ও ছবি</h3>
+              <h3 className="font-bold text-sage-secondary">Additional Information and Photo</h3>
             </div>
             <div className="grid gap-2">
-              <label className="text-xs font-bold text-sage-secondary">অতিরিক্ত তথ্য বা নোট (Extra Info / Note)</label>
+              <label className="text-xs font-bold text-sage-secondary">Additional Information or Note</label>
               <textarea name="note" defaultValue={student?.note} placeholder="Write any extra information here..." className="w-full h-20 rounded-lg border border-sage-border px-3 py-2 focus:ring-1 focus:ring-sage-primary outline-none" />
             </div>
             
             <div className="pt-2">
-              <label className="mb-2 block text-xs font-bold text-sage-secondary uppercase tracking-widest">ছাত্র-ছাত্রীর ছবি (ঐচ্ছিক)</label>
+              <label className="mb-2 block text-xs font-bold text-sage-secondary uppercase tracking-widest">Student Photo (Optional)</label>
               <div className="flex justify-start">
                 <StudentImageUpload currentImage={student?.image?.url} />
               </div>
@@ -482,8 +487,8 @@ export function StudentAdmissionForm({ batches, student, prefillData, onCancel }
               className="h-12 w-full md:w-auto md:min-w-[200px] rounded-xl bg-sage-primary px-8 font-bold text-white shadow-lg shadow-sage-primary/20 transition hover:bg-sage-secondary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending 
-                ? "প্রসেসিং হচ্ছে..." 
-                : (isEdit ? "আপডেট করুন" : "ভর্তি সম্পন্ন করুন")}
+                ? "Processing..."
+                : (isEdit ? "Update Student" : "Complete Enrollment")}
             </button>
           </div>
         </div>

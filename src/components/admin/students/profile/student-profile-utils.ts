@@ -1,4 +1,5 @@
 import { buildWeeklyRoutineFromBatch } from "@/lib/routine-utils";
+import { formatAdminCurrency, formatAdminNumber } from "@/lib/admin-format";
 
 import type { RoutineItem, StudentFeeSubject, StudentProfile } from "./types";
 
@@ -8,19 +9,19 @@ export function subjectTotal(subjects: StudentFeeSubject[] = []) {
 
 export function discountText(subject: StudentFeeSubject) {
   const baseFee = subject.baseFee ?? subject.monthlyFee;
-  if (baseFee <= subject.monthlyFee) return "কোনো ছাড় নেই";
+  if (baseFee <= subject.monthlyFee) return "No discount";
   if (subject.discountType === "percent" && subject.discountValue) {
-    return `${subject.discountValue}% ছাড়`;
+    return `${formatAdminNumber(subject.discountValue)}% discount`;
   }
-  return `৳${baseFee - subject.monthlyFee} ছাড়`;
+  return `${formatAdminCurrency(baseFee - subject.monthlyFee)} discount`;
 }
 
 export function buildRoutine(student: StudentProfile): RoutineItem[] {
   return buildWeeklyRoutineFromBatch(student.batch?.subjects, (subject, day) => ({
     day: day.en,
-    dayBn: day.bn,
-    subjectName: subject.subjectName ?? "বিষয়",
-    teacherName: subject.teacher?.name ?? "শিক্ষক নির্ধারণ হয়নি",
+    dayBn: day.en,
+    subjectName: subject.subjectName ?? "Subject",
+    teacherName: subject.teacher?.name ?? "Teacher not assigned",
     startTime: subject.startTime ?? "",
     endTime: subject.endTime ?? "",
   }));

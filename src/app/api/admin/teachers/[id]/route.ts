@@ -71,7 +71,7 @@ export const PUT = withApiHandler(async (req: NextRequest, context: RouteContext
       _id: { $ne: teacherId } 
     });
     if (duplicate) {
-      throw new Error(`সিরিয়াল নম্বর ${validatedData.order} ইতিমধ্যে শিক্ষক "${duplicate.name}" এর জন্য ব্যবহৃত হচ্ছে।`);
+      throw new Error(`Order number ${validatedData.order} is already assigned to teacher "${duplicate.name}".`);
     }
   }
 

@@ -15,9 +15,9 @@ export function TestimonialDeleteModal({ open, deleting, name, error, onClose, o
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4">
       <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
-        <h3 className="text-base font-bold text-sage-secondary">টেস্টিমোনিয়াল ডিলিট করবেন?</h3>
+        <h3 className="text-base font-bold text-sage-secondary">Delete testimonial?</h3>
         <p className="mt-2 text-sm text-sage-gray-700">
-          {name ? `“${name}”` : "এই testimonial"} ডিলিট করলে এটি স্থায়ীভাবে মুছে যাবে।
+          Deleting {name ? `“${name}”` : "this testimonial"} will remove it permanently.
         </p>
         {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
 
@@ -28,7 +28,7 @@ export function TestimonialDeleteModal({ open, deleting, name, error, onClose, o
             disabled={deleting}
             className="rounded-lg border border-sage-border px-4 py-2 text-sm font-bold text-sage-secondary disabled:opacity-60"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             type="button"
@@ -36,7 +36,7 @@ export function TestimonialDeleteModal({ open, deleting, name, error, onClose, o
             disabled={deleting}
             className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
           >
-            {deleting ? "ডিলিট হচ্ছে..." : "হ্যাঁ, ডিলিট করুন"}
+            {deleting ? "Deleting..." : "Yes, delete"}
           </button>
         </div>
       </div>

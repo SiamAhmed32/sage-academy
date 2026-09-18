@@ -17,14 +17,14 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
   const body = await parseUpdateExamQuestionBody(req);
 
   if (body.options && body.correctIndex !== undefined && body.correctIndex >= body.options.length) {
-    throw new BadRequestError("Correct option index is out of range");
+    throw new BadRequestError("The correct option index is outside the available options.");
   }
 
   const question = await ExamQuestion.findByIdAndUpdate(questionId, body, { new: true, runValidators: true }).lean();
-  if (!question) throw new NotFoundError("Question not found");
+  if (!question) throw new NotFoundError("Exam question not found.");
   return successResponse(
     { ...question, _id: String(question._id), programId: String(question.programId) },
-    "Question updated"
+    "Exam question updated successfully."
   );
 });
 
@@ -33,6 +33,6 @@ export const DELETE = withApiHandler(async (_req: NextRequest, context: RouteCon
   await connectDB();
   const { questionId } = await context.params;
   const question = await ExamQuestion.findByIdAndDelete(questionId);
-  if (!question) throw new NotFoundError("Question not found");
-  return successResponse(null, "Question deleted");
+  if (!question) throw new NotFoundError("Exam question not found.");
+  return successResponse(null, "Exam question deleted successfully.");
 });

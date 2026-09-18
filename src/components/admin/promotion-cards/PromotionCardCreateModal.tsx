@@ -31,14 +31,14 @@ export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCa
         body: formData,
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "কার্ড তৈরি করা যায়নি");
+      if (!response.ok) throw new Error(data.message || "Could not create the card");
       
-      toast.success("প্রমোশন কার্ড তৈরি হয়েছে");
+      toast.success("Promotion card created");
       setPreviewUrl("");
       onClose();
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "কার্ড তৈরি করা যায়নি");
+      toast.error(error instanceof Error ? error.message : "Could not create the card");
     } finally {
       setIsSaving(false);
     }
@@ -48,8 +48,8 @@ export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCa
     <AdminModal
       open={open}
       onClose={onClose}
-      title="নতুন প্রমোশন কার্ড"
-      description="ওয়েবসাইটের জন্য নতুন প্রমোশন কার্ড যোগ করুন।"
+      title="New promotion card"
+      description="Add a new promotion card for the website."
     >
       <form onSubmit={handleSubmit}>
         <PromotionCardFields
@@ -60,10 +60,10 @@ export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCa
 
         <div className="mt-6 flex items-center gap-4 border-t border-sage-border pt-6">
           <label className="flex items-center gap-2 text-sm font-semibold text-sage-secondary">
-            <input name="websiteVisible" type="checkbox" defaultChecked /> ওয়েবসাইটে দেখান
+            <input name="websiteVisible" type="checkbox" defaultChecked /> Show on website
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold text-sage-secondary">
-            <input name="featured" type="checkbox" /> হোমপেজে ফিচার
+            <input name="featured" type="checkbox" /> Feature on homepage
           </label>
 
           <div className="ml-auto flex gap-3">
@@ -72,14 +72,14 @@ export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCa
               onClick={onClose}
               className="rounded-lg border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              বাতিল
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="rounded-lg bg-sage-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sage-primary/90 disabled:opacity-60"
             >
-              {isSaving ? "তৈরি হচ্ছে..." : "কার্ড তৈরি করুন"}
+              {isSaving ? "Creating..." : "Create card"}
             </button>
           </div>
         </div>

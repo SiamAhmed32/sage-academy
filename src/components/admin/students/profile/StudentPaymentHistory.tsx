@@ -8,7 +8,7 @@ import { PaymentSlipButton } from "@/components/admin/payments/PaymentSlipButton
 import { ReverseReceiptModal } from "@/components/admin/payments/ReverseReceiptModal";
 import { PaymentProofControl } from "./PaymentProofControl";
 import {
-  bnMonthLabel,
+  monthLabel,
   paidBySubject,
   paymentDateLabel,
   paymentDue,
@@ -16,6 +16,7 @@ import {
   statusTone,
   type StudentPayment,
 } from "./payment-history-utils";
+import { formatAdminCurrency, formatAdminNumber } from "@/lib/admin-format";
 
 const methodLabels: Record<string, string> = {
   cash: "Cash",
@@ -99,7 +100,7 @@ export function StudentPaymentHistory({
                           <ChevronDown className={`mt-1 h-4 w-4 shrink-0 transition ${open ? "rotate-180" : ""}`} />
                           <span>
                             <p className="font-black text-sage-secondary">
-                              {bnMonthLabel(payment.month)} {payment.year}
+                              {monthLabel(payment.month)} {formatAdminNumber(payment.year)}
                             </p>
                             <p className="mt-1 text-xs text-sage-gray-500">{paymentDateLabel(payment)}</p>
                           </span>
@@ -110,9 +111,9 @@ export function StudentPaymentHistory({
                           {status}
                         </span>
                       </td>
-                      <td className="p-4 font-bold text-sage-secondary">৳{expected}</td>
-                      <td className="p-4 font-black text-sage-primary">৳{payment.amount}</td>
-                      <td className="p-4 font-bold text-sage-secondary">৳{due}</td>
+                      <td className="p-4 font-bold text-sage-secondary">{formatAdminCurrency(expected)}</td>
+                      <td className="p-4 font-black text-sage-primary">{formatAdminCurrency(payment.amount)}</td>
+                      <td className="p-4 font-bold text-sage-secondary">{formatAdminCurrency(due)}</td>
                       <td className="p-4 text-sage-gray-600">
                         {methodLabels[payment.paymentMethod || ""] || (installmentCount ? "Mixed" : "—")}
                       </td>
@@ -123,7 +124,7 @@ export function StudentPaymentHistory({
                           className="inline-flex h-9 items-center gap-2 rounded-lg border border-sage-border bg-white px-3 text-xs font-bold text-sage-primary shadow-sm transition hover:bg-sage-primary hover:text-white"
                         >
                           <Eye className="h-3.5 w-3.5" />
-                          {installmentCount} installment{installmentCount === 1 ? "" : "s"}
+                          {formatAdminNumber(installmentCount)} installment{installmentCount === 1 ? "" : "s"}
                         </button>
                       </td>
                       <td className="p-4">
@@ -156,11 +157,11 @@ export function StudentPaymentHistory({
                                   return (
                                     <tr key={item.label}>
                                       <td className="px-4 py-2 font-semibold text-sage-secondary">{item.label}</td>
-                                      <td className="px-4 py-2">৳{item.fee}</td>
-                                      <td className="px-4 py-2">৳{item.discount}</td>
-                                      <td className="px-4 py-2">৳{billed}</td>
-                                      <td className="px-4 py-2 text-sage-primary">৳{paidAmount}</td>
-                                      <td className="px-4 py-2">৳{subjectDue}</td>
+                                      <td className="px-4 py-2">{formatAdminCurrency(item.fee)}</td>
+                                      <td className="px-4 py-2">{formatAdminCurrency(item.discount)}</td>
+                                      <td className="px-4 py-2">{formatAdminCurrency(billed)}</td>
+                                      <td className="px-4 py-2 text-sage-primary">{formatAdminCurrency(paidAmount)}</td>
+                                      <td className="px-4 py-2">{formatAdminCurrency(subjectDue)}</td>
                                     </tr>
                                   );
                                 })}
@@ -228,10 +229,10 @@ function InstallmentModal({
         <div className="flex items-start justify-between gap-4 border-b border-sage-border bg-sage-red-50/40 p-5">
           <div>
             <h3 className="text-xl font-black text-sage-secondary">
-              {payment.month} {payment.year} installments
+              {payment.month} {formatAdminNumber(payment.year)} installments
             </h3>
             <p className="mt-1 text-sm text-sage-gray-500">
-              Expected ৳{expected} · Paid ৳{payment.amount} · Due ৳{payment.dueAmount ?? paymentDue(payment.amount, expected)}
+              Expected {formatAdminCurrency(expected)} · Paid {formatAdminCurrency(payment.amount)} · Due {formatAdminCurrency(payment.dueAmount ?? paymentDue(payment.amount, expected))}
             </p>
           </div>
           <button
@@ -270,11 +271,11 @@ function InstallmentModal({
 
                   return (
                     <tr key={transaction._id} className={transaction.status === "reversed" ? "bg-sage-red-50/20 opacity-70" : ""}>
-                      <td className="p-3 font-black text-sage-secondary">#{index + 1}</td>
-                      <td className="p-3 font-black text-sage-primary">৳{transaction.amount}</td>
-                      <td className="p-3 font-semibold text-sage-gray-600">৳{previousPaid}</td>
-                      <td className="p-3 font-semibold text-sage-gray-600">৳{totalAfter}</td>
-                      <td className="p-3 font-semibold text-sage-gray-600">৳{remaining}</td>
+                      <td className="p-3 font-black text-sage-secondary">#{formatAdminNumber(index + 1)}</td>
+                      <td className="p-3 font-black text-sage-primary">{formatAdminCurrency(transaction.amount)}</td>
+                      <td className="p-3 font-semibold text-sage-gray-600">{formatAdminCurrency(previousPaid)}</td>
+                      <td className="p-3 font-semibold text-sage-gray-600">{formatAdminCurrency(totalAfter)}</td>
+                      <td className="p-3 font-semibold text-sage-gray-600">{formatAdminCurrency(remaining)}</td>
                       <td className="p-3 text-sage-gray-600">
                         {(transaction.lineItems || []).map((item) => item.label).join(", ") || "Payment received"}
                         {transaction.reversalReason ? (

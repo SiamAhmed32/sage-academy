@@ -46,6 +46,11 @@ const TeacherSchema = new Schema(
   }
 );
 
+TeacherSchema.index({ order: 1, name: 1 });
+TeacherSchema.index({ isFeatured: 1, order: 1, name: 1 });
+TeacherSchema.index({ subject: 1, order: 1, name: 1 });
+TeacherSchema.index({ createdAt: -1 });
+
 const Teacher = models.Teacher || model("Teacher", TeacherSchema);
 
 export default Teacher;

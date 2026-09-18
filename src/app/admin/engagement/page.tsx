@@ -11,8 +11,8 @@ export default async function AdminEngagementPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="ভিজিটর অ্যাক্টিভিটি"
-        description="ওয়েবসাইটে কে কোন গুরুত্বপূর্ণ কাজ করছে তা সহজ ভাষায় দেখুন: ভর্তি পেজ দেখা, ভর্তি ফর্ম শুরু করা, বা গুরুত্বপূর্ণ বাটনে ক্লিক করা।"
+        title="Visitor Activity"
+        description="See important website actions such as viewing admission pages, starting an admission form, or clicking key calls to action."
       />
       <EngagementAdminClient analytics={safe} days={RANGE_DAYS} />
     </div>

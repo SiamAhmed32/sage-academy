@@ -2,19 +2,17 @@
 
 import { Eye, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { formatAdminDate } from "@/lib/admin-format";
+import type { ContactRequestItem } from "./types";
 
 type ContactRowProps = {
-  item: any;
-  onView: (item: any) => void;
-  onDelete: (item: any) => void;
+  item: ContactRequestItem;
+  onView: (item: ContactRequestItem) => void;
+  onDelete: (item: ContactRequestItem) => void;
 };
 
 export function ContactRow({ item, onView, onDelete }: ContactRowProps) {
-  const formattedDate = new Date(item.createdAt).toLocaleDateString("bn-BD", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const formattedDate = formatAdminDate(item.createdAt);
 
   return (
     <tr className="group border-b border-sage-border transition hover:bg-sage-red-50/30">
@@ -36,14 +34,14 @@ export function ContactRow({ item, onView, onDelete }: ContactRowProps) {
           <button
             onClick={() => onView(item)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-sage-red-50 text-sage-primary transition hover:bg-sage-primary hover:text-white"
-            title="বিস্তারিত দেখুন"
+            title="View details"
           >
             <Eye size={16} />
           </button>
           <button
             onClick={() => onDelete(item)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
-            title="মুছে ফেলুন"
+            title="Delete"
           >
             <Trash2 size={16} />
           </button>

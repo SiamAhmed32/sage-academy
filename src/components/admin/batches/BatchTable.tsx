@@ -30,10 +30,14 @@ export function BatchTable({
     if (openRoutineId && batches.length > 0) {
       const match = batches.find((b) => batchId(b) === openRoutineId);
       if (match) {
-        setRoutineBatch({ ...match, _id: openRoutineId });
+        const timer = window.setTimeout(
+          () => setRoutineBatch({ ...match, _id: openRoutineId }),
+          0
+        );
         const params = new URLSearchParams(searchParams.toString());
         params.delete("openRoutine");
         router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, { scroll: false });
+        return () => window.clearTimeout(timer);
       }
     }
   }, [searchParams, batches, router, pathname]);
@@ -41,9 +45,9 @@ export function BatchTable({
   if (!batches.length) {
     return (
       <div className="rounded-xl border border-sage-border bg-sage-white p-8 text-center">
-        <h3 className="text-xl font-bold text-sage-secondary">এখনো কোনো ব্যাচ নেই</h3>
+        <h3 className="text-xl font-bold text-sage-secondary">No batches yet</h3>
         <p className="mt-2 text-sm text-sage-gray-500">
-          প্রথমে একটি ব্যাচ তৈরি করুন, তারপর শিক্ষার্থীদের সেই ব্যাচে যুক্ত করুন।
+          Create a batch, then assign students to it.
         </p>
       </div>
     );
@@ -55,13 +59,13 @@ export function BatchTable({
         <table className="w-full min-w-[1120px] text-left text-sm">
           <thead className="bg-sage-red-50 text-sage-secondary">
             <tr>
-              <th className="p-4">ব্যাচ</th>
-              <th className="p-4">ধরন</th>
-              <th className="p-4">সাবজেক্ট</th>
-              <th className="p-4">সিট (মোট/খালি)</th>
-              <th className="p-4">রুটিন নোট</th>
-              <th className="p-4">স্ট্যাটাস</th>
-              <th className="p-4">Action</th>
+              <th className="p-4">Batch</th>
+              <th className="p-4">Type</th>
+              <th className="p-4">Subjects</th>
+              <th className="p-4">Seats (total/available)</th>
+              <th className="p-4">Schedule note</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sage-border">

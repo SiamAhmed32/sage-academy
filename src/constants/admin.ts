@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Bell,
   BookOpen,
   CalendarDays,
@@ -8,58 +9,76 @@ import {
   GraduationCap,
   Home,
   Inbox,
+  Layers,
   Layout,
   LineChart,
+  ListTree,
   MessageSquare,
   Quote,
   Shield,
   Trophy,
+  UserPlus,
   Users,
 } from "lucide-react";
 
 export const adminNavGroups = [
   {
-    title: "ওভারভিউ",
-    items: [{ label: "ড্যাশবোর্ড", href: "/admin", icon: Home }],
+    title: "Overview",
+    items: [{ label: "Dashboard", href: "/admin", icon: Home }],
   },
   {
-    title: "লিড ও ভর্তি",
+    // Everything about getting a student in the door and set up, in one place:
+    // the daily New Admission / Create Batch / Transfer screens, the one-time
+    // Class/Subject setup they depend on, and the incoming lead inbox from the
+    // public admission form — instead of split across two separate dropdowns.
+    title: "Admissions",
     items: [
-      { label: "ভর্তি আবেদন", href: "/admin/admissions", icon: Inbox },
-      { label: "যোগাযোগ", href: "/admin/contacts", icon: MessageSquare },
-      { label: "ফ্রি ক্লাস লিড", href: "/admin/free-class-leads", icon: Gift },
-      { label: "টেস্ট/Exam লিড", href: "/admin/assessment-registrations", icon: ClipboardCheck },
-      { label: "কুইজ লিড", href: "/admin/quiz-leads", icon: Users },
-      { label: "ফানেল / ইভেন্ট", href: "/admin/engagement", icon: LineChart },
+      { label: "New Admission", href: "/admin/academic-structure/admission", icon: UserPlus },
+      { label: "Create Batch", href: "/admin/academic-structure/create-batch", icon: ListTree },
+      { label: "Transfer Subject Batch", href: "/admin/academic-structure/transfer", icon: ArrowLeftRight },
+      { label: "Admission Requests", href: "/admin/admissions", icon: Inbox },
+      { label: "Classes", href: "/admin/academic-structure/classes", icon: Layers },
+      { label: "Subjects", href: "/admin/academic-structure/subjects", icon: BookOpen },
     ],
   },
   {
-    title: "একাডেমিক অপারেশন",
+    title: "Academic Operations",
     items: [
-      { label: "শিক্ষার্থী", href: "/admin/students", icon: Users },
-      { label: "পেমেন্ট", href: "/admin/payments", icon: CreditCard },
-      { label: "ক্লাস রুটিন", href: "/admin/routine", icon: CalendarDays },
-      { label: "নোটিশ", href: "/admin/notices", icon: Bell },
-      { label: "একাডেমিক ব্যাচ", href: "/admin/academic-batches", icon: BookOpen },
-      { label: "শিক্ষক", href: "/admin/teachers", icon: GraduationCap },
+      { label: "Students", href: "/admin/students", icon: Users },
+      { label: "Payments", href: "/admin/payments", icon: CreditCard },
+      { label: "Class Routine", href: "/admin/routine", icon: CalendarDays },
+      { label: "Notices", href: "/admin/notices", icon: Bell },
+      { label: "Academic Batches", href: "/admin/academic-batches", icon: BookOpen },
+      { label: "Teachers", href: "/admin/teachers", icon: GraduationCap },
     ],
   },
   {
-    title: "ওয়েবসাইট কনটেন্ট",
+    // Marketing-side lead capture, unrelated to the student admission pipeline above.
+    title: "Marketing Leads",
     items: [
-      { label: "কুইজ প্রশ্ন", href: "/admin/quizzes", icon: BookOpen },
-      { label: "মডেল টেস্ট", href: "/admin/model-tests", icon: ClipboardCheck },
+      { label: "Contact Messages", href: "/admin/contacts", icon: MessageSquare },
+      { label: "Free Class Leads", href: "/admin/free-class-leads", icon: Gift },
+      { label: "Assessment Leads", href: "/admin/assessment-registrations", icon: ClipboardCheck },
+      { label: "Quiz Leads", href: "/admin/quiz-leads", icon: Users },
+      { label: "Funnel and Events", href: "/admin/engagement", icon: LineChart },
+    ],
+  },
+  {
+    title: "Website Content",
+    items: [
+      { label: "Quiz Questions", href: "/admin/quizzes", icon: BookOpen },
+      { label: "Model Tests", href: "/admin/model-tests", icon: ClipboardCheck },
       { label: "Exam Hub", href: "/admin/exam-hub", icon: Trophy },
-      { label: "Exam", href: "/admin/exams", icon: CalendarDays },
-      { label: "প্রমোশন কার্ড", href: "/admin/promotion-cards", icon: Layout },
-      { label: "টেস্টিমোনিয়াল", href: "/admin/testimonials", icon: Quote },
+      { label: "Exams", href: "/admin/exams", icon: CalendarDays },
+      { label: "Promotion Cards", href: "/admin/promotion-cards", icon: Layout },
+      { label: "Testimonials", href: "/admin/testimonials", icon: Quote },
     ],
   },
   {
-    title: "সিস্টেম",
+    title: "System",
     items: [
-      { label: "ইউজার", href: "/admin/users", icon: Users },
-      { label: "রোল গাইড", href: "/admin/roles", icon: Shield },
+      { label: "Users", href: "/admin/users", icon: Users },
+      { label: "Role Guide", href: "/admin/roles", icon: Shield },
     ],
   },
 ];
@@ -67,27 +86,27 @@ export const adminNavGroups = [
 export const adminNavItems = adminNavGroups.flatMap((group) => group.items);
 
 export const requestStatusOptions = [
-  { value: "new", label: "নতুন" },
-  { value: "contacted", label: "যোগাযোগ হয়েছে" },
-  { value: "qualified", label: "যোগ্য" },
-  { value: "closed", label: "বন্ধ" },
-  { value: "spam", label: "স্প্যাম" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "qualified", label: "Qualified" },
+  { value: "closed", label: "Closed" },
+  { value: "spam", label: "Spam" },
 ];
 
 export const contactStatusOptions = [
-  { value: "new", label: "নতুন" },
-  { value: "contacted", label: "যোগাযোগ হয়েছে" },
-  { value: "closed", label: "বন্ধ" },
-  { value: "spam", label: "স্প্যাম" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "closed", label: "Closed" },
+  { value: "spam", label: "Spam" },
 ];
 
 export const freeClassLeadStatusOptions = [
-  { value: "new", label: "নতুন" },
-  { value: "contacted", label: "যোগাযোগ হয়েছে" },
-  { value: "scheduled", label: "ক্লাস নির্ধারিত" },
-  { value: "attended", label: "উপস্থিত" },
-  { value: "invalid", label: "ভুল নম্বর/তথ্য" },
-  { value: "closed", label: "বন্ধ" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "scheduled", label: "Scheduled" },
+  { value: "attended", label: "Attended" },
+  { value: "invalid", label: "Invalid number or information" },
+  { value: "closed", label: "Closed" },
 ];
 
 export const userRoleOptions = [

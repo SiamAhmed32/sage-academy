@@ -33,6 +33,8 @@ const ExamAttemptSchema = new Schema(
 
 ExamAttemptSchema.index({ programId: 1, status: 1, score: -1, submittedAt: 1 });
 ExamAttemptSchema.index({ enrollmentId: 1, createdAt: -1 });
+ExamAttemptSchema.index({ programId: 1, status: 1, submittedAt: -1, createdAt: -1 });
+ExamAttemptSchema.index({ status: 1, submittedAt: -1, createdAt: -1 });
 
 const ExamAttempt = models.ExamAttempt || model("ExamAttempt", ExamAttemptSchema);
 

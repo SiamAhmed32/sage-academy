@@ -44,7 +44,7 @@ const defaults: AssessmentFormState = {
   schoolFocus: "Banani Ideal\nNational Ideal\nFaizur Rahman Ideal",
   startDate: "", endDate: "", routineTitle: "SSC 2027", routineSubtitle: "Batch: G10-1", scheduleNote: "",
   fees: defaultFees(), classSpecificInfo: defaultClasses.map(c => ({ classLevel: c, subjects: "Bangla\nEnglish\nMath\nScience", routine: [{ day: "Saturday", time: "12.00-1.00", subject: "English" }] })),
-  features: ["মানসম্মত প্রশ্নপত্র", "উত্তরপত্র যাচাইকরণ", "প্রতিটি পরীক্ষার পর Solve Class", "নিয়মিত মূল্যায়নে আত্মবিশ্বাস বৃদ্ধি"], status: "draft", featured: true, order: "0",
+  features: ["High-quality question papers", "Answer-sheet review", "Solve class after every exam", "Confidence through regular assessment"], status: "draft", featured: true, order: "0",
 };
 
 type Props = {
@@ -56,10 +56,10 @@ type Props = {
 };
 
 const tabOptions = [
-  { id: "basic", label: "বেসিক তথ্য" },
-  { id: "fees", label: "শ্রেণি ও ফি" },
-  { id: "routine", label: "রুটিন ও বিষয়সূচি" },
-  { id: "features", label: "ফিচার ও নোট" },
+  { id: "basic", label: "Basic information" },
+  { id: "fees", label: "Classes and fees" },
+  { id: "routine", label: "Routine and subjects" },
+  { id: "features", label: "Features and notes" },
 ];
 
 export function AssessmentFormModal({ open, onClose, editingItem, isExam, onSave }: Props) {
@@ -69,28 +69,32 @@ export function AssessmentFormModal({ open, onClose, editingItem, isExam, onSave
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (editingItem) {
-      const start = editingItem.startDate ? new Date(editingItem.startDate).toISOString().slice(0, 10) : "";
-      const end = editingItem.endDate ? new Date(editingItem.endDate).toISOString().slice(0, 10) : "";
-      setForm({
-        title: editingItem.title, image: editingItem.image || "", examType: editingItem.examType || "Regular Exam",
-        classLevels: editingItem.classLevels, version: editingItem.version,
-        schoolFocus: editingItem.schoolFocus.join("\n"), startDate: start, endDate: end, routineTitle: editingItem.routineTitle || editingItem.title,
-        routineSubtitle: editingItem.routineSubtitle || "", scheduleNote: editingItem.scheduleNote || "",
-        fees: editingItem.fees?.length ? editingItem.fees.map(f => ({ ...f, classLevel: Number(f.classLevel) })) : defaultFees(editingItem.classLevels),
-        classSpecificInfo: editingItem.classSpecificInfo?.length ? editingItem.classSpecificInfo.map(c => ({ ...c, subjects: c.subjects.join("\n") })) : editingItem.classLevels.map(c => ({ classLevel: c, subjects: "Bangla\nEnglish", routine: [] })), features: editingItem.features || [], status: editingItem.status, featured: editingItem.featured, order: String(editingItem.order || 0),
-      });
-      setImagePreview(editingItem.image || "");
-    } else {
-      setForm(defaults);
-      setImagePreview("");
-    }
-    setActiveTab("basic");
+    const resetTimer = window.setTimeout(() => {
+      if (editingItem) {
+        const start = editingItem.startDate ? new Date(editingItem.startDate).toISOString().slice(0, 10) : "";
+        const end = editingItem.endDate ? new Date(editingItem.endDate).toISOString().slice(0, 10) : "";
+        setForm({
+          title: editingItem.title, image: editingItem.image || "", examType: editingItem.examType || "Regular Exam",
+          classLevels: editingItem.classLevels, version: editingItem.version,
+          schoolFocus: editingItem.schoolFocus.join("\n"), startDate: start, endDate: end, routineTitle: editingItem.routineTitle || editingItem.title,
+          routineSubtitle: editingItem.routineSubtitle || "", scheduleNote: editingItem.scheduleNote || "",
+          fees: editingItem.fees?.length ? editingItem.fees.map(f => ({ ...f, classLevel: Number(f.classLevel) })) : defaultFees(editingItem.classLevels),
+          classSpecificInfo: editingItem.classSpecificInfo?.length ? editingItem.classSpecificInfo.map(c => ({ ...c, subjects: c.subjects.join("\n") })) : editingItem.classLevels.map(c => ({ classLevel: c, subjects: "Bangla\nEnglish", routine: [] })), features: editingItem.features || [], status: editingItem.status, featured: editingItem.featured, order: String(editingItem.order || 0),
+        });
+        setImagePreview(editingItem.image || "");
+      } else {
+        setForm(defaults);
+        setImagePreview("");
+      }
+      setActiveTab("basic");
+    }, 0);
+
+    return () => window.clearTimeout(resetTimer);
   }, [editingItem, open]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (form.classLevels.length === 0) return toast.error("কমপক্ষে একটি শ্রেণি নির্বাচন করুন");
+    if (form.classLevels.length === 0) return toast.error("Select at least one class");
     setSaving(true);
     const payload = new FormData();
     payload.set("title", form.title);
@@ -116,14 +120,14 @@ export function AssessmentFormModal({ open, onClose, editingItem, isExam, onSave
       await onSave(payload);
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "সেভ করা যায়নি");
+      toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <AdminModal open={open} onClose={onClose} title={editingItem ? "এডিট করুন" : "নতুন তৈরি করুন"} description="শ্রেণি অনুযায়ী ফি ও রুটিন সুন্দরভাবে সাজান।" maxWidth="max-w-5xl">
+    <AdminModal open={open} onClose={onClose} title={editingItem ? "Edit assessment" : "Create assessment"} description="Organize fees and routines by class." maxWidth="max-w-5xl">
       <form onSubmit={submit} className="space-y-6">
         <div className="flex border-b border-sage-border overflow-x-auto whitespace-nowrap scrollbar-none pb-px gap-1">
           {tabOptions.map((t) => (
@@ -148,9 +152,9 @@ export function AssessmentFormModal({ open, onClose, editingItem, isExam, onSave
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-sage-border">
-          <button type="button" onClick={onClose} className="rounded-xl border border-sage-border px-5 py-3 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50">বাতিল</button>
+          <button type="button" onClick={onClose} className="rounded-xl border border-sage-border px-5 py-3 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50">Cancel</button>
           <button disabled={saving} className="rounded-xl bg-sage-secondary px-7 py-3 text-sm font-black text-white transition hover:bg-sage-primary disabled:opacity-60">
-            {saving ? "সেভ হচ্ছে..." : editingItem ? "আপডেট করুন" : "তৈরি করুন"}
+            {saving ? "Saving..." : editingItem ? "Update" : "Create"}
           </button>
         </div>
       </form>

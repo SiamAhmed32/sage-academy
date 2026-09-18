@@ -81,7 +81,7 @@ export function Pagination({
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage <= 1}
             className="flex h-11 w-11 items-center justify-center rounded-xl border border-sage-border bg-white text-base transition hover:bg-sage-red-50 disabled:opacity-30 disabled:hover:bg-white md:h-12 md:w-12"
-            aria-label="আগের পৃষ্ঠা"
+            aria-label="Previous page"
           >
             <ChevronLeft size={22} className="text-sage-secondary" />
           </button>
@@ -106,7 +106,7 @@ export function Pagination({
                       : "border-sage-border bg-white text-sage-secondary hover:bg-sage-red-50"
                   }`}
                 >
-                  {item.toLocaleString("bn-BD")}
+                  {item}
                 </button>
               )
             )}
@@ -117,7 +117,7 @@ export function Pagination({
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
             className="flex h-11 w-11 items-center justify-center rounded-xl border border-sage-border bg-white text-base transition hover:bg-sage-red-50 disabled:opacity-30 disabled:hover:bg-white md:h-12 md:w-12"
-            aria-label="পরের পৃষ্ঠা"
+            aria-label="Next page"
           >
             <ChevronRight size={22} className="text-sage-secondary" />
           </button>
@@ -126,12 +126,12 @@ export function Pagination({
 
       {from != null && to != null && totalItems != null ? (
         <p className="text-center text-base font-medium text-sage-gray-600">
-          এই পৃষ্ঠায়{" "}
+          Showing{" "}
           <span className="font-bold text-sage-secondary">
-            {from.toLocaleString("bn-BD")}–{to.toLocaleString("bn-BD")}
+            {from}–{to}
           </span>{" "}
-          নম্বর রেকর্ড · মোট{" "}
-          <span className="font-bold text-sage-secondary">{totalItems.toLocaleString("bn-BD")}</span> টি
+          of{" "}
+          <span className="font-bold text-sage-secondary">{totalItems}</span> records
         </p>
       ) : null}
     </div>

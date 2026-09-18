@@ -2,6 +2,7 @@ import { BookOpen, CreditCard } from "lucide-react";
 
 import type { StudentProfile } from "./types";
 import { discountText, subjectTotal } from "./student-profile-utils";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 export function StudentBillingSubjects({ student }: { student: StudentProfile }) {
   const subjects = student.selectedSubjects ?? [];
@@ -19,7 +20,7 @@ export function StudentBillingSubjects({ student }: { student: StudentProfile })
           </p>
         </div>
         <div className="rounded-full bg-sage-primary px-4 py-2 text-sm font-black text-white">
-          Monthly ৳{subjectTotal(subjects)}
+          Monthly {formatAdminCurrency(subjectTotal(subjects))}
         </div>
       </div>
 
@@ -38,13 +39,13 @@ export function StudentBillingSubjects({ student }: { student: StudentProfile })
                   </div>
                 </div>
                 <span className="rounded-full bg-sage-red-50 px-3 py-1 text-xs font-black text-sage-primary ring-1 ring-sage-red-100">
-                  ৳{subject.monthlyFee}
+                  {formatAdminCurrency(subject.monthlyFee)}
                 </span>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-                <p className="rounded-lg bg-sage-red-50/40 p-2">Batch ৳{subject.baseFee ?? subject.monthlyFee}</p>
+                <p className="rounded-lg bg-sage-red-50/40 p-2">Batch {formatAdminCurrency(subject.baseFee ?? subject.monthlyFee)}</p>
                 <p className="rounded-lg bg-sage-red-50/40 p-2">{discountText(subject)}</p>
-                <p className="rounded-lg bg-sage-red-50/40 p-2 font-bold">Final ৳{subject.monthlyFee}</p>
+                <p className="rounded-lg bg-sage-red-50/40 p-2 font-bold">Final {formatAdminCurrency(subject.monthlyFee)}</p>
               </div>
             </div>
           ))

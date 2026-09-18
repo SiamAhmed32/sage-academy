@@ -29,9 +29,9 @@ export function AssessmentImageUploadField({ previewUrl, onPreviewChange, fallba
     <div className="rounded-2xl border border-sage-border bg-sage-red-50/30 p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-black text-sage-secondary">ক্যাম্পেইন ছবি</p>
+          <p className="text-sm font-black text-sage-secondary">Campaign image</p>
           <p className="mt-1 text-xs font-semibold text-sage-gray-500">
-            পোস্টার/ক্লাসরুম/এক্সাম ভিজ্যুয়াল আপলোড করুন। JPG, PNG, WEBP, সর্বোচ্চ ৫MB।
+            Upload a poster, classroom, or exam image. JPG, PNG, or WEBP, up to 5 MB.
           </p>
         </div>
         <div className="relative">
@@ -45,7 +45,7 @@ export function AssessmentImageUploadField({ previewUrl, onPreviewChange, fallba
           />
           <div className="inline-flex h-11 items-center gap-2 rounded-xl border border-sage-border bg-white px-4 text-sm font-black text-sage-secondary transition hover:border-sage-primary hover:text-sage-primary">
             <Camera className="h-4 w-4" />
-            ছবি নির্বাচন
+            Choose image
           </div>
         </div>
       </div>

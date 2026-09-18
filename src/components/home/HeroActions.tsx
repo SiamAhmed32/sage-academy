@@ -22,15 +22,15 @@ export function HeroActions() {
       <button
         type="button"
         onClick={handleFreeClassClick}
-        className="group bn-text relative inline-flex min-h-[3.75rem] items-center justify-center gap-3 overflow-hidden rounded-full bg-sage-primary px-8 py-4 text-base font-semibold leading-normal text-sage-white shadow-lg shadow-sage-primary/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-sage-primary-hover hover:shadow-xl hover:shadow-sage-primary/40 active:translate-y-0"
+        className="group bn-text relative inline-flex min-h-[3.75rem] max-w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-sage-primary px-8 py-4 text-base font-semibold leading-normal text-sage-white shadow-lg shadow-sage-primary/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-sage-primary-hover hover:shadow-xl hover:shadow-sage-primary/40 active:translate-y-0"
       >
         {/* shimmer sweep */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full"
         />
-        ফ্রি ক্লাস বুক করুন
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:translate-x-1">
+        <span>ফ্রি ক্লাস বুক করুন</span>
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:translate-x-1">
           <FaArrowRight aria-hidden="true" className="text-xs" />
         </span>
       </button>
@@ -39,12 +39,12 @@ export function HeroActions() {
       <TrackedLink
         href="/batches"
         trackingLabel="hero_batches"
-        className="bn-text group inline-flex min-h-[3.75rem] items-center justify-center gap-3 rounded-full border-2 border-sage-primary/30 bg-white/80 px-8 py-4 text-base font-semibold leading-normal text-sage-primary shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-sage-primary hover:bg-sage-red-50 hover:shadow-md hover:shadow-sage-red-100/50 active:translate-y-0"
+        className="bn-text group inline-flex min-h-[3.75rem] max-w-full items-center justify-center gap-3 rounded-full border-2 border-sage-primary/30 bg-white/80 px-8 py-4 text-base font-semibold leading-normal text-sage-primary shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-sage-primary hover:bg-sage-red-50 hover:shadow-md hover:shadow-sage-red-100/50 active:translate-y-0"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-sage-primary/10 transition-all duration-300 group-hover:bg-sage-primary group-hover:text-white">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sage-primary/10 transition-all duration-300 group-hover:bg-sage-primary group-hover:text-white">
           <FaBookOpen aria-hidden="true" className="text-xs" />
         </span>
-        ব্যাচ সম্পর্কে জানুন
+        <span>ব্যাচ সম্পর্কে জানুন</span>
       </TrackedLink>
     </div>
   );

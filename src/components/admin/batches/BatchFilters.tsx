@@ -4,21 +4,30 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
-type BatchFiltersProps = { q: string; classLevel: string; genderGroup: string; status: string };
+import { adminClassLevelOptions } from "@/constants/admin-display";
+
+type BatchFiltersProps = {
+  q: string;
+  classLevel: string;
+  genderGroup: string;
+  status: string;
+  sort: string;
+};
 
 const inputClass = "h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none";
-const classLevels = [
-  { value: "5", label: "৫ম শ্রেণি" }, { value: "6", label: "৬ষ্ঠ শ্রেণি" },
-  { value: "7", label: "৭ম শ্রেণি" }, { value: "8", label: "৮ম শ্রেণি" },
-  { value: "9", label: "৯ম শ্রেণি" }, { value: "10", label: "১০ম শ্রেণি" },
-  { value: "11", label: "একাদশ শ্রেণি" }, { value: "12", label: "দ্বাদশ শ্রেণি" },
-];
+const classLevels = adminClassLevelOptions.filter((option) => option.value >= 5);
 
-export function BatchFilters({ q, classLevel, genderGroup, status }: BatchFiltersProps) {
+export function BatchFilters({ q, classLevel, genderGroup, status, sort }: BatchFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchTimerRef = useRef<number | null>(null);
-  const [filters, setFilters] = useState({ q, classLevel, genderGroup: genderGroup || "all", status: status || "all" });
+  const [filters, setFilters] = useState({
+    q,
+    classLevel,
+    genderGroup: genderGroup || "all",
+    status: status || "all",
+    sort: sort || "default",
+  });
 
   const applyFilters = (next: typeof filters) => {
     const params = new URLSearchParams();
@@ -26,6 +35,7 @@ export function BatchFilters({ q, classLevel, genderGroup, status }: BatchFilter
     if (next.classLevel.trim()) params.set("classLevel", next.classLevel.trim());
     if (next.genderGroup !== "all") params.set("genderGroup", next.genderGroup);
     if (next.status !== "all") params.set("status", next.status);
+    if (next.sort !== "default") params.set("sort", next.sort);
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
@@ -53,24 +63,33 @@ export function BatchFilters({ q, classLevel, genderGroup, status }: BatchFilter
         name="q"
         value={filters.q}
         onChange={updateFilter}
-        placeholder="ব্যাচ কোড, শ্রেণি বা slug দিয়ে খুঁজুন"
-        className={`${inputClass} lg:col-span-4`}
+        maxLength={80}
+        placeholder="Search by batch title, code, or slug"
+        className={`${inputClass} lg:col-span-3`}
       />
       <select name="classLevel" value={filters.classLevel} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="">সব শ্রেণি</option>
+        <option value="">All classes</option>
         {classLevels.map((level) => <option key={level.value} value={level.value}>{level.label}</option>)}
       </select>
       <select name="genderGroup" value={filters.genderGroup} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="all">সব ধরন</option>
-        <option value="male">ছেলেদের ব্যাচ</option>
-        <option value="female">মেয়েদের ব্যাচ</option>
-        <option value="combined">কম্বাইন্ড ব্যাচ</option>
+        <option value="all">All types</option>
+        <option value="male">Boys</option>
+        <option value="female">Girls</option>
+        <option value="combined">Combined</option>
       </select>
-      <select name="status" value={filters.status} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="all">সব স্ট্যাটাস</option>
+      <select name="status" value={filters.status} onChange={updateFilter} className={`${inputClass} lg:col-span-1`}>
+        <option value="all">All statuses</option>
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
         <option value="archived">Archived</option>
+      </select>
+      <select name="sort" value={filters.sort} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
+        <option value="default">Default order</option>
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="class_asc">Class, low to high</option>
+        <option value="title_asc">Title, A–Z</option>
+        <option value="title_desc">Title, Z–A</option>
       </select>
       <Link
         href={pathname}

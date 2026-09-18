@@ -171,6 +171,8 @@ PaymentSchema.index({ year: -1, monthNumber: -1, dueAmount: 1 });
 PaymentSchema.index({ year: -1, monthNumber: -1, amount: 1 });
 PaymentSchema.index({ paymentMethod: 1, year: -1, monthNumber: -1 });
 PaymentSchema.index({ createdAt: -1 });
+PaymentSchema.index({ year: -1, monthNumber: -1, createdAt: -1 });
+PaymentSchema.index({ student: 1, year: -1, monthNumber: -1, createdAt: -1 });
 
 const Payment = models.Payment || model("Payment", PaymentSchema);
 

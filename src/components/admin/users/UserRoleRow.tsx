@@ -45,13 +45,13 @@ export function UserRoleRow({ user, roleOptions, isEditable }: UserRoleRowProps)
 
       const result = await updateUserRoleAction(formData);
       if (result.ok) {
-        toast.success(`${user.name} এর role সেভ হয়েছে`);
+        toast.success(`Role saved for ${user.name}.`);
         router.refresh();
       } else {
-        toast.error(result.message || "সেভ করা যায়নি");
+        toast.error(result.message || "The changes could not be saved.");
       }
     } catch {
-      toast.error("সার্ভার সমস্যা হয়েছে");
+      toast.error("A server error occurred.");
     } finally {
       setIsSaving(false);
     }
@@ -92,7 +92,7 @@ export function UserRoleRow({ user, roleOptions, isEditable }: UserRoleRowProps)
           disabled={!isEditable || isSaving}
           className="rounded-lg bg-sage-primary px-4 py-2 font-bold text-white disabled:opacity-40"
         >
-          {isSaving ? "..." : "সেভ"}
+          {isSaving ? "..." : "Save"}
         </button>
       </td>
     </tr>

@@ -71,6 +71,7 @@ const UserSchema = new Schema(
 );
 
 UserSchema.index({ role: 1, isActive: 1, createdAt: -1 });
+UserSchema.index({ role: 1, isActive: 1, name: 1 });
 UserSchema.index({ name: 1 });
 UserSchema.index({ linkedStudent: 1 });
 

@@ -2,6 +2,7 @@
 
 import { BookOpen, CheckCircle2, X } from "lucide-react";
 import { useState } from "react";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 interface StudentSubjectsDialogProps {
   studentName: string;
@@ -40,10 +41,11 @@ export function StudentSubjectsDialog({ studentName, subjects }: StudentSubjects
             <div className="flex items-center justify-between border-b border-sage-border bg-sage-red-50 px-6 py-4">
               <div className="flex items-center gap-2">
                 <BookOpen size={20} className="text-sage-primary" />
-                <h3 className="text-lg font-bold text-sage-secondary">{studentName} - বিষয়সমূহ</h3>
+                <h3 className="text-lg font-bold text-sage-secondary">{studentName} - Subjects</h3>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
+                aria-label="Close subjects dialog"
                 className="rounded-full p-2 text-sage-gray-400 hover:bg-sage-red-100 hover:text-sage-primary transition"
               >
                 <X size={20} />
@@ -53,7 +55,7 @@ export function StudentSubjectsDialog({ studentName, subjects }: StudentSubjects
             {/* Content */}
             <div className="p-6 space-y-4">
               <p className="text-xs text-sage-gray-500">
-                শিক্ষার্থীর নির্বাচিত বিষয় এবং মাসিক ফি এর তালিকা।
+                Selected subjects and their monthly fees.
               </p>
 
               <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
@@ -70,17 +72,17 @@ export function StudentSubjectsDialog({ studentName, subjects }: StudentSubjects
                         </div>
                         {(sub.baseFee ?? sub.monthlyFee) !== sub.monthlyFee && (
                           <p className="mt-1 text-[10px] text-sage-gray-500">
-                            Batch ৳{sub.baseFee} → Final ৳{sub.monthlyFee}
+                            Batch {formatAdminCurrency(sub.baseFee ?? 0)} → Final {formatAdminCurrency(sub.monthlyFee)}
                             {sub.discountNote ? ` · ${sub.discountNote}` : ""}
                           </p>
                         )}
                       </div>
-                      <span className="text-xs font-black text-sage-primary">৳{sub.monthlyFee}</span>
+                      <span className="text-xs font-black text-sage-primary">{formatAdminCurrency(sub.monthlyFee)}</span>
                     </div>
                   ))
                 ) : (
                   <div className="py-6 text-center text-sage-gray-400 italic text-sm">
-                    কোনো বিষয় নির্বাচন করা হয়নি।
+                    No subjects selected.
                   </div>
                 )}
               </div>
@@ -88,7 +90,7 @@ export function StudentSubjectsDialog({ studentName, subjects }: StudentSubjects
               {subjects && subjects.length > 0 && (
                 <div className="flex items-center justify-end gap-2 border-t border-sage-border pt-4">
                   <span className="text-[10px] font-black text-sage-gray-400 uppercase tracking-widest">Total Monthly:</span>
-                  <span className="text-xl font-black text-sage-primary">৳{totalFee}</span>
+                  <span className="text-xl font-black text-sage-primary">{formatAdminCurrency(totalFee)}</span>
                 </div>
               )}
             </div>
@@ -100,7 +102,7 @@ export function StudentSubjectsDialog({ studentName, subjects }: StudentSubjects
                 onClick={() => setIsOpen(false)}
                 className="rounded-xl bg-sage-secondary px-5 py-2 text-sm font-bold text-white transition hover:bg-sage-primary shadow-lg shadow-sage-primary/20"
               >
-                বন্ধ করুন
+                Close
               </button>
             </div>
           </div>

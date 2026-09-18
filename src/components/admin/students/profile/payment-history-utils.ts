@@ -1,3 +1,5 @@
+import { formatAdminDate } from "@/lib/admin-format";
+
 export type StudentPayment = {
   _id: string;
   student: { nameEnglish: string; studentId: string };
@@ -67,7 +69,7 @@ export function paymentDue(paid: number, expected: number) {
 
 export function paymentDateLabel(payment: StudentPayment) {
   const value = payment.paymentDate || payment.createdAt;
-  return value ? new Date(value).toLocaleDateString("bn-BD") : "N/A";
+  return formatAdminDate(value, "N/A");
 }
 
 export function paidBySubject(payment: StudentPayment) {
@@ -92,34 +94,25 @@ export function statusTone(status: string) {
   return "bg-sage-red-50 text-sage-primary ring-sage-red-100";
 }
 
+export function monthLabel(month: string) {
+  return month;
+}
+
+/** Retained for the public student ledger; admin rendering uses monthLabel. */
 export function bnMonthLabel(month: string) {
-  const index = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ].indexOf(month);
-  if (index < 0) return month;
-  return [
-    "জানুয়ারি",
-    "ফেব্রুয়ারি",
-    "মার্চ",
-    "এপ্রিল",
-    "মে",
-    "জুন",
-    "জুলাই",
-    "আগস্ট",
-    "সেপ্টেম্বর",
-    "অক্টোবর",
-    "নভেম্বর",
-    "ডিসেম্বর",
-  ][index];
+  const labels: Record<string, string> = {
+    January: "জানুয়ারি", // admin-language-allow: public student content
+    February: "ফেব্রুয়ারি", // admin-language-allow: public student content
+    March: "মার্চ", // admin-language-allow: public student content
+    April: "এপ্রিল", // admin-language-allow: public student content
+    May: "মে", // admin-language-allow: public student content
+    June: "জুন", // admin-language-allow: public student content
+    July: "জুলাই", // admin-language-allow: public student content
+    August: "আগস্ট", // admin-language-allow: public student content
+    September: "সেপ্টেম্বর", // admin-language-allow: public student content
+    October: "অক্টোবর", // admin-language-allow: public student content
+    November: "নভেম্বর", // admin-language-allow: public student content
+    December: "ডিসেম্বর", // admin-language-allow: public student content
+  };
+  return labels[month] ?? month;
 }

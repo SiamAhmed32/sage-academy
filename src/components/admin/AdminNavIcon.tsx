@@ -36,8 +36,8 @@ export function AdminNavIcon({ href, icon: Icon, isActive }: AdminNavIconProps) 
     <span
       className={cn(
         "grid h-9 w-9 shrink-0 place-items-center rounded-xl ring-1 transition",
-        iconToneByHref[href] ?? "bg-white/10 text-white ring-white/15",
-        !isActive && "shadow-sm shadow-black/10"
+        iconToneByHref[href] ?? "bg-gray-50 text-gray-500 ring-gray-200",
+        isActive && "ring-2"
       )}
     >
       <Icon size={18} strokeWidth={2.2} />

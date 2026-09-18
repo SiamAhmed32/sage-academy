@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { heroCopy, heroGallerySlides, heroHighlights } from "@/constants/hero";
 import { Container } from "@/components/shared/Container";
@@ -10,6 +9,58 @@ import { HeroStats } from "@/components/home/HeroStats";
 import { HeroVisual } from "@/components/home/HeroVisual";
 
 const HIGHLIGHT_ICONS = ["✦", "◈", "✧"];
+
+const HeroCopy = memo(function HeroCopy() {
+  return (
+    <div className="sage-hero-in min-w-0 max-w-2xl overflow-visible [overflow-anchor:none] lg:max-w-none">
+      <span className="bn-pill mb-6 inline-flex max-w-full items-center gap-2.5 rounded-full border border-sage-red-100 bg-white/90 px-5 py-2.5 text-sm font-semibold leading-normal text-sage-primary shadow-md shadow-sage-red-100/50 backdrop-blur">
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sage-primary opacity-60" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sage-primary" />
+        </span>
+        <span className="min-w-0">{heroCopy.badge}</span>
+      </span>
+
+      <h1
+        lang="bn"
+        className="max-w-[48rem] text-[1.95rem] font-semibold text-sage-secondary sm:text-[2.35rem] lg:max-w-none lg:text-[2.15rem] xl:text-[2.4rem]"
+      >
+        <span className="bn-headline block">{heroCopy.headlineLine1}</span>
+        <span className="bn-headline-subline relative inline-block max-w-full text-sage-primary">
+          {heroCopy.headlineLine2}
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-1 left-0 h-[3px] w-[72%] max-w-full rounded-full bg-gradient-to-r from-sage-primary via-[#C8161D] to-transparent opacity-30"
+          />
+        </span>
+      </h1>
+
+      <p className="bn-text mt-6 hidden max-w-[52ch] text-[20px] leading-8 text-sage-gray-700 sm:mt-7 sm:text-[1.25rem] lg:block">
+        {heroCopy.description}
+      </p>
+
+      <div className="mt-6 flex max-w-2xl flex-wrap gap-2.5">
+        {heroHighlights.map((item, i) => (
+          <span
+            key={item}
+            className="bn-pill inline-flex max-w-full items-center gap-2 rounded-full border border-sage-red-100 bg-white px-4 py-2.5 text-sm font-semibold leading-normal text-sage-gray-700 shadow-sm shadow-sage-red-100/30 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-sage-primary/30 hover:shadow-md hover:shadow-sage-red-100/40"
+          >
+            <span className="shrink-0 text-xs font-bold text-sage-primary">
+              {HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]}
+            </span>
+            <span className="min-w-0">{item}</span>
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-8 sm:mt-9">
+        <HeroActions />
+      </div>
+
+      <HeroStats />
+    </div>
+  );
+});
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -28,7 +79,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative overflow-x-clip overflow-y-visible bg-white [overflow-anchor:none]">
       {/* ── Layer 1: Diagonal two-tone split (cream left → white right) ── */}
       <div className="absolute inset-0 bg-[linear-gradient(118deg,#fff8f8_0%,#fff3f3_44%,#ffffff_44%,#ffffff_100%)]" />
 
@@ -64,106 +115,14 @@ export function HeroSection() {
         <HeroVisual activeIndex={activeSlide} />
       </div>
 
-      <Container className="relative grid grid-cols-1 items-center gap-8 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(430px,0.9fr)] lg:gap-12 lg:py-14">
-        {/* ───── TEXT ───── */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="max-w-2xl overflow-visible lg:max-w-[48rem] xl:max-w-[52rem]"
-        >
-          {/* ── Badge ── */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-          >
-            <span className="bn-pill mb-6 inline-flex items-center gap-2.5 rounded-full border border-sage-red-100 bg-white/90 px-5 py-2.5 text-sm font-semibold leading-normal text-sage-primary shadow-md shadow-sage-red-100/50 backdrop-blur">
-              {/* Animated pulsing dot */}
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sage-primary opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sage-primary" />
-              </span>
-              {heroCopy.badge}
-            </span>
-          </motion.div>
+      <Container className="relative grid grid-cols-1 items-center gap-8 py-8 sm:py-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-10 lg:py-14 xl:gap-12">
+        <HeroCopy />
 
-          {/* ── Headline ── */}
-          <motion.h1
-            lang="bn"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.6 }}
-            className="max-w-[48rem] text-[1.95rem] font-semibold text-sage-secondary sm:text-[2.35rem] lg:text-[2.25rem] xl:text-[2.4rem]"
-          >
-            <span className="bn-headline block xl:whitespace-nowrap">
-              {heroCopy.headlineLine1}
-            </span>
-            {/* Second line with decorative underline highlight */}
-            <span className="bn-headline-subline relative block text-sage-primary lg:whitespace-nowrap">
-              {heroCopy.headlineLine2}
-              <span
-                aria-hidden="true"
-                className="absolute -bottom-1 left-0 h-[3px] w-[72%] rounded-full bg-gradient-to-r from-sage-primary via-[#C8161D] to-transparent opacity-30"
-              />
-            </span>
-          </motion.h1>
-
-          {/* ── Description ── */}
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28, duration: 0.6 }}
-            className="bn-text mt-6 hidden max-w-[52ch] text-[20px] leading-8 text-sage-gray-700 sm:mt-7 sm:text-[1.25rem] lg:block"
-          >
-            {heroCopy.description}
-          </motion.p>
-
-          {/* ── Highlight Chips ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.38, duration: 0.55 }}
-            className="mt-6 flex max-w-2xl flex-wrap gap-2.5"
-          >
-            {heroHighlights.map((item, i) => (
-              <span
-                key={item}
-                className="bn-pill flex items-center gap-2 rounded-full border border-sage-red-100 bg-white px-4 py-2.5 text-sm font-semibold leading-normal text-sage-gray-700 shadow-sm shadow-sage-red-100/30 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-sage-primary/30 hover:shadow-md hover:shadow-sage-red-100/40"
-              >
-                <span className="text-xs font-bold text-sage-primary">{HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]}</span>
-                {item}
-              </span>
-            ))}
-          </motion.div>
-
-          {/* ── CTA Buttons ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.46, duration: 0.55 }}
-            className="mt-8 sm:mt-9"
-          >
-            <HeroActions />
-          </motion.div>
-
-          {/* ── Stats ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.56, duration: 0.55 }}
-          >
-            <HeroStats />
-          </motion.div>
-        </motion.div>
-
-        {/* ───── DESKTOP IMAGE ───── */}
-        <div className="hidden pb-8 lg:block lg:pb-10">
+        <div className="hidden min-w-0 pb-8 lg:block lg:pb-10">
           <HeroVisual activeIndex={activeSlide} />
         </div>
       </Container>
 
-      {/* Bottom border */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sage-red-100/80 to-transparent" />
     </section>
   );

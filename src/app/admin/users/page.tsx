@@ -1,17 +1,20 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Pagination } from "@/components/admin/shared/Pagination";
 import { UserRoleRow } from "@/components/admin/users/UserRoleRow";
 import { userRoleOptions } from "@/constants/admin";
+import { adminRoleLabels } from "@/constants/admin-display";
 import type { AuthRole } from "@/lib/auth";
+import { formatAdminNumber } from "@/lib/admin-format";
 import { connectDB } from "@/lib/mongodb";
 import { canManageUsers, assignableUserRoles, requireAdminPageUser } from "@/lib/rbac";
 import User from "@/models/User";
-import Link from "next/link";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const PAGE_SIZE = 20;
+const MAX_SEARCH_LENGTH = 80;
 
 function getParam(
   params: Record<string, string | string[] | undefined>,
@@ -36,11 +39,11 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const currentUser = await requireAdminPageUser();
   await connectDB();
 
-  const q = getParam(params, "q").trim();
+  const q = getParam(params, "q").trim().slice(0, MAX_SEARCH_LENGTH);
   const role = getParam(params, "role", "all");
   const status = getParam(params, "status", "all");
   const sort = getParam(params, "sort", "newest");
-  const page = Math.max(1, Number(getParam(params, "page", "1")));
+  const requestedPage = Number.parseInt(getParam(params, "page", "1"), 10);
 
   const query: {
     role?: AuthRole;
@@ -73,33 +76,35 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   };
   const sortQuery = sortMap[sort] ?? sortMap.newest;
 
-  const [users, total] = await Promise.all([
-    User.find(query)
-      .sort(sortQuery)
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE)
-      .select("name email phone role isActive createdAt")
-      .lean(),
-    User.countDocuments(query),
-  ]);
+  const total = await User.countDocuments(query);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = Math.min(
+    Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+    totalPages
+  );
+  const users = await User.find(query)
+    .sort(sortQuery)
+    .skip((page - 1) * PAGE_SIZE)
+    .limit(PAGE_SIZE)
+    .select("name email phone role isActive createdAt")
+    .lean();
   const canEditRoles = canManageUsers(currentUser.role);
   const assignableRoles = assignableUserRoles(currentUser.role);
   const roleOptionsForEditor = userRoleOptions
     .filter((option) => assignableRoles.includes(option.value as AuthRole))
     .map((option) => ({
       value: option.value as AuthRole,
-      label: option.label,
+      label: adminRoleLabels[option.value] ?? option.label,
     }));
 
   return (
     <div>
       <AdminPageHeader
-        title="ইউজার ও রোল"
+        title="Users and Roles"
         description={
           canEditRoles
-            ? "Admin ও Super admin user role ও active status পরিবর্তন করতে পারবে। Super admin role শুধু super admin দিতে পারবে।"
-            : "Role পরিবর্তনের জন্য admin বা super admin access লাগবে।"
+            ? "Admins and super admins can update user roles and active status. Only a super admin can assign the super admin role."
+            : "Admin or super admin access is required to change roles."
         }
       />
 
@@ -108,7 +113,8 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           <input
             name="q"
             defaultValue={q}
-            placeholder="নাম, ইমেইল বা ফোন দিয়ে খুঁজুন"
+            maxLength={MAX_SEARCH_LENGTH}
+            placeholder="Search by name, email, or phone"
             className="h-10 rounded-lg border border-sage-border px-3 text-sm lg:col-span-4"
           />
           <select
@@ -116,10 +122,10 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             defaultValue={role}
             className="h-10 rounded-lg border border-sage-border px-3 text-sm lg:col-span-3"
           >
-            <option value="all">সব রোল</option>
+            <option value="all">All roles</option>
             {userRoleOptions.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {adminRoleLabels[option.value] ?? option.label}
               </option>
             ))}
           </select>
@@ -128,7 +134,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             defaultValue={status}
             className="h-10 rounded-lg border border-sage-border px-3 text-sm lg:col-span-2"
           >
-            <option value="all">সব স্ট্যাটাস</option>
+            <option value="all">All statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
@@ -151,7 +157,10 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
         </form>
 
         <div className="mt-3 text-xs text-sage-gray-700">
-          মোট ফলাফল: <span className="font-semibold text-sage-secondary">{total}</span>
+          Total results:{" "}
+          <span className="font-semibold text-sage-secondary">
+            {formatAdminNumber(total)}
+          </span>
         </div>
       </div>
 
@@ -159,10 +168,10 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
         <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="bg-sage-red-50 text-sage-secondary">
             <tr>
-              <th className="p-4">নাম</th>
-              <th className="p-4">ইমেইল</th>
-              <th className="p-4">ফোন</th>
-              <th className="p-4">রোল</th>
+              <th className="p-4">Name</th>
+              <th className="p-4">Email</th>
+              <th className="p-4">Phone</th>
+              <th className="p-4">Role</th>
               <th className="p-4">Active</th>
               <th className="p-4">Action</th>
             </tr>
@@ -193,29 +202,13 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-sage-border bg-white px-4 py-3 text-sm">
-          <span className="text-sage-gray-700">
-            পেজ {page} / {totalPages}
-          </span>
-          <div className="flex items-center gap-2">
-            <Link
-              href={`?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(sort)}&page=${Math.max(1, page - 1)}`}
-              className={`rounded-lg border px-3 py-1.5 ${page <= 1 ? "pointer-events-none opacity-40" : ""}`}
-            >
-              Previous
-            </Link>
-            <Link
-              href={`?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(sort)}&page=${Math.min(totalPages, page + 1)}`}
-              className={`rounded-lg border px-3 py-1.5 ${
-                page >= totalPages ? "pointer-events-none opacity-40" : ""
-              }`}
-            >
-              Next
-            </Link>
-          </div>
-        </div>
-      )}
+      <Pagination
+        totalPages={totalPages}
+        currentPage={page}
+        totalItems={total}
+        pageSize={PAGE_SIZE}
+        showWhenSinglePage
+      />
     </div>
   );
 }

@@ -59,7 +59,8 @@ export function TeacherFilters({ subjects }: { subjects: string[] }) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-sage-gray-400" />
           <Input
-            placeholder="শিক্ষকের নাম অথবা বিষয় লিখে খুঁজুন..."
+            placeholder="Search by teacher name or subject..."
+            maxLength={80}
             className="pl-10 h-11 border-sage-border focus:ring-sage-primary/20"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
@@ -71,7 +72,7 @@ export function TeacherFilters({ subjects }: { subjects: string[] }) {
             value={searchParams.get("subject") || ""}
             onChange={(e) => handleFilterChange("subject", e.target.value)}
           >
-            <option value="">সকল বিষয়</option>
+            <option value="">All subjects</option>
             {subjects.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
@@ -82,11 +83,11 @@ export function TeacherFilters({ subjects }: { subjects: string[] }) {
             value={searchParams.get("sort") || "order:asc"}
             onChange={(e) => handleFilterChange("sort", e.target.value)}
           >
-            <option value="order:asc">সিরিয়াল (ছোট থেকে বড়)</option>
-            <option value="order:desc">সিরিয়াল (বড় থেকে ছোট)</option>
-            <option value="name:asc">নাম (A-Z)</option>
-            <option value="name:desc">নাম (Z-A)</option>
-            <option value="createdAt:desc">নতুন আগে</option>
+            <option value="order:asc">Order, low to high</option>
+            <option value="order:desc">Order, high to low</option>
+            <option value="name:asc">Name, A–Z</option>
+            <option value="name:desc">Name, Z–A</option>
+            <option value="createdAt:desc">Newest first</option>
           </select>
 
           <select
@@ -94,7 +95,7 @@ export function TeacherFilters({ subjects }: { subjects: string[] }) {
             value={searchParams.get("isFeatured") || ""}
             onChange={(e) => handleFilterChange("isFeatured", e.target.value)}
           >
-            <option value="">সব শিক্ষক</option>
+            <option value="">All teachers</option>
             <option value="true">Featured Only</option>
             <option value="false">Non-Featured</option>
           </select>
@@ -103,12 +104,12 @@ export function TeacherFilters({ subjects }: { subjects: string[] }) {
               onClick={clearFilters}
               className="flex h-11 items-center gap-2 rounded-lg border border-sage-red-100 bg-sage-red-50 px-4 text-sm font-bold text-sage-primary transition hover:bg-sage-red-100"
             >
-              <X size={16} /> রিসেট
+              <X size={16} /> Reset
             </button>
           ) }
         </div>
       </div>
-      {isPending && <p className="text-xs text-sage-primary animate-pulse font-medium">লোড হচ্ছে...</p>}
+      {isPending && <p className="text-xs text-sage-primary animate-pulse font-medium">Loading...</p>}
     </div>
   );
 }

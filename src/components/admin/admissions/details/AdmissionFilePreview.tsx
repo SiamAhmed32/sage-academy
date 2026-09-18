@@ -1,8 +1,9 @@
 import { FileText, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import type { AdmissionUploadedForm } from "../types";
 
-export function AdmissionFilePreview({ uploadedForm }: { uploadedForm: any }) {
+export function AdmissionFilePreview({ uploadedForm }: { uploadedForm?: AdmissionUploadedForm | null }) {
   if (!uploadedForm?.url) return null;
 
   const isImage = 
@@ -14,7 +15,7 @@ export function AdmissionFilePreview({ uploadedForm }: { uploadedForm: any }) {
       <div className="border-b border-sage-border bg-sage-red-50/50 px-6 py-4">
         <h3 className="flex items-center gap-2 text-sm font-black text-sage-secondary">
           <FileText size={18} className="text-sage-primary" />
-          আপলোড করা ভর্তি ফর্ম (Uploaded Document)
+          Uploaded Admission Form
         </h3>
       </div>
       
@@ -36,7 +37,7 @@ export function AdmissionFilePreview({ uploadedForm }: { uploadedForm: any }) {
                 target="_blank"
                 className="inline-flex items-center gap-2 rounded-xl bg-sage-primary px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-sage-primary/20 transition hover:bg-sage-secondary active:scale-[0.98]"
               >
-                পূর্ণ সাইজে দেখুন (View Full Image)
+                View Full Image
                 <ExternalLink size={14} />
               </Link>
             </div>
@@ -46,14 +47,14 @@ export function AdmissionFilePreview({ uploadedForm }: { uploadedForm: any }) {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-sage-red-50 text-sage-primary">
               <FileText size={32} />
             </div>
-            <p className="font-bold text-sage-secondary">এটি একটি PDF ফাইল</p>
-            <p className="mt-1 text-xs text-sage-gray-500 mb-6">বিস্তারিত দেখতে নিচের বাটনে ক্লিক করুন।</p>
+            <p className="font-bold text-sage-secondary">This is a PDF file</p>
+            <p className="mt-1 text-xs text-sage-gray-500 mb-6">Open the file to review its details.</p>
             <Link
               href={uploadedForm.url}
               target="_blank"
               className="inline-flex items-center gap-2 rounded-xl bg-sage-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-sage-primary/20 transition hover:bg-sage-secondary active:scale-[0.98]"
             >
-              পিডিএফটি ওপেন করুন (Open PDF)
+              Open PDF
               <ExternalLink size={14} />
             </Link>
           </div>

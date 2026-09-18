@@ -1,6 +1,8 @@
 import { AlertTriangle, Calendar, Phone, User } from "lucide-react";
 
 import type { StudentProfile } from "./types";
+import { getAdminClassLabel, getAdminStatusLabel } from "@/constants/admin-display";
+import { formatAdminCurrency, formatAdminDate, formatAdminNumber } from "@/lib/admin-format";
 
 export function StudentProfileHero({ student, monthlyTotal }: { student: StudentProfile; monthlyTotal: number }) {
   const initials = student.nameEnglish?.slice(0, 1).toUpperCase() || "S";
@@ -34,30 +36,28 @@ export function StudentProfileHero({ student, monthlyTotal }: { student: Student
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-2xl font-black text-sage-secondary">{student.nameEnglish}</h2>
             <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
-              {student.isActive === false ? "Inactive" : "Active"}
+              {getAdminStatusLabel(student.isActive === false ? "inactive" : "active")}
             </span>
           </div>
-          <p className="mt-1 text-sm text-sage-gray-500">{student.nameBangla || "বাংলা নাম নেই"}</p>
+          <p className="mt-1 text-sm text-sage-gray-500">{student.nameBangla || "No Bangla name provided"}</p>
           <p className="mt-2 text-xs font-bold uppercase tracking-wider text-sage-primary">
             Student ID: {student.studentId}
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-sm text-sage-gray-600">
             <span className="inline-flex items-center gap-2">
               <Phone className="h-4 w-4 text-sage-primary" />
-              {student.whatsapp || "ফোন নেই"}
+              {student.whatsapp || "No phone number"}
             </span>
             <span className="inline-flex items-center gap-2">
               <Calendar className="h-4 w-4 text-sage-primary" />
-              {student.admissionDate
-                ? new Date(student.admissionDate).toLocaleDateString("bn-BD")
-                : "তারিখ নেই"}
+              {formatAdminDate(student.admissionDate, "No admission date")}
             </span>
           </div>
         </div>
       </div>
         <div className="grid gap-3 sm:grid-cols-3 lg:w-[420px] lg:grid-cols-1">
-          <HeroStat label="Monthly payable" value={`৳${monthlyTotal}`} />
-          <HeroStat label="Subjects" value={String(subjectCount)} />
+          <HeroStat label="Monthly payable" value={formatAdminCurrency(monthlyTotal)} />
+          <HeroStat label="Subjects" value={formatAdminNumber(subjectCount)} />
           <HeroStat label="Batch" value={student.batch?.title || "Not assigned"} />
         </div>
       </div>
@@ -65,7 +65,7 @@ export function StudentProfileHero({ student, monthlyTotal }: { student: Student
         <div className="border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-900">
           <span className="inline-flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
-            Class/batch mismatch: student class {student.classLevel}, batch class {student.batch?.classLevel}. Edit the student and choose a matching batch.
+            Class/batch mismatch: student {getAdminClassLabel(student.classLevel || "")}, batch {getAdminClassLabel(student.batch?.classLevel || "")}. Edit the student and choose a matching batch.
           </span>
         </div>
       )}

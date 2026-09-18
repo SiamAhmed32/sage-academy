@@ -23,23 +23,23 @@ function LeadCard({ lead }: { lead: DashboardLead }) {
         <div className="grid min-w-0 gap-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <h4 className="truncate font-bold text-sage-secondary">
-              {lead.name || "নাম পাওয়া যায়নি"}
+              {lead.name || "Name not available"}
             </h4>
             <StatusBadge value={lead.status} />
             <span className="rounded-full bg-sage-red-50 px-2 py-0.5 text-[11px] font-bold text-sage-primary">
               {lead.source === "Admission"
-                ? "ভর্তি"
+                ? "Admission"
                 : lead.source === "Free class"
-                  ? "ফ্রি ক্লাস"
+                  ? "Free class"
                   : lead.source === "Assessment"
-                    ? "টেস্ট/Exam"
+                    ? "Test/Exam"
                     : lead.source === "Quiz"
-                      ? "কুইজ"
-                      : "যোগাযোগ"}
+                      ? "Quiz"
+                      : "Contact"}
             </span>
           </div>
           <p className="text-sm font-semibold text-sage-primary">
-            {lead.phone || "ফোন নেই"}
+            {lead.phone || "No phone number"}
           </p>
           <p className="text-xs text-sage-gray-500">
             {lead.className ? `${lead.className} · ` : ""}
@@ -88,10 +88,10 @@ export function LeadsTable({ leads }: { leads: DashboardLead[] }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h3 className="text-lg font-bold text-sage-secondary">
-              ফলো-আপ কিউ
+              Follow-up queue
             </h3>
             <p className="mt-1 text-sm leading-6 text-sage-gray-500">
-              আগে কল করার মতো সাম্প্রতিক লিডগুলো।
+              Recent leads to contact first.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -99,25 +99,25 @@ export function LeadsTable({ leads }: { leads: DashboardLead[] }) {
               href="/admin/admissions"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              ভর্তি
+              Admissions
             </Link>
             <Link
               href="/admin/free-class-leads"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              ফ্রি ক্লাস
+              Free classes
             </Link>
             <Link
               href="/admin/assessment-registrations"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-border bg-white px-3 py-1.5 text-xs font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              টেস্ট/Exam
+              Tests/Exams
             </Link>
             <Link
               href="/admin/quiz-leads"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-sage-primary px-3 py-1.5 text-xs font-bold text-white transition hover:bg-sage-secondary"
             >
-              কুইজ
+              Quizzes
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -128,7 +128,7 @@ export function LeadsTable({ leads }: { leads: DashboardLead[] }) {
         leads.map((lead) => <LeadCard key={lead.id} lead={lead} />)
       ) : (
         <div className="rounded-xl border border-dashed border-sage-border bg-white px-4 py-10 text-center text-sm text-sage-gray-500">
-          এখনো কোনো নতুন লিড নেই।
+          There are no new leads yet.
         </div>
       )}
     </section>

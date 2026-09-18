@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 import { heroGallerySlides, type HeroGallerySlide } from "@/constants/hero";
@@ -33,67 +32,56 @@ function getHeroImageClass(imageClass?: string, eyebrow?: string) {
 
 function SlideCaption({
   slide,
-  activeIndex,
   className,
   tone = "light",
 }: {
   slide: HeroGallerySlide;
-  activeIndex: number;
   className?: string;
   tone?: "light" | "dark";
 }) {
   const isDark = tone === "dark";
 
   return (
-    <AnimatePresence initial={false} mode="sync">
-      <motion.div
-        key={`hero-gallery-caption-${activeIndex}-${tone}`}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.35, ease: "easeInOut" }}
-        className={className}
-      >
-        <div className="flex items-end justify-between gap-3 sm:gap-4">
-          <div className="min-w-0">
-            <p
-              className={cn(
-                "text-[10px] font-bold uppercase tracking-[0.18em] sm:text-[11px]",
-                isDark ? "text-sage-red-100/90" : "text-sage-gray-500"
-              )}
-            >
-              {slide.eyebrow}
-            </p>
-            <h3
-              className={cn(
-                "bn-headline mt-1 text-lg font-bold leading-6 sm:text-xl lg:text-2xl lg:leading-8",
-                isDark ? "text-white" : "text-sage-secondary"
-              )}
-            >
-              {slide.title}
-            </h3>
-            <p
-              className={cn(
-                "bn-pill mt-1 text-sm font-semibold leading-normal",
-                isDark ? "text-sage-red-100" : "text-sage-primary"
-              )}
-            >
-              {slide.subtitle}
-            </p>
-          </div>
-          <div
+    <div className={className}>
+      <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <p
             className={cn(
-              "inline-flex max-w-[8.5rem] shrink-0 items-center rounded-full px-3 py-1.5 text-[11px] font-bold leading-normal sm:max-w-[9rem] sm:py-2 sm:text-xs lg:max-w-none lg:px-3.5 lg:text-sm",
-              isDark
-                ? "border border-white/20 bg-white/15 text-white"
-                : "bg-sage-red-50 text-sage-primary"
+              "text-[10px] font-bold uppercase tracking-[0.18em] sm:text-[11px]",
+              isDark ? "text-sage-red-100/90" : "text-sage-gray-500"
             )}
           >
-            {slide.badge}
-          </div>
+            {slide.eyebrow}
+          </p>
+          <h3
+            className={cn(
+              "bn-headline mt-1 text-lg font-bold leading-6 sm:text-xl lg:text-2xl lg:leading-8",
+              isDark ? "text-white" : "text-sage-secondary"
+            )}
+          >
+            {slide.title}
+          </h3>
+          <p
+            className={cn(
+              "bn-pill mt-1 text-sm font-semibold leading-normal",
+              isDark ? "text-sage-red-100" : "text-sage-primary"
+            )}
+          >
+            {slide.subtitle}
+          </p>
         </div>
-      </motion.div>
-    </AnimatePresence>
+        <div
+          className={cn(
+            "inline-flex max-w-full items-center rounded-full px-3 py-1.5 text-left text-[11px] font-bold leading-normal sm:py-2 sm:text-xs lg:px-3.5 lg:text-sm",
+            isDark
+              ? "border border-white/20 bg-white/15 text-white"
+              : "bg-sage-red-50 text-sage-primary"
+          )}
+        >
+          <span>{slide.badge}</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -163,8 +151,8 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
       </div>
 
       {/* Desktop: caption below image */}
-      <div className="relative hidden min-h-[7.5rem] bg-white px-6 py-4 lg:block">
-        <SlideCaption slide={slide} activeIndex={activeIndex} tone="light" className="absolute inset-x-6 inset-y-4" />
+      <div className="relative hidden bg-white px-6 py-5 lg:block">
+        <SlideCaption slide={slide} tone="light" />
       </div>
     </div>
   );

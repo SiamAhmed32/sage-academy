@@ -18,24 +18,25 @@ import {
 import { engagementEventLabels } from "@/constants/engagement-events";
 import type { EngagementAnalytics } from "@/types/engagement-analytics";
 import { cn } from "@/lib/utils";
+import { formatAdminDateTime, formatAdminNumber } from "@/lib/admin-format";
 
 const EVENT_HELP: Record<
   string,
   { title: string; note: string; icon: React.ComponentType<{ className?: string }> }
 > = {
   admission_page_view: {
-    title: "ভর্তি পেজ দেখেছে",
-    note: "কেউ ভর্তি সম্পর্কিত পেজে এসেছে। এটি আগ্রহের প্রথম ধাপ।",
+    title: "Viewed an admission page",
+    note: "A visitor opened an admission-related page, the first stage of interest.",
     icon: Eye,
   },
   admission_form_started: {
-    title: "ফর্ম শুরু করেছে",
-    note: "কেউ ভর্তি ফর্মে ক্লিক/টাইপ করা শুরু করেছে। এটি শক্ত আগ্রহের সংকেত।",
+    title: "Started an admission form",
+    note: "A visitor began interacting with an admission form, indicating stronger interest.",
     icon: CheckCircle2,
   },
   cta_click: {
-    title: "বাটন/লিংকে ক্লিক করেছে",
-    note: "কেউ ভর্তি, লগইন বা অন্য গুরুত্বপূর্ণ বাটনে ক্লিক করেছে।",
+    title: "Clicked a button or link",
+    note: "A visitor clicked an admission, sign-in, or other important call to action.",
     icon: MousePointerClick,
   },
 };
@@ -46,11 +47,8 @@ function formatDayLabel(dateKey: string) {
 }
 
 function formatDateTime(value: unknown) {
-  if (!value) return "সময় পাওয়া যায়নি";
-  return new Date(value as string).toLocaleString("bn-BD", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  if (!value) return "Time unavailable";
+  return formatAdminDateTime(value as string);
 }
 
 function eventHelp(eventType: string) {
@@ -59,7 +57,7 @@ function eventHelp(eventType: string) {
       title:
         engagementEventLabels[eventType as keyof typeof engagementEventLabels] ??
         eventType,
-      note: "ওয়েবসাইটে একটি গুরুত্বপূর্ণ কাজ রেকর্ড হয়েছে।",
+      note: "An important website action was recorded.",
       icon: Activity,
     }
   );
@@ -97,13 +95,12 @@ function TeacherNote() {
     <div className="rounded-xl border border-sage-red-100 bg-sage-red-50/60 p-4 text-sm leading-7 text-sage-gray-700 sm:p-5">
       <div className="mb-2 flex items-center gap-2 font-bold text-sage-secondary">
         <HelpCircle className="h-4 w-4 text-sage-primary" />
-        এই পেজ কীভাবে পড়বেন
+        How to read this page
       </div>
       <p>
-        এখানে “ভিজিটর অ্যাক্টিভিটি” মানে ওয়েবসাইটে হওয়া ছোট ছোট কাজ। যেমন কেউ ভর্তি
-        পেজ দেখেছে, ফর্ম শুরু করেছে, বা কোনো গুরুত্বপূর্ণ বাটনে ক্লিক করেছে। কেউ
-        লগইন করা থাকলে তার ইমেইল/ফোন দেখা যেতে পারে; না থাকলে তাকে অচেনা ভিজিটর
-        হিসেবে ধরা হবে।
+        Visitor activity captures small but important website actions, such as viewing an
+        admission page, starting a form, or clicking a key button. Email or phone details
+        appear only when they are available; otherwise the person is shown as an anonymous visitor.
       </p>
     </div>
   );
@@ -122,10 +119,10 @@ function EventTypeGuide({ analytics }: { analytics: EngagementAnalytics }) {
         </div>
         <div>
           <h3 className="text-base font-bold text-sage-secondary">
-            কোন ধরনের কাজ বেশি হচ্ছে?
+            Which actions happen most?
           </h3>
           <p className="mt-1 text-sm leading-6 text-sage-gray-500">
-            ভর্তি আগ্রহ কোন ধাপে আছে তা বুঝতে এই অংশ দেখুন।
+            Use this section to understand where admission interest is concentrated.
           </p>
         </div>
       </div>
@@ -150,7 +147,7 @@ function EventTypeGuide({ analytics }: { analytics: EngagementAnalytics }) {
                   </div>
                 </div>
                 <span className="shrink-0 rounded-full bg-sage-red-50 px-3 py-1 text-sm font-bold text-sage-primary ring-1 ring-sage-red-100">
-                  {count}
+                  {formatAdminNumber(count)}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-sage-red-50">
@@ -179,10 +176,10 @@ function DailyActivity({ analytics, days }: { analytics: EngagementAnalytics; da
         </div>
         <div>
           <h3 className="text-base font-bold text-sage-secondary">
-            প্রতিদিন কতবার অ্যাক্টিভিটি হয়েছে?
+            How much activity occurred each day?
           </h3>
           <p className="mt-1 text-sm leading-6 text-sage-gray-500">
-            শেষ {days} দিনের কোন দিনে বেশি আগ্রহ এসেছে তা দেখায়।
+            This shows which days had the most interest during the last {formatAdminNumber(days)} days.
           </p>
         </div>
       </div>
@@ -196,10 +193,10 @@ function DailyActivity({ analytics, days }: { analytics: EngagementAnalytics; da
               <div
                 key={row.dateKey}
                 className="flex h-full min-w-9 flex-1 flex-col items-center justify-end gap-2"
-                title={`${row.dateKey}: ${row.count}`}
+                title={`${row.dateKey}: ${formatAdminNumber(row.count)}`}
               >
                 <span className="text-xs font-bold text-sage-secondary">
-                  {row.count}
+                  {formatAdminNumber(row.count)}
                 </span>
                 <div className="flex h-40 w-full items-end">
                   <div
@@ -216,8 +213,8 @@ function DailyActivity({ analytics, days }: { analytics: EngagementAnalytics; da
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-sage-border bg-sage-red-50/30 px-4 py-10 text-center text-sm leading-6 text-sage-gray-600">
-          এখনো কোনো অ্যাক্টিভিটি নেই। ভিজিটররা ভর্তি পেজ দেখলে, ফর্ম শুরু করলে বা
-          বাটনে ক্লিক করলে এখানে বার দেখা যাবে।
+          No activity yet. Bars will appear after visitors view admission pages, start forms,
+          or click important buttons.
         </div>
       )}
     </div>
@@ -232,7 +229,7 @@ function VisitorIdentity({ row }: { row: Record<string, unknown> }) {
     return (
       <div className="flex items-center gap-2 text-sm text-sage-gray-500">
         <UserRound className="h-4 w-4" />
-        অচেনা ভিজিটর
+        Anonymous visitor
       </div>
     );
   }
@@ -303,7 +300,7 @@ function EngagementEventsList({ rows }: { rows: Record<string, unknown>[] }) {
   if (!rows.length) {
     return (
       <div className="rounded-xl border border-dashed border-sage-border bg-white px-4 py-10 text-center text-sm leading-6 text-sage-gray-600">
-        এখনো কোনো ভিজিটর অ্যাক্টিভিটি রেকর্ড হয়নি।
+        No visitor activity has been recorded yet.
       </div>
     );
   }
@@ -334,21 +331,21 @@ export function EngagementAdminClient({
 
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard
-          title="শেষ ১৪ দিনের কাজ"
-          value={analytics.totalInRange}
-          note="এই সময়ের মধ্যে ভর্তি পেজ দেখা, ফর্ম শুরু, বা বাটন ক্লিকের মোট সংখ্যা।"
+          title={`Activity in the last ${formatAdminNumber(days)} days`}
+          value={formatAdminNumber(analytics.totalInRange)}
+          note="Total admission-page views, form starts, and important button clicks in this period."
           icon={Activity}
         />
         <SummaryCard
-          title="সব মিলিয়ে মোট"
-          value={analytics.totalAllTime}
-          note="সিস্টেম চালুর পর থেকে যতগুলো গুরুত্বপূর্ণ অ্যাক্টিভিটি জমা হয়েছে।"
+          title="All-time activity"
+          value={formatAdminNumber(analytics.totalAllTime)}
+          note="All important activity recorded since tracking began."
           icon={BarChart3}
         />
         <SummaryCard
-          title="সাম্প্রতিক তালিকা"
-          value={analytics.recent.length}
-          note="নিচের তালিকায় সর্বশেষ অ্যাক্টিভিটিগুলো সহজ ভাষায় দেখানো হয়েছে।"
+          title="Recent activity list"
+          value={formatAdminNumber(analytics.recent.length)}
+          note="The latest recorded actions are listed below."
           icon={MousePointerClick}
         />
       </div>
@@ -365,7 +362,7 @@ export function EngagementAdminClient({
                 : "text-sage-gray-600 hover:text-sage-secondary"
             )}
           >
-            সহজ রিপোর্ট
+            Summary
           </button>
           <button
             type="button"
@@ -377,12 +374,12 @@ export function EngagementAdminClient({
                 : "text-sage-gray-600 hover:text-sage-secondary"
             )}
           >
-            কে কী করেছে
+            Activity log
           </button>
         </div>
 
         <p className="text-sm leading-6 text-sage-gray-500">
-          রিপোর্ট রেঞ্জ: শেষ {days} দিন
+          Report range: last {formatAdminNumber(days)} days
         </p>
       </div>
 
@@ -395,11 +392,11 @@ export function EngagementAdminClient({
         <div className="space-y-4">
           <div className="rounded-xl border border-sage-border bg-white p-4 shadow-sm sm:p-5">
             <h3 className="text-base font-bold text-sage-secondary">
-              সাম্প্রতিক ভিজিটর অ্যাক্টিভিটি
+              Recent Visitor Activity
             </h3>
             <p className="mt-1 text-sm leading-6 text-sage-gray-500">
-              এখানে সবচেয়ে নতুন কাজগুলো আগে দেখা যায়। ইমেইল/ফোন শুধু তখনই দেখা যাবে
-              যখন ভিজিটর লগইন করা থাকে বা সিস্টেমে তথ্য পাওয়া যায়।
+              Newest actions appear first. Email and phone details are shown only when
+              the visitor is signed in or the information is otherwise available.
             </p>
           </div>
           <EngagementEventsList rows={analytics.recent as Record<string, unknown>[]} />
@@ -407,10 +404,10 @@ export function EngagementAdminClient({
       )}
 
       <div className="rounded-xl border border-sage-border bg-white p-4 text-sm leading-7 text-sage-gray-600 shadow-sm sm:p-5">
-        <p className="font-bold text-sage-secondary">মনে রাখবেন</p>
+        <p className="font-bold text-sage-secondary">Note</p>
         <p className="mt-1">
-          এটি ভর্তি আবেদন বা যোগাযোগ মেসেজের পূর্ণ তালিকা নয়। পূর্ণ ভর্তি আবেদন
-          দেখতে “ভর্তি আবেদন” মেনুতে যান, আর যোগাযোগ মেসেজ দেখতে “যোগাযোগ” মেনুতে যান।
+          This is not the complete admission-application or contact-message list. Use
+          Admission Requests or Contact Messages for the full records.
         </p>
       </div>
     </div>

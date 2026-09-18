@@ -15,20 +15,27 @@ function getParam(params: Record<string, string | string[] | undefined>, key: st
   return value ?? fallback;
 }
 
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export default async function AdminContactsPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const q = getParam(params, "q").trim();
-  const status = getParam(params, "status", "all").trim();
-  const sort = getParam(params, "sort", "desc").trim();
-  const dateRange = getParam(params, "dateRange", "all").trim();
-  const page = Number(getParam(params, "page", "1"));
+  const q = getParam(params, "q").trim().slice(0, 100);
+  const rawStatus = getParam(params, "status", "all").trim();
+  const status = ["new", "contacted", "closed", "spam"].includes(rawStatus) ? rawStatus : "all";
+  const sort = getParam(params, "sort") === "asc" ? "asc" : "desc";
+  const rawDateRange = getParam(params, "dateRange", "all").trim();
+  const dateRange = ["today", "week", "month"].includes(rawDateRange) ? rawDateRange : "all";
+  const requestedPage = Math.max(1, Math.trunc(Number(getParam(params, "page", "1"))) || 1);
   const limit = 10;
 
-  const query: any = {};
+  const query: Record<string, unknown> = {};
   if (q) {
+    const regex = { $regex: escapeRegex(q), $options: "i" };
     query.$or = [
-      { name: { $regex: q, $options: "i" } },
-      { phone: { $regex: q, $options: "i" } },
+      { name: regex },
+      { phone: regex },
     ];
   }
   if (status !== "all") query.status = status;
@@ -38,32 +45,46 @@ export default async function AdminContactsPage({ searchParams }: PageProps) {
     const start = new Date();
     if (dateRange === "today") start.setHours(0, 0, 0, 0);
     else if (dateRange === "week") start.setDate(now.getDate() - 7);
-    else if (dateRange === "month") start.setMonth(now.getMonth() - 1);
+    else if (dateRange === "month") start.setDate(now.getDate() - 30);
     query.createdAt = { $gte: start };
   }
 
   await connectDB();
   const totalDocs = await ContactRequest.countDocuments(query);
-  const totalPages = Math.ceil(totalDocs / limit);
+  const totalPages = Math.max(1, Math.ceil(totalDocs / limit));
+  const page = Math.min(requestedPage, totalPages);
   
-  const requests = await ContactRequest.find(query)
+  const rawRequests = await ContactRequest.find(query)
     .sort({ createdAt: sort === "asc" ? 1 : -1 })
     .skip((page - 1) * limit)
     .limit(limit)
     .lean();
+  const requests = JSON.parse(JSON.stringify(rawRequests));
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="যোগাযোগ বার্তা"
-        description="হোমপেজের ছোট contact form থেকে আসা বার্তাগুলো এখানে follow-up হবে।"
+        title="Contact Messages"
+        description="Review and follow up on messages submitted through the homepage contact form."
       />
 
-      <ContactFilters q={q} status={status} sort={sort} />
+      <ContactFilters
+        key={[q, status, sort, dateRange].join("|")}
+        q={q}
+        status={status}
+        sort={sort}
+        dateRange={dateRange}
+      />
       
       <ContactTable requests={requests} />
 
-      <Pagination totalPages={totalPages} currentPage={page} />
+      <Pagination
+        totalPages={totalPages}
+        currentPage={page}
+        totalItems={totalDocs}
+        pageSize={limit}
+        showWhenSinglePage={totalDocs > 0}
+      />
     </div>
   );
 }

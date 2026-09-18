@@ -1,6 +1,7 @@
 "use client";
 
-import { classLevelOptions, getClassLabel } from "@/constants/class-levels";
+import { adminClassLevelOptions, getAdminClassLabel } from "@/constants/admin-display";
+import { getClassLabel } from "@/constants/class-levels";
 
 type FeeRow = {
   classLevel: number;
@@ -48,9 +49,9 @@ export function AssessmentFormTabFees({ classLevels, fees, onChange }: Props) {
   return (
     <div className="space-y-5">
       <div className="rounded-2xl border border-sage-border bg-sage-red-50/20 p-4">
-        <p className="text-sm font-black text-sage-secondary">শ্রেণি নির্বাচন</p>
+        <p className="text-sm font-black text-sage-secondary">Select classes</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {classLevelOptions.filter((item) => item.value >= 4 && item.value <= 12).map((option) => {
+          {adminClassLevelOptions.filter((item) => item.value >= 4 && item.value <= 12).map((option) => {
             const isActive = classLevels.includes(option.value);
             return (
               <button
@@ -69,23 +70,23 @@ export function AssessmentFormTabFees({ classLevels, fees, onChange }: Props) {
       </div>
 
       <div className="rounded-2xl border border-sage-border bg-white p-4">
-        <p className="text-sm font-black text-sage-secondary">শ্রেণি অনুযায়ী ফি</p>
+        <p className="text-sm font-black text-sage-secondary">Fees by class</p>
         {fees.length === 0 ? (
-          <p className="mt-3 text-center py-4 text-sm text-sage-gray-400">কোনো শ্রেণি নির্বাচিত নেই। অনুগ্রহ করে প্রথমে শ্রেণি নির্বাচন করুন।</p>
+          <p className="mt-3 text-center py-4 text-sm text-sage-gray-400">No classes selected. Select a class first.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm">
               <thead className="text-left text-sage-primary">
                 <tr>
-                  <th className="py-2">শ্রেণি</th>
-                  <th className="py-2 pr-3">SAGE শিক্ষার্থী ফি</th>
-                  <th className="py-2">বাইরের শিক্ষার্থী ফি</th>
+                  <th className="py-2">Class</th>
+                  <th className="py-2 pr-3">SAGE student fee</th>
+                  <th className="py-2">External student fee</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-sage-border">
                 {fees.map((fee, index) => (
                   <tr key={fee.classLevel}>
-                    <td className="py-3 font-black text-sage-secondary">{getClassLabel(fee.classLevel)}</td>
+                    <td className="py-3 font-black text-sage-secondary">{getAdminClassLabel(fee.classLevel)}</td>
                     <td className="py-3 pr-3">
                       <input
                         type="number"

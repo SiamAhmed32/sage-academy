@@ -10,6 +10,7 @@ import type { AdminPayment, StudentOption } from "@/components/admin/payments/Pa
 import { StudentPaymentHistory } from "./StudentPaymentHistory";
 import type { StudentPayment } from "./payment-history-utils";
 import type { StudentProfile } from "./types";
+import { formatAdminCurrency, formatAdminMonth, formatAdminNumber } from "@/lib/admin-format";
 
 type Props = {
   student: StudentProfile;
@@ -83,11 +84,11 @@ export function StudentPaymentCenter({ student, payments, monthlyTotal, mode = "
       </div>
 
       <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-5">
-        <PaymentMetric label="This month" value={`৳${currentExpected}`} note={`paid ৳${currentPaid} · due ৳${currentDue}`} />
-        <PaymentMetric label="All expected" value={`৳${totals.expected}`} />
-        <PaymentMetric label="All paid" value={`৳${totals.paid}`} />
-        <PaymentMetric label="Advance" value={`৳${totals.advance}`} />
-        <PaymentMetric label="Open due" value={`৳${totals.due}`} note={totals.reversed ? `${totals.reversed} reversed receipt(s)` : "no reversed receipts"} />
+        <PaymentMetric label="This month" value={formatAdminCurrency(currentExpected)} note={`paid ${formatAdminCurrency(currentPaid)} · due ${formatAdminCurrency(currentDue)}`} />
+        <PaymentMetric label="All expected" value={formatAdminCurrency(totals.expected)} />
+        <PaymentMetric label="All paid" value={formatAdminCurrency(totals.paid)} />
+        <PaymentMetric label="Advance" value={formatAdminCurrency(totals.advance)} />
+        <PaymentMetric label="Open due" value={formatAdminCurrency(totals.due)} note={totals.reversed ? `${formatAdminNumber(totals.reversed)} reversed receipt(s)` : "no reversed receipts"} />
       </div>
 
       {mode === "full" ? (
@@ -98,10 +99,10 @@ export function StudentPaymentCenter({ student, payments, monthlyTotal, mode = "
         <div className="grid gap-4 border-t border-sage-border p-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="rounded-xl border border-sage-border bg-sage-red-50/20 p-4">
             <p className="text-sm font-bold text-sage-secondary">
-              Current focus: {current?.month || new Date().toLocaleString("en-US", { month: "long" })} {current?.year || new Date().getFullYear()}
+              Current focus: {current ? `${current.month} ${formatAdminNumber(current.year)}` : formatAdminMonth(new Date())}
             </p>
             <p className="mt-1 text-sm text-sage-gray-500">
-              Paid ৳{currentPaid}, due ৳{currentDue}. Full month/year history is kept on the payment page.
+              Paid {formatAdminCurrency(currentPaid)}, due {formatAdminCurrency(currentDue)}. Full month/year history is kept on the payment page.
             </p>
           </div>
           <Link

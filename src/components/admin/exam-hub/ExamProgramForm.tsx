@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -259,7 +259,7 @@ export function ExamProgramForm({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(typeof data?.message === "string" ? data.message : "Save failed");
+        toast.error(typeof data?.message === "string" ? data.message : "Could not save the exam program");
         return;
       }
       onSaved(data.data);
@@ -696,17 +696,17 @@ function CoverImageField({
   onFileChange: (file: File | null) => void;
   onClearExisting: () => void;
 }) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrl = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : null),
+    [imageFile]
+  );
 
-  useEffect(() => {
-    if (!imageFile) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(imageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [imageFile]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl]
+  );
 
   const displaySrc = previewUrl || existingImage || "";
   const hasPreview = Boolean(displaySrc);

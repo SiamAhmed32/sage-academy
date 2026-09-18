@@ -24,12 +24,12 @@ export function BatchPermanentDeleteButton({
         method: "DELETE",
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.message || "ডিলিট করা যায়নি");
-      toast.success("ব্যাচ স্থায়ীভাবে ডিলিট হয়েছে");
+      if (!response.ok) throw new Error(data?.message || "The batch could not be deleted.");
+      toast.success("Batch permanently deleted.");
       setIsOpen(false);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "ডিলিট করা যায়নি");
+      toast.error(error instanceof Error ? error.message : "The batch could not be deleted.");
     } finally {
       setBusy(false);
     }
@@ -41,7 +41,7 @@ export function BatchPermanentDeleteButton({
         type="button"
         onClick={() => setIsOpen(true)}
         className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
-        title="মুছে ফেলুন"
+        title="Permanently delete batch"
       >
         <Trash2 size={16} />
       </button>
@@ -53,9 +53,9 @@ export function BatchPermanentDeleteButton({
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-sage-secondary">স্থায়ীভাবে ডিলিট করবেন?</h3>
+              <h3 className="text-xl font-bold text-sage-secondary">Permanently delete this batch?</h3>
               <p className="mt-3 text-sm text-sage-gray-600 leading-relaxed">
-                <span className="font-bold text-sage-secondary">{batchTitle}</span> স্থায়ীভাবে ডিলিট হয়ে যাবে। এই কাজ ফেরানো সম্ভব নয়। আপনি কি নিশ্চিত?
+                <span className="font-bold text-sage-secondary">{batchTitle}</span> will be permanently deleted. This action cannot be undone.
               </p>
             </div>
 
@@ -66,7 +66,7 @@ export function BatchPermanentDeleteButton({
                 disabled={busy}
                 className="rounded-xl border border-sage-border bg-white px-4 py-3 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50 disabled:opacity-50"
               >
-                বাতিল করুন
+                Cancel
               </button>
               <button
                 type="button"
@@ -74,7 +74,7 @@ export function BatchPermanentDeleteButton({
                 disabled={busy}
                 className="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-700 active:scale-95 disabled:opacity-50"
               >
-                {busy ? "ডিলিট হচ্ছে..." : "হ্যাঁ, ডিলিট করুন"}
+                {busy ? "Deleting..." : "Delete permanently"}
               </button>
             </div>
           </div>

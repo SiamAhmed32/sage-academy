@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import { generateMonthlyBillsAction } from "@/app/admin/actions";
 import { monthLabels, months } from "./payment-options";
+import { formatAdminNumber } from "@/lib/admin-format";
 
 export function MonthlyBillGenerator() {
   const now = new Date();
@@ -23,7 +24,7 @@ export function MonthlyBillGenerator() {
 
     if (res.ok && res.data) {
       toast.success(
-        `${monthLabels[month] || month} ${year}: ${res.data.created} new bills, ${res.data.refreshed} refreshed.`
+        `${monthLabels[month] || month} ${formatAdminNumber(year)}: ${formatAdminNumber(res.data.created)} new bills, ${formatAdminNumber(res.data.refreshed)} refreshed.`
       );
     } else {
       toast.error(res.message || "Could not generate bills.");
@@ -39,10 +40,10 @@ export function MonthlyBillGenerator() {
           </span>
           <div>
             <h3 className="text-lg font-black text-sage-secondary">
-              মাসিক বিল তৈরি করুন
+              Generate Monthly Bills
             </h3>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-sage-gray-500">
-              নির্বাচিত মাসে সব active শিক্ষার্থীর জন্য subject fee ও discount ধরে bill তৈরি হবে। আগে তৈরি থাকলে bill refresh হবে, কিন্তু আগের payment transaction থাকবে।
+              Generate bills for all active students using subject fees and discounts. Existing bills are refreshed without changing prior payment transactions.
             </p>
           </div>
         </div>
@@ -71,7 +72,7 @@ export function MonthlyBillGenerator() {
             onClick={generate}
             className="h-11 rounded-lg bg-sage-primary px-5 text-sm font-bold text-white transition hover:bg-sage-secondary disabled:opacity-60"
           >
-            {isGenerating ? "তৈরি হচ্ছে..." : "Generate bills"}
+            {isGenerating ? "Generating..." : "Generate Bills"}
           </button>
         </div>
       </div>

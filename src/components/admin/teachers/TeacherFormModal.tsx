@@ -35,7 +35,7 @@ export function TeacherFormModal({ teacher, trigger }: TeacherFormModalProps) {
           onClick={() => setOpen(true)}
           className="bg-sage-primary hover:bg-sage-primary-hover h-12 rounded-xl px-6 font-bold shadow-lg shadow-sage-red-100"
         >
-          <Plus className="mr-2 h-4 w-4" /> নতুন শিক্ষক যুক্ত করুন
+          <Plus className="mr-2 h-4 w-4" /> Add teacher
         </Button>
       )}
 
@@ -44,14 +44,14 @@ export function TeacherFormModal({ teacher, trigger }: TeacherFormModalProps) {
           <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-2xl font-bold text-sage-secondary">
-                {isEdit ? "শিক্ষকের তথ্য পরিবর্তন করুন" : "নতুন শিক্ষকের তথ্য দিন"}
+                {isEdit ? "Edit Teacher Details" : "Add a New Teacher"}
               </h3>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 className="rounded-lg border border-sage-border px-3 py-1.5 text-sm font-bold text-sage-secondary"
               >
-                বন্ধ করুন
+                Close
               </button>
             </div>
 

@@ -3,9 +3,10 @@
 import { X, User, ShieldCheck } from "lucide-react";
 import { AdmissionInfoGrid } from "./details/AdmissionInfoGrid";
 import { AdmissionAddressBox } from "./details/AdmissionAddressBox";
+import type { AdmissionRequestItem } from "./types";
 
 interface AdmissionDetailModalProps {
-  item: any;
+  item: AdmissionRequestItem;
   onClose: () => void;
 }
 
@@ -64,7 +65,7 @@ export function AdmissionDetailModal({ item, onClose }: AdmissionDetailModalProp
               <div className="rounded-xl border border-sage-border bg-white p-4 shadow-sm">
                 <p className="text-[9px] font-black uppercase text-sage-gray-400 tracking-wider mb-2">Internal Note / Message</p>
                 <p className="text-xs font-semibold text-sage-secondary leading-relaxed italic">
-                  "{item.message}"
+                  &quot;{item.message}&quot;
                 </p>
               </div>
             )}

@@ -340,7 +340,7 @@ export async function createBatchAction(formData: FormData) {
   const version = text(formData, "version") || "bangla";
   const startTime = text(formData, "startTime");
   const endTime = text(formData, "endTime");
-  const shift = text(formData, "shift") || [startTime, endTime].filter(Boolean).join(" - ") || "সময় নির্ধারিত হবে";
+  const shift = text(formData, "shift") || [startTime, endTime].filter(Boolean).join(" - ") || "সময় নির্ধারিত হবে"; // admin-language-allow: persisted public content
   const fallbackSlug = `class-${classLevel || "general"}-${genderGroup}-${version}`;
   const baseSlug = buildSlug(text(formData, "title"), fallbackSlug);
   const slugExists = await AcademicBatch.countDocuments({ slug: baseSlug });
@@ -361,13 +361,13 @@ export async function createBatchAction(formData: FormData) {
     examSchedule: text(formData, "examSchedule"),
     features: features.length
       ? features
-      : ["নিয়মিত ক্লাস", "সাপ্তাহিক পরীক্ষা", "ডাউট সলভিং সাপোর্ট"],
+      : ["নিয়মিত ক্লাস", "সাপ্তাহিক পরীক্ষা", "ডাউট সলভিং সাপোর্ট"], // admin-language-allow: persisted public content
     overview: text(formData, "overview"),
     duration: text(formData, "duration"),
     totalClasses: numberValue(formData, "totalClasses"),
     seats: numberValue(formData, "seats"),
     instructor: null,
-    status: text(formData, "status") || "ভর্তি চলছে",
+    status: text(formData, "status") || "ভর্তি চলছে", // admin-language-allow: persisted public content
     isActive: bool(formData, "isActive"),
     order: numberValue(formData, "order"),
   });
@@ -443,7 +443,7 @@ export async function updateAcademicBatchAction(formData: FormData) {
       duration: text(formData, "duration"),
       totalClasses: numberValue(formData, "totalClasses"),
       seats: numberValue(formData, "seats"),
-      status: text(formData, "status") || "ভর্তি চলছে",
+      status: text(formData, "status") || "ভর্তি চলছে", // admin-language-allow: persisted public content
       isActive: bool(formData, "isActive"),
       order: numberValue(formData, "order"),
     },
@@ -464,7 +464,7 @@ export async function archiveAcademicBatchAction(formData: FormData) {
     isActive: false,
     isArchived: true,
     archivedAt: new Date(),
-    status: "আর্কাইভড",
+    status: "আর্কাইভড", // admin-language-allow: persisted public content
   });
 
   revalidatePath("/admin/batches");
@@ -481,7 +481,7 @@ export async function restoreAcademicBatchAction(formData: FormData) {
     isArchived: false,
     websiteVisible: true,
     archivedAt: null,
-    status: "ভর্তি চলছে",
+    status: "ভর্তি চলছে", // admin-language-allow: persisted public content
   });
 
   revalidatePath("/admin/batches");
@@ -517,7 +517,7 @@ export async function updateTeacherOrderAction(formData: FormData) {
     // For now, I'll just return and we can handle it in the UI if needed,
     // but the requirement says "give a toast".
     // I'll implement a check in the API too.
-    return { ok: false, message: "এই সিরিয়াল নম্বরটি অন্য একজন শিক্ষকের জন্য ইতিমধ্যে ব্যবহৃত হয়েছে।" };
+    return { ok: false, message: "This serial number is already assigned to another teacher." };
   }
 
   await Teacher.findByIdAndUpdate(id, { order });

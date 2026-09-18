@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Upload } from "lucide-react";
 import { toast } from "react-toastify";
 
-import type { AdminExamProgram } from "@/components/admin/exam-hub/ExamHubManager";
+import type { ExamProgramOption } from "@/components/admin/exam-hub/ExamHubManager";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,7 @@ export function ExamQuestionPanel({
   selectedProgramId,
   onSelectProgram,
 }: {
-  programs: AdminExamProgram[];
+  programs: ExamProgramOption[];
   selectedProgramId: string;
   onSelectProgram: (id: string) => void;
 }) {
@@ -67,11 +67,14 @@ export function ExamQuestionPanel({
 
   useEffect(() => {
     if (!selectedProgramId) return;
-    setLoading(true);
-    fetch(`/api/admin/exam-hub/programs/${selectedProgramId}/questions`)
+    const controller = new AbortController();
+    fetch(`/api/admin/exam-hub/programs/${selectedProgramId}/questions`, {
+      signal: controller.signal,
+    })
       .then((r) => r.json())
       .then((data) => setQuestions(data.data || []))
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [selectedProgramId]);
 
   function resetForm() {
@@ -134,7 +137,7 @@ export function ExamQuestionPanel({
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(typeof data?.message === "string" ? data.message : "Save failed");
+        toast.error(typeof data?.message === "string" ? data.message : "Could not save the exam question");
         return;
       }
 
@@ -154,7 +157,7 @@ export function ExamQuestionPanel({
   async function removeQuestion(id: string) {
     const res = await fetch(`/api/admin/exam-hub/questions/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error("Could not delete the exam question");
       return;
     }
     setQuestions((prev) => prev.filter((q) => q._id !== id));
@@ -171,7 +174,7 @@ export function ExamQuestionPanel({
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(typeof data?.message === "string" ? data.message : "Could not activate questions");
+        toast.error(typeof data?.message === "string" ? data.message : "Could not activate the exam questions");
         return;
       }
       setQuestions((prev) => prev.map((q) => ({ ...q, isActive: true })));
@@ -220,7 +223,7 @@ export function ExamQuestionPanel({
           {inactiveCount > 0 ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
               <p className="text-sm font-medium text-amber-900">
-                <strong>{inactiveCount}</strong> question(s) are <strong>Inactive</strong> and hidden from the public exam
+                <strong>{inactiveCount}</strong> inactive {inactiveCount === 1 ? "question is" : "questions are"} hidden from the public exam
                 ({activeCount} active / {questions.length} total).
               </p>
               <Button
@@ -296,7 +299,7 @@ export function ExamQuestionPanel({
           <div className="rounded-xl border border-sage-border bg-white">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sage-border px-4 py-3">
               <p className="text-sm font-semibold text-sage-secondary">
-                {questions.length} question(s) · {activeCount} active for students
+                {questions.length} {questions.length === 1 ? "question" : "questions"} · {activeCount} active for students
               </p>
             </div>
             {loading ? <p className="p-4 text-sm text-sage-gray-500">Loading...</p> : (
@@ -362,17 +365,17 @@ function QuestionImageField({
   onFileChange: (file: File | null) => void;
   onClearExisting: () => void;
 }) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrl = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : null),
+    [imageFile]
+  );
 
-  useEffect(() => {
-    if (!imageFile) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(imageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [imageFile]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl]
+  );
 
   const displaySrc = previewUrl || existingImage || "";
   const hasPreview = Boolean(displaySrc);

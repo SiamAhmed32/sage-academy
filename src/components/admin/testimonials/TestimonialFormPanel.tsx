@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Camera, X } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -92,18 +93,18 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
   return (
     <form onSubmit={submit} className="mb-4 rounded-xl border border-sage-border bg-white p-4">
       <p className="mb-3 text-sm font-bold text-sage-secondary">
-        {mode === "create" ? "নতুন টেস্টিমোনিয়াল তৈরি করুন" : "টেস্টিমোনিয়াল এডিট করুন"}
+        {mode === "create" ? "Create testimonial" : "Edit testimonial"}
       </p>
       <div className="grid gap-3 md:grid-cols-2">
         <div>
           <Label>
-            নাম <span className="text-destructive">*</span>
+            Name <span className="text-destructive">*</span>
           </Label>
           <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </div>
         <div>
           <Label>
-            ক্লাস <span className="text-destructive">*</span>
+            Class <span className="text-destructive">*</span>
           </Label>
           <Input
             required
@@ -113,7 +114,7 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
         </div>
         <div>
           <Label>
-            রোল <span className="text-destructive">*</span>
+            Role <span className="text-destructive">*</span>
           </Label>
           <select
             required
@@ -127,7 +128,7 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
         </div>
         <div>
           <Label>
-            রেটিং <span className="text-destructive">*</span>
+            Rating <span className="text-destructive">*</span>
           </Label>
           <Input
             required
@@ -138,10 +139,10 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
             onChange={(e) => setForm({ ...form, rating: Number(e.target.value) || 5 })}
           />
         </div>
-        <div><Label>অর্ডার</Label><Input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) || 0 })} /></div>
+        <div><Label>Display order</Label><Input type="number" min={0} value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) || 0 })} /></div>
         <div className="md:col-span-2">
           <Label>
-            রিভিউ <span className="text-destructive">*</span>
+            Review <span className="text-destructive">*</span>
           </Label>
           <Textarea
             required
@@ -151,16 +152,18 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
           />
         </div>
         <div className="md:col-span-2 space-y-4">
-          <Label className="text-sm font-bold text-sage-secondary">ইমেজ ফাইল আপলোড</Label>
+          <Label className="text-sm font-bold text-sage-secondary">Upload image file</Label>
           
           <div className="flex flex-col items-start gap-6">
             {/* Preview with Close Button */}
             {previewUrl && (
               <div className="relative h-32 w-32 overflow-hidden rounded-xl border-2 border-sage-primary shadow-lg animate-in fade-in zoom-in duration-300">
-                <img
+                <Image
                   src={previewUrl}
                   alt="Testimonial preview"
-                  className="h-full w-full object-cover"
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
                 <button
                   type="button"
@@ -196,7 +199,7 @@ export function TestimonialFormPanel({ mode, initial, onCancel, onSaved }: Props
                   <Camera size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-sage-secondary">ছবি আপলোড করুন</p>
+                  <p className="text-sm font-bold text-sage-secondary">Upload image</p>
                   <p className="text-[10px] text-sage-gray-500">JPG, PNG, WEBP (Max 5MB)</p>
                 </div>
               </div>

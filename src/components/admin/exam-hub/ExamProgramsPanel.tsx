@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  CalendarRange,
   ChevronLeft,
   ChevronRight,
   FileQuestion,
   Loader2,
-  MonitorPlay,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -70,17 +68,21 @@ const defaultFilters: Filters = {
 };
 
 type Props = {
-  programs: AdminExamProgram[];
-  onProgramsChange: (updater: (prev: AdminExamProgram[]) => AdminExamProgram[]) => void;
-  onRefresh: () => Promise<void>;
+  onProgramUpsert: (program: AdminExamProgram) => void;
+  onProgramDelete: (programId: string) => void;
 };
 
-export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Props) {
+export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
   const [variant, setVariant] = useState<ProgramVariant>("online");
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[0]);
+  const [programs, setPrograms] = useState<AdminExamProgram[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const deferredQuery = useDeferredValue(filters.query.trim());
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [createMode, setCreateMode] = useState<ProgramVariant>("online");
@@ -91,52 +93,63 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
   const [deleteTarget, setDeleteTarget] = useState<AdminExamProgram | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const onlinePrograms = useMemo(() => programs.filter((p) => p.deliveryMode === "online"), [programs]);
-  const offlinePrograms = useMemo(() => programs.filter((p) => p.deliveryMode === "offline"), [programs]);
-  const activePrograms = variant === "online" ? onlinePrograms : offlinePrograms;
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, total);
 
-  const stats = useMemo(() => {
-    const published = programs.filter((p) => p.status === "published").length;
-    const enrollments = programs.reduce((sum, p) => sum + (p.enrollmentCount || 0), 0);
-    const questions = programs.reduce((sum, p) => sum + (p.questionCount || 0), 0);
-    return { published, enrollments, questions };
-  }, [programs]);
+  const loadPrograms = useCallback(
+    async (signal?: AbortSignal) => {
+      const params = new URLSearchParams({
+        deliveryMode: variant,
+        sort: "order:asc",
+        page: String(page),
+        limit: String(pageSize),
+      });
+      if (deferredQuery) params.set("q", deferredQuery);
+      if (filters.status !== "all") params.set("status", filters.status);
+      if (variant === "online" && filters.accessType !== "all") {
+        params.set("accessType", filters.accessType);
+      }
+      if (variant === "offline" && filters.offlineType !== "all") {
+        params.set("offlineType", filters.offlineType);
+      }
 
-  const filtered = useMemo(() => {
-    const q = filters.query.trim().toLowerCase();
-    return activePrograms.filter((program) => {
-      const haystack = [program.title, program.slug, program.subtitle, program.status]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      const matchQuery = !q || haystack.includes(q);
-      const matchStatus = filters.status === "all" || program.status === filters.status;
-      const matchAccess =
-        variant === "online" &&
-        (filters.accessType === "all" || program.accessType === filters.accessType);
-      const matchOfflineType =
-        variant === "offline" &&
-        (filters.offlineType === "all" || program.offlineType === filters.offlineType);
-      return matchQuery && matchStatus && (variant === "online" ? matchAccess : matchOfflineType);
-    });
-  }, [activePrograms, filters, variant]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filtered.slice(start, start + pageSize);
-  }, [filtered, page, pageSize]);
-
-  const rangeStart = filtered.length === 0 ? 0 : (page - 1) * pageSize + 1;
-  const rangeEnd = Math.min(page * pageSize, filtered.length);
+      try {
+        const res = await fetch(`/api/admin/exam-hub/programs?${params.toString()}`, { signal });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (!signal?.aborted) {
+            toast.error(typeof data?.message === "string" ? data.message : "Could not load the exam programs");
+          }
+          return;
+        }
+        const nextTotalPages = data.data?.totalPages || 0;
+        if (page > Math.max(1, nextTotalPages)) {
+          setPage(Math.max(1, nextTotalPages));
+          return;
+        }
+        setPrograms(data.data?.items || []);
+        setTotal(data.data?.total || 0);
+        setTotalPages(nextTotalPages);
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [
+      deferredQuery,
+      filters.accessType,
+      filters.offlineType,
+      filters.status,
+      page,
+      pageSize,
+      variant,
+    ]
+  );
 
   useEffect(() => {
-    setPage(1);
-  }, [filters, pageSize, variant]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+    const controller = new AbortController();
+    void loadPrograms(controller.signal);
+    return () => controller.abort();
+  }, [loadPrograms]);
 
   function openCreate(mode: ProgramVariant) {
     setEditing(null);
@@ -157,8 +170,9 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
 
   async function handleRefresh() {
     setRefreshing(true);
+    setLoading(true);
     try {
-      await onRefresh();
+      await loadPrograms();
     } finally {
       setRefreshing(false);
     }
@@ -171,12 +185,14 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
       const res = await fetch(`/api/admin/exam-hub/programs/${deleteTarget._id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(typeof data?.message === "string" ? data.message : "Delete failed");
+        toast.error(typeof data?.message === "string" ? data.message : "Could not delete the exam program");
         return;
       }
-      onProgramsChange((prev) => prev.filter((p) => p._id !== deleteTarget._id));
-      toast.success("Program deleted");
+      onProgramDelete(deleteTarget._id);
+      toast.success("Exam program deleted successfully");
       setDeleteTarget(null);
+      if (programs.length === 1 && page > 1) setPage((current) => current - 1);
+      else await loadPrograms();
     } finally {
       setDeleting(false);
     }
@@ -184,36 +200,24 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
 
   const isOnline = variant === "online";
 
+  function updateFilters(update: Partial<Filters>) {
+    setLoading(true);
+    setPage(1);
+    setFilters((current) => ({ ...current, ...update }));
+  }
+
   return (
     <>
       <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="Online MCQ"
-            value={onlinePrograms.length}
-            hint="Live & draft online exams"
-            icon={MonitorPlay}
-            tone="online"
-          />
-          <StatCard
-            label="Offline center"
-            value={offlinePrograms.length}
-            hint="Weekly & monthly exams"
-            icon={CalendarRange}
-            tone="offline"
-          />
-          <StatCard label="Published" value={stats.published} hint="Visible on website" icon={RefreshCw} tone="neutral" />
-          <StatCard
-            label="Enrollments"
-            value={stats.enrollments}
-            hint={`${stats.questions} active questions total`}
-            icon={Users}
-            tone="neutral"
-          />
-        </div>
-
         <Card className="overflow-hidden border-sage-border/80 bg-white py-0 shadow-sm ring-sage-border/60">
-          <Tabs value={variant} onValueChange={(v) => setVariant(v as ProgramVariant)}>
+          <Tabs
+            value={variant}
+            onValueChange={(value) => {
+              setLoading(true);
+              setPage(1);
+              setVariant(value as ProgramVariant);
+            }}
+          >
             <div className="flex flex-col gap-4 border-b border-sage-border/80 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h3 className="text-lg font-bold text-sage-secondary">Exam programs</h3>
@@ -224,15 +228,15 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
               <TabsList className="h-11 w-full rounded-2xl bg-sage-cream/80 p-1 sm:w-auto">
                 <TabsTrigger value="online" className="rounded-xl px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Online
-                  <Badge variant="secondary" className="ml-2 bg-sage-red-50 text-sage-primary">
-                    {onlinePrograms.length}
-                  </Badge>
+                  {variant === "online" ? (
+                    <Badge variant="secondary" className="ml-2 bg-sage-red-50 text-sage-primary">{total}</Badge>
+                  ) : null}
                 </TabsTrigger>
                 <TabsTrigger value="offline" className="rounded-xl px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                   Offline
-                  <Badge variant="secondary" className="ml-2 bg-amber-50 text-amber-800">
-                    {offlinePrograms.length}
-                  </Badge>
+                  {variant === "offline" ? (
+                    <Badge variant="secondary" className="ml-2 bg-amber-50 text-amber-800">{total}</Badge>
+                  ) : null}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -244,14 +248,14 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
                     <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-sage-gray-400" />
                     <Input
                       value={filters.query}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
+                      onChange={(event) => updateFilters({ query: event.target.value })}
                       placeholder="Search title or slug..."
                       className="h-10 rounded-xl border-sage-border pl-9"
                     />
                   </div>
                   <Select
                     value={filters.status}
-                    onValueChange={(value) => setFilters((prev) => ({ ...prev, status: value as Filters["status"] }))}
+                    onValueChange={(value) => updateFilters({ status: value as Filters["status"] })}
                   >
                     <SelectTrigger className="h-10 rounded-xl border-sage-border">
                       <SelectValue placeholder="Status" />
@@ -267,9 +271,7 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
                   {isOnline ? (
                     <Select
                       value={filters.accessType}
-                      onValueChange={(value) =>
-                        setFilters((prev) => ({ ...prev, accessType: value as Filters["accessType"] }))
-                      }
+                      onValueChange={(value) => updateFilters({ accessType: value as Filters["accessType"] })}
                     >
                       <SelectTrigger className="h-10 rounded-xl border-sage-border">
                         <SelectValue placeholder="Access" />
@@ -283,9 +285,7 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
                   ) : (
                     <Select
                       value={filters.offlineType}
-                      onValueChange={(value) =>
-                        setFilters((prev) => ({ ...prev, offlineType: value as Filters["offlineType"] }))
-                      }
+                      onValueChange={(value) => updateFilters({ offlineType: value as Filters["offlineType"] })}
                     >
                       <SelectTrigger className="h-10 rounded-xl border-sage-border">
                         <SelectValue placeholder="Type" />
@@ -300,7 +300,12 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setFilters(defaultFilters)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => updateFilters(defaultFilters)}
+                  >
                     <RotateCcw className="size-4" />
                     Reset
                   </Button>
@@ -331,8 +336,9 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
               <TabsContent value="online" className="mt-0">
                 <ProgramList
                   variant="online"
-                  programs={paginated}
-                  empty={filtered.length === 0}
+                  programs={programs}
+                  empty={!loading && total === 0}
+                  loading={loading}
                   onView={setViewTarget}
                   onEdit={openEdit}
                   onDelete={setDeleteTarget}
@@ -341,8 +347,9 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
               <TabsContent value="offline" className="mt-0">
                 <ProgramList
                   variant="offline"
-                  programs={paginated}
-                  empty={filtered.length === 0}
+                  programs={programs}
+                  empty={!loading && total === 0}
+                  loading={loading}
                   onView={setViewTarget}
                   onEdit={openEdit}
                   onDelete={setDeleteTarget}
@@ -352,13 +359,23 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
               <PaginationBar
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                total={filtered.length}
+                total={total}
                 page={page}
-                totalPages={totalPages}
+                totalPages={Math.max(1, totalPages)}
                 pageSize={pageSize}
-                onPageSizeChange={setPageSize}
-                onPrev={() => setPage((p) => Math.max(1, p - 1))}
-                onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onPageSizeChange={(size) => {
+                  setLoading(true);
+                  setPage(1);
+                  setPageSize(size);
+                }}
+                onPrev={() => {
+                  setLoading(true);
+                  setPage((current) => Math.max(1, current - 1));
+                }}
+                onNext={() => {
+                  setLoading(true);
+                  setPage((current) => Math.min(totalPages, current + 1));
+                }}
               />
             </CardContent>
           </Tabs>
@@ -411,13 +428,10 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
               defaultDeliveryMode={editing?.deliveryMode || createMode}
               onSavingChange={setSavingProgram}
               onSaved={(program) => {
-                if (editing) {
-                  onProgramsChange((prev) => prev.map((p) => (p._id === program._id ? program : p)));
-                } else {
-                  onProgramsChange((prev) => [program, ...prev]);
-                }
+                onProgramUpsert(program);
+                void loadPrograms();
                 closeSheet();
-                toast.success("Program saved");
+                toast.success(editing ? "Exam program updated successfully" : "Exam program created successfully");
               }}
               onCancel={closeSheet}
             />
@@ -490,55 +504,11 @@ export function ExamProgramsPanel({ programs, onProgramsChange, onRefresh }: Pro
   );
 }
 
-function StatCard({
-  label,
-  value,
-  hint,
-  icon: Icon,
-  tone,
-}: {
-  label: string;
-  value: number;
-  hint: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tone: "online" | "offline" | "neutral";
-}) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <Card
-        className={cn(
-          "border py-4 shadow-sm",
-          tone === "online" && "border-sage-primary/15 bg-gradient-to-br from-sage-red-50/80 to-white",
-          tone === "offline" && "border-amber-200 bg-gradient-to-br from-amber-50/80 to-white",
-          tone === "neutral" && "border-sage-border bg-white"
-        )}
-      >
-        <CardContent className="flex items-start justify-between gap-3 px-4">
-          <div>
-            <p className="text-sm font-medium text-sage-gray-500">{label}</p>
-            <p className="mt-1 text-3xl font-black tabular-nums text-sage-secondary">{value}</p>
-            <p className="mt-1 text-xs text-sage-gray-500">{hint}</p>
-          </div>
-          <span
-            className={cn(
-              "flex size-10 items-center justify-center rounded-xl",
-              tone === "online" && "bg-sage-primary text-white",
-              tone === "offline" && "bg-amber-700 text-white",
-              tone === "neutral" && "bg-sage-cream text-sage-secondary"
-            )}
-          >
-            <Icon className="size-4" />
-          </span>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
 function ProgramList({
   variant,
   programs,
   empty,
+  loading,
   onView,
   onEdit,
   onDelete,
@@ -546,10 +516,20 @@ function ProgramList({
   variant: ProgramVariant;
   programs: AdminExamProgram[];
   empty: boolean;
+  loading: boolean;
   onView: (p: AdminExamProgram) => void;
   onEdit: (p: AdminExamProgram) => void;
   onDelete: (p: AdminExamProgram) => void;
 }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-2xl border border-sage-border bg-sage-cream/20 px-6 py-16 text-sm text-sage-gray-500">
+        <Loader2 className="size-4 animate-spin" />
+        Loading exam programs...
+      </div>
+    );
+  }
+
   if (empty) {
     return (
       <div className="rounded-2xl border border-dashed border-sage-border bg-sage-cream/20 px-6 py-16 text-center">
@@ -570,7 +550,7 @@ function ProgramList({
                 <>
                   <TableHead>Access</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Q / Enroll</TableHead>
+                  <TableHead>Questions / enrollments</TableHead>
                 </>
               ) : (
                 <>
@@ -658,8 +638,8 @@ function ProgramList({
               {variant === "online" ? (
                 <>
                   {program.accessType ? <Badge variant="outline">{program.accessType}</Badge> : null}
-                  <Badge variant="outline">{program.questionCount || 0} Q</Badge>
-                  <Badge variant="outline">{program.enrollmentCount || 0} enroll</Badge>
+                  <Badge variant="outline">{program.questionCount || 0} questions</Badge>
+                  <Badge variant="outline">{program.enrollmentCount || 0} enrollments</Badge>
                 </>
               ) : (
                 <>

@@ -2,17 +2,13 @@
 
 import { useMemo, useState } from "react";
 
+import { adminWeekdayLabels } from "@/constants/admin-display";
 import type { BatchSubjectInput, TeacherOption } from "./types";
 
 const dayOptions = [
-  { label: "শনিবার", value: "Saturday" },
-  { label: "রবিবার", value: "Sunday" },
-  { label: "সোমবার", value: "Monday" },
-  { label: "মঙ্গলবার", value: "Tuesday" },
-  { label: "বুধবার", value: "Wednesday" },
-  { label: "বৃহস্পতিবার", value: "Thursday" },
-  { label: "শুক্রবার", value: "Friday" },
-];
+  adminWeekdayLabels[6],
+  ...adminWeekdayLabels.slice(0, 6),
+].map((day) => ({ label: day, value: day }));
 
 const timeOptions = Array.from({ length: (22 - 7) * 4 + 1 }, (_, i) => {
   const totalMinutes = 7 * 60 + i * 15;
@@ -86,15 +82,15 @@ export function BatchSubjectRows({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h4 className="font-bold text-sage-secondary">সাবজেক্ট ও রুটিন</h4>
-          <p className="text-sm text-sage-gray-500">প্রতিটি সাবজেক্টের সময় (Start & End Time) দেওয়া বাধ্যতামূলক।</p>
+          <h4 className="font-bold text-sage-secondary">Subjects and Schedule</h4>
+          <p className="text-sm text-sage-gray-500">A start and end time is required for every subject.</p>
         </div>
         <button
           type="button"
           onClick={() => setSubjects((items) => [...items, { ...emptySubject }])}
           className="rounded-lg border border-sage-border px-4 py-2 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50"
         >
-          + সাবজেক্ট
+          + Subject
         </button>
       </div>
 
@@ -116,7 +112,7 @@ export function BatchSubjectRows({
                onChange={(event) => updateSubject(index, "teacher", event.target.value || null)}
                className={`${inputClass} w-full`}
              >
-               <option value="">শিক্ষক নির্বাচন</option>
+               <option value="">Select a teacher</option>
                {teachers.map((teacher) => (
                  <option key={teacher._id} value={teacher._id}>
                    {teacher.name} {teacher.subject ? `- ${teacher.subject}` : ""}
@@ -163,7 +159,7 @@ export function BatchSubjectRows({
           </div>
 
           <div className="lg:col-span-11">
-            <p className="text-[10px] font-bold text-sage-gray-400 uppercase mb-2">ক্লাসের দিন</p>
+            <p className="text-[10px] font-bold text-sage-gray-400 uppercase mb-2">Class days</p>
             <div className="flex flex-wrap gap-2">
               {dayOptions.map((day) => (
                 <label key={day.value} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold cursor-pointer transition ${subject.days.includes(day.value) ? 'bg-sage-primary text-white border-sage-primary' : 'bg-white text-sage-secondary border-sage-border hover:border-sage-primary'}`}>
@@ -185,14 +181,14 @@ export function BatchSubjectRows({
               onClick={() => setSubjects((items) => items.filter((_, itemIndex) => itemIndex !== index))}
               className="rounded-lg border border-sage-border bg-white px-3 py-2 text-xs font-bold text-sage-primary hover:bg-sage-red-50 transition"
             >
-              মুছুন
+              Remove
             </button>
           </div>
         </div>
       ))}
       
       <p className="text-[10px] text-sage-gray-400 italic">
-        * সময় না দিলে সাবজেক্টটি সেভ হবে না এবং রুটিনে দেখা যাবে না।
+        * Subjects without start and end times will not be saved or shown in the schedule.
       </p>
     </div>
   );

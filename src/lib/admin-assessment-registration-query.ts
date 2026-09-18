@@ -8,6 +8,8 @@ export type AssessmentRegistrationFilterInput = {
   dateRange: string;
 };
 
+const MAX_SEARCH_LENGTH = 100;
+
 function escapedRegex(input: string) {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -17,7 +19,7 @@ export function buildAssessmentRegistrationFilter(input: AssessmentRegistrationF
   const query: Record<string, unknown> = {};
 
   if (q.trim()) {
-    const trimmed = q.trim();
+    const trimmed = q.trim().slice(0, MAX_SEARCH_LENGTH);
     const regex = { $regex: escapedRegex(trimmed), $options: "i" };
     const digits = trimmed.replace(/\D/g, "");
 
@@ -36,18 +38,20 @@ export function buildAssessmentRegistrationFilter(input: AssessmentRegistrationF
     ];
   }
 
-  if (status !== "all") query.status = status;
-  if (assessmentKind !== "all") query.assessmentKind = assessmentKind;
+  if (["new", "contacted", "confirmed", "attended", "cancelled", "invalid"].includes(status)) {
+    query.status = status;
+  }
+  if (["modelTest", "exam"].includes(assessmentKind)) query.assessmentKind = assessmentKind;
   if (assessmentType !== "all") query.assessmentType = assessmentType;
   if (classLabel !== "all") query.classLabel = classLabel;
-  if (applicantType !== "all") query.applicantType = applicantType;
+  if (["sage", "outside"].includes(applicantType)) query.applicantType = applicantType;
 
-  if (dateRange !== "all") {
+  if (["today", "week", "month"].includes(dateRange)) {
     const now = new Date();
     const start = new Date();
     if (dateRange === "today") start.setHours(0, 0, 0, 0);
     else if (dateRange === "week") start.setDate(now.getDate() - 7);
-    else if (dateRange === "month") start.setMonth(now.getMonth() - 1);
+    else if (dateRange === "month") start.setDate(now.getDate() - 30);
     query.createdAt = { $gte: start };
   }
 

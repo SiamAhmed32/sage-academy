@@ -53,6 +53,8 @@ const ModelTestSchema = new Schema(
 );
 
 ModelTestSchema.index({ status: 1, featured: 1, endDate: 1, order: 1 });
+ModelTestSchema.index({ status: 1, classLevels: 1, order: 1, createdAt: -1 });
+ModelTestSchema.index({ status: 1, classLevels: 1, startDate: 1, createdAt: -1 });
 
 const ModelTest = models.ModelTest || model("ModelTest", ModelTestSchema);
 

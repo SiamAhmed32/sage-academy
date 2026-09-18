@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
@@ -38,6 +38,12 @@ export type AdminAssessmentItem = {
 type Props = {
   type: "modelTest" | "exam";
   items: AdminAssessmentItem[];
+  filters: {
+    q: string;
+    status: string;
+    classLevel: string;
+    sort: string;
+  };
 };
 
 type ConfirmState = {
@@ -46,12 +52,9 @@ type ConfirmState = {
   item: AdminAssessmentItem | null;
 };
 
-export function AssessmentManager({ type, items }: Props) {
+export function AssessmentManager({ type, items, filters }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAssessmentItem | null>(null);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [classFilter, setClassFilter] = useState("all");
   const [confirmState, setConfirmState] = useState<ConfirmState>({
     isOpen: false,
     type: "delete",
@@ -62,31 +65,21 @@ export function AssessmentManager({ type, items }: Props) {
   const isExam = type === "exam";
   const baseUrl = isExam ? "/api/exams" : "/api/model-tests";
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((item) => {
-      const matchQuery = !q || [item.title, item.slug, item.status, item.examType, ...item.schoolFocus].filter(Boolean).join(" ").toLowerCase().includes(q);
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
-      const matchClass = classFilter === "all" || item.classLevels.includes(Number(classFilter));
-      return matchQuery && matchStatus && matchClass;
-    });
-  }, [items, query, statusFilter, classFilter]);
-
-  const confirmCopy = useMemo(() => {
+  const confirmCopy = (() => {
     const title = confirmState.item?.title || "";
     if (confirmState.type === "archive") {
       return {
-        title: "আর্কাইভ করতে চান?",
-        message: `"${title}" আর্কাইভ লিস্টে পাঠানো হবে। পরে প্রয়োজনে আবার এডিট বা রিস্টোর করা যাবে।`,
-        confirmLabel: "আর্কাইভ করুন",
+        title: "Archive this item?",
+        message: `"${title}" will move to the archive. You can edit or restore it later.`,
+        confirmLabel: "Archive",
       };
     }
     return {
-      title: "চিরতরে মুছে ফেলতে চান?",
-      message: `"${title}" এবং এর সম্পর্কিত তথ্য স্থায়ীভাবে মুছে ফেলা হবে।`,
-      confirmLabel: "চিরতরে মুছুন",
+      title: "Delete permanently?",
+      message: `"${title}" and its related information will be permanently deleted.`,
+      confirmLabel: "Delete permanently",
     };
-  }, [confirmState.item?.title, confirmState.type]);
+  })();
 
   function openCreate() { setEditing(null); setModalOpen(true); }
   function openEdit(item: AdminAssessmentItem) { setEditing(item); setModalOpen(true); }
@@ -94,8 +87,8 @@ export function AssessmentManager({ type, items }: Props) {
   async function handleSave(payload: FormData) {
     const res = await fetch(editing ? `${baseUrl}/${editing._id}` : baseUrl, { method: editing ? "PATCH" : "POST", body: payload });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.success) throw new Error(json.message || "সেভ করা যায়নি");
-    toast.success(editing ? "আপডেট হয়েছে" : "তৈরি হয়েছে");
+    if (!res.ok || !json.success) throw new Error(json.message || "Could not save");
+    toast.success(editing ? "Updated successfully" : "Created successfully");
     router.refresh();
   }
 
@@ -124,14 +117,14 @@ export function AssessmentManager({ type, items }: Props) {
   async function archiveItem(item: AdminAssessmentItem) {
     const res = await fetch(`${baseUrl}/${item._id}`, { method: "PATCH", body: buildArchivePayload(item) });
     if (!res.ok) throw new Error();
-    toast.success("আর্কাইভ হয়েছে");
+    toast.success("Archived successfully");
     router.refresh();
   }
 
   async function removeItem(item: AdminAssessmentItem) {
     const res = await fetch(`${baseUrl}/${item._id}?permanent=true`, { method: "DELETE" });
     if (!res.ok) throw new Error();
-    toast.success("ডিলিট হয়েছে");
+    toast.success("Deleted successfully");
     router.refresh();
   }
 
@@ -146,7 +139,7 @@ export function AssessmentManager({ type, items }: Props) {
       }
       setConfirmState({ isOpen: false, type: "delete", item: null });
     } catch {
-      toast.error(confirmState.type === "archive" ? "আর্কাইভ করা যায়নি" : "ডিলিট করা যায়নি");
+      toast.error(confirmState.type === "archive" ? "Could not archive" : "Could not delete");
     } finally {
       setIsProcessing(false);
     }
@@ -154,9 +147,9 @@ export function AssessmentManager({ type, items }: Props) {
 
   return (
     <div className="space-y-5">
-      <AssessmentFilters query={query} onQueryChange={setQuery} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} classFilter={classFilter} onClassFilterChange={setClassFilter} onCreateClick={openCreate} isExam={isExam} />
+      <AssessmentFilters filters={filters} onCreateClick={openCreate} isExam={isExam} />
       <AssessmentTable
-        items={filtered}
+        items={items}
         isExam={isExam}
         onEdit={openEdit}
         onArchive={(item) => setConfirmState({ isOpen: true, type: "archive", item })}

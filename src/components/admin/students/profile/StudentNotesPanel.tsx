@@ -11,7 +11,7 @@ export function StudentNotesPanel({ note }: { note?: string }) {
       </div>
       <div className="p-4">
         <p className="rounded-xl bg-sage-red-50/30 p-4 text-sm leading-6 text-sage-gray-600">
-          {note || "কোনো নোট নেই।"}
+          {note || "No notes available."}
         </p>
       </div>
     </section>

@@ -1,6 +1,3 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { PromotionCardTableRow } from "./PromotionCardTableRow";
 import type { SerializedPromotionCard } from "@/lib/promotion-card-serialize";
@@ -10,111 +7,103 @@ type BatchOption = { _id: string; title: string; batchCode: string };
 export function PromotionCardTable({
   cards,
   batches,
+  filters,
 }: {
   cards: SerializedPromotionCard[];
   batches: BatchOption[];
+  filters: {
+    q: string;
+    batch: string;
+    visibility: string;
+    view: string;
+    sort: string;
+  };
 }) {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "visible" | "hidden" | "featured">("all");
-  const [view, setView] = useState<"active" | "archived">("active");
-  const [batchFilter, setBatchFilter] = useState("all");
-
-  const filteredCards = useMemo(() => {
-    return cards.filter((card) => {
-      const title = card.title?.toLowerCase() ?? "";
-      const matchesSearch = title.includes(search.toLowerCase());
-      const matchesView = view === "active" ? !card.isArchived : card.isArchived;
-      const matchesFilter =
-        filter === "all"
-          ? true
-          : filter === "visible"
-            ? card.websiteVisible
-            : filter === "hidden"
-              ? !card.websiteVisible
-              : filter === "featured"
-                ? card.featured
-                : true;
-      const matchesBatch =
-        batchFilter === "all"
-          ? true
-          : batchFilter === "none"
-            ? !card.linkedBatch
-            : card.linkedBatch?._id === batchFilter;
-
-      return matchesSearch && matchesView && matchesFilter && matchesBatch;
-    });
-  }, [cards, search, filter, view, batchFilter]);
-
   return (
     <div className="space-y-4">
-      <div className="mb-5 grid gap-3 rounded-xl border border-sage-border bg-sage-white p-4 lg:grid-cols-12">
+      <form method="get" className="mb-5 grid gap-3 rounded-xl border border-sage-border bg-sage-white p-4 lg:grid-cols-12">
         <div className="relative lg:col-span-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-sage-gray-400" size={18} />
-          <input 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="টাইটেল দিয়ে খুঁজুন..." 
+          <input
+            name="q"
+            defaultValue={filters.q}
+            placeholder="Search by title..."
             className="h-10 w-full rounded-lg border border-sage-border bg-sage-white pl-10 pr-4 text-sm outline-none transition focus:border-sage-primary"
           />
         </div>
         
-        <select 
-          value={batchFilter}
-          onChange={(e) => setBatchFilter(e.target.value)}
-          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-3"
+        <select
+          name="batch"
+          defaultValue={filters.batch}
+          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-2"
         >
-          <option value="all">সব ব্যাচ</option>
-          <option value="none">লিঙ্কড নেই</option>
+          <option value="">All batches</option>
+          <option value="none">Not linked</option>
           {batches.map(b => (
             <option key={b._id} value={b._id}>{b.title} ({b.batchCode})</option>
           ))}
         </select>
 
-        <select 
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as any)}
-          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-3"
+        <select
+          name="visibility"
+          defaultValue={filters.visibility}
+          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-2"
         >
-          <option value="all">সব কার্ড</option>
-          <option value="visible">ওয়েবসাইটে দৃশ্যমান</option>
-          <option value="hidden">ওয়েবসাইটে লুকানো</option>
-          <option value="featured">হোমপেজে ফিচার্ড</option>
+          <option value="">All cards</option>
+          <option value="visible">Visible on website</option>
+          <option value="hidden">Hidden on website</option>
+          <option value="featured">Featured on homepage</option>
         </select>
 
         <select
-          value={view}
-          onChange={(e) => setView(e.target.value as any)}
-          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-2"
+          name="view"
+          defaultValue={filters.view}
+          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-1"
         >
           <option value="active">Active</option>
           <option value="archived">Archived</option>
         </select>
-      </div>
+
+        <select
+          name="sort"
+          defaultValue={filters.sort}
+          className="h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none lg:col-span-1"
+        >
+          <option value="order">Order</option>
+          <option value="newest">Newest</option>
+          <option value="title">Title</option>
+        </select>
+
+        <button type="submit" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-sage-primary px-3 text-sm font-bold text-white lg:col-span-2">
+          <Filter size={16} />
+          Apply filters
+        </button>
+      </form>
 
       <div className="overflow-hidden rounded-xl border border-sage-border bg-sage-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="bg-sage-red-50 text-sage-secondary">
             <tr>
-              <th className="p-4">কার্ড ইমেজ</th>
-              <th className="p-4">টাইটেল</th>
-              <th className="p-4">লিঙ্কড ব্যাচ</th>
-              <th className="p-4">ফিচারসমূহ</th>
-              <th className="p-4">স্ট্যাটাস</th>
+              <th className="p-4">Card image</th>
+              <th className="p-4">Title</th>
+              <th className="p-4">Linked batch</th>
+              <th className="p-4">Features</th>
+              <th className="p-4">Status</th>
               <th className="p-4">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sage-border">
-            {filteredCards.map((card) => (
+            {cards.map((card) => (
               <PromotionCardTableRow
                 key={card._id}
                 card={card}
                 batches={batches}
               />
             ))}
-            {filteredCards.length === 0 && (
+            {cards.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-12 text-center text-sage-gray-500">
-                  কোনো কার্ড পাওয়া যায়নি
+                  No cards found
                 </td>
               </tr>
             )}

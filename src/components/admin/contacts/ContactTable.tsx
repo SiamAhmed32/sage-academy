@@ -4,14 +4,15 @@ import { useState } from "react";
 import { ContactRow } from "./ContactRow";
 import { ContactDetailModal } from "./ContactDetailModal";
 import { ContactDeleteModal } from "./ContactDeleteModal";
+import type { ContactRequestItem } from "./types";
 
 type ContactTableProps = {
-  requests: any[];
+  requests: ContactRequestItem[];
 };
 
 export function ContactTable({ requests }: ContactTableProps) {
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<ContactRequestItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<ContactRequestItem | null>(null);
 
   return (
     <div className="overflow-hidden rounded-xl border border-sage-border bg-white shadow-sm">
@@ -19,11 +20,11 @@ export function ContactTable({ requests }: ContactTableProps) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-sage-red-50/50 border-b border-sage-border">
-              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">প্রেরক</th>
-              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">বার্তা</th>
-              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">তারিখ</th>
-              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">স্ট্যাটাস</th>
-              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">অ্যাকশন</th>
+              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">Sender</th>
+              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">Message</th>
+              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">Date</th>
+              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">Status</th>
+              <th className="px-4 py-3 text-sm font-bold text-sage-secondary">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -41,7 +42,7 @@ export function ContactTable({ requests }: ContactTableProps) {
 
       {requests.length === 0 && (
         <div className="py-12 text-center text-sage-gray-500">
-          কোনো মেসেজ পাওয়া যায়নি।
+          No messages found.
         </div>
       )}
 

@@ -49,6 +49,9 @@ const ContactRequestSchema = new Schema(
   { timestamps: true }
 );
 
+ContactRequestSchema.index({ createdAt: -1 });
+ContactRequestSchema.index({ status: 1, createdAt: -1 });
+
 const ContactRequest =
   models.ContactRequest || model("ContactRequest", ContactRequestSchema);
 

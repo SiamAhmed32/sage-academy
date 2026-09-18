@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 
 import { renderPaymentReceipt } from "./payment-receipt-layout";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 export type ReceiptPayment = {
   _id: string;
@@ -46,7 +47,7 @@ export type ReceiptTransaction = {
 };
 
 export function money(value = 0) {
-  return `BDT ${Number(value || 0).toLocaleString("en-US")}`;
+  return formatAdminCurrency(Number(value) || 0);
 }
 
 function rows(payment: ReceiptPayment): ReceiptLineItem[] {

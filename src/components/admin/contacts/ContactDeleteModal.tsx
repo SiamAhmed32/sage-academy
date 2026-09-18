@@ -2,9 +2,10 @@
 
 import { AlertTriangle, X } from "lucide-react";
 import { deleteContactRequestAction } from "@/app/admin/actions";
+import type { ContactRequestItem } from "./types";
 
 type ContactDeleteModalProps = {
-  item: any;
+  item: ContactRequestItem;
   onClose: () => void;
 };
 
@@ -23,9 +24,9 @@ export function ContactDeleteModal({ item, onClose }: ContactDeleteModalProps) {
             <AlertTriangle size={28} />
           </div>
           
-          <h3 className="mb-2 text-lg font-bold text-sage-secondary">মুছে ফেলার নিশ্চয়তা</h3>
+          <h3 className="mb-2 text-lg font-bold text-sage-secondary">Delete Message?</h3>
           <p className="mb-6 text-sm text-sage-gray-500">
-            আপনি কি নিশ্চিতভাবে <span className="font-bold text-sage-secondary">{item.name}</span> এর এই বার্তাটি স্থায়ীভাবে মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।
+            Permanently delete the message from <span className="font-bold text-sage-secondary">{item.name}</span>? This cannot be undone.
           </p>
           
           <div className="flex gap-3">
@@ -33,7 +34,7 @@ export function ContactDeleteModal({ item, onClose }: ContactDeleteModalProps) {
               onClick={onClose}
               className="flex-1 h-11 rounded-xl border border-sage-border text-sm font-bold text-sage-gray-600 transition hover:bg-sage-red-50"
             >
-              বাতিল করুন
+              Cancel
             </button>
             <form action={deleteContactRequestAction} onSubmit={() => onClose()} className="flex-1">
               <input type="hidden" name="id" value={item._id.toString()} />
@@ -41,7 +42,7 @@ export function ContactDeleteModal({ item, onClose }: ContactDeleteModalProps) {
                 type="submit"
                 className="w-full h-11 rounded-xl bg-red-600 text-sm font-bold text-white shadow-lg shadow-red-200 transition hover:bg-red-700 active:scale-95"
               >
-                হ্যাঁ, মুছে ফেলুন
+                Delete
               </button>
             </form>
           </div>

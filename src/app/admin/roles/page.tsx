@@ -3,19 +3,19 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 const roles = [
   {
     title: "Super Admin",
-    details: "সবকিছু manage করবে, user role পরিবর্তন করবে, sensitive settings নিয়ন্ত্রণ করবে।",
+    details: "Can manage all areas, update user roles, and control sensitive settings.",
   },
   {
     title: "Admin",
-    details: "Super admin এর মতো প্রায় সব admin panel access পাবে। User role (super admin ছাড়া) পরিবর্তন, admission, batch, teacher, content সব manage করতে পারবে।",
+    details: "Has access to nearly all admin areas. Can manage admissions, batches, teachers, content, and every user role except super admin.",
   },
   {
     title: "Manager",
-    details: "Contact/admission follow-up করবে, status ও note update করবে, delete বা role change করবে না।",
+    details: "Can follow up on contacts and admissions and update statuses and notes, but cannot delete records or change roles.",
   },
   {
     title: "Student / Guardian",
-    details: "Public account. Admin panel access থাকবে না।",
+    details: "Public account with no access to the admin panel.",
   },
 ];
 
@@ -23,8 +23,8 @@ export default function AdminRolesPage() {
   return (
     <div>
       <AdminPageHeader
-        title="রোল গাইড"
-        description="কোন user কতটুকু access পাবে তার production-safe rule."
+        title="Role Guide"
+        description="Production access rules for each user role."
       />
       <div className="grid gap-4 md:grid-cols-2">
         {roles.map((role) => (

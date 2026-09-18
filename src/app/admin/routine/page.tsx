@@ -16,8 +16,8 @@ export default async function AdminRoutinePage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="ক্লাস রুটিন"
-        description="একাডেমিক ব্যাচের subject routine থেকে দিন অনুযায়ী ক্লাস তালিকা দেখুন। সময়, ব্যাচ, বিষয়, শিক্ষক ও সিট একই জায়গায় রাখা হয়েছে।"
+        title="Class Schedule"
+        description="View daily classes from academic batch schedules, including time, batch, subject, teacher, and seat availability."
       />
 
       <RoutineDayTabs selectedDay={selectedDay} />

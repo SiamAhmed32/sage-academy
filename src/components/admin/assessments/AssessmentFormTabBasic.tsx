@@ -40,7 +40,7 @@ export function AssessmentFormTabBasic({ form, onChange, isExam, imagePreview, o
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          শিরোনাম
+          Title
           <input name="title" required value={form.title} onChange={(e) => onChange({ title: e.target.value })} className={inputClass} />
         </label>
 
@@ -56,17 +56,17 @@ export function AssessmentFormTabBasic({ form, onChange, isExam, imagePreview, o
         )}
 
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          ভার্সন
-          <select name="version" value={form.version} onChange={(e) => onChange({ version: e.target.value as any })} className={inputClass}>
+          Version
+          <select name="version" value={form.version} onChange={(e) => onChange({ version: e.target.value as BasicFormState["version"] })} className={inputClass}>
             <option value="both">Bangla + English</option>
-            <option value="bangla">বাংলা</option>
+            <option value="bangla">Bangla</option>
             <option value="english">English</option>
           </select>
         </label>
 
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          স্ট্যাটাস
-          <select name="status" value={form.status} onChange={(e) => onChange({ status: e.target.value as any })} className={inputClass}>
+          Status
+          <select name="status" value={form.status} onChange={(e) => onChange({ status: e.target.value as BasicFormState["status"] })} className={inputClass}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
             <option value="hidden">Hidden</option>
@@ -75,23 +75,23 @@ export function AssessmentFormTabBasic({ form, onChange, isExam, imagePreview, o
         </label>
 
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          শুরু
+          Start date
           <input name="startDate" required type="date" value={form.startDate} onChange={(e) => onChange({ startDate: e.target.value })} className={inputClass} />
         </label>
 
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          শেষ
+          End date
           <input name="endDate" required type="date" value={form.endDate} onChange={(e) => onChange({ endDate: e.target.value })} className={inputClass} />
         </label>
 
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          অর্ডার
+          Display order
           <input name="order" type="number" value={form.order} onChange={(e) => onChange({ order: e.target.value })} className={inputClass} />
         </label>
 
         <label className="flex items-center gap-2 self-end rounded-xl border border-sage-border px-4 py-3.5 text-sm font-bold text-sage-secondary bg-white cursor-pointer select-none">
           <input type="checkbox" name="featured" checked={form.featured} onChange={(e) => onChange({ featured: e.target.checked })} className="rounded text-sage-primary" />
-          হোমপেজে ফিচার
+          Feature on homepage
         </label>
       </div>
     </div>

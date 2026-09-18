@@ -3,7 +3,7 @@
 import { Edit, Trash2 } from "lucide-react";
 import type { AdminQuizQuestion } from "./QuizManager";
 import { deleteQuizQuestionAction } from "@/app/admin/actions";
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel } from "@/constants/admin-display";
 import { toast } from "react-toastify";
 
 type Props = {
@@ -16,24 +16,24 @@ export function QuizQuestionTable({ questions, onEdit, onDeleted }: Props) {
   if (questions.length === 0) {
     return (
       <div className="rounded-2xl border border-sage-border bg-white p-20 text-center">
-        <p className="text-lg font-bold text-sage-secondary">কোনো কুইজ প্রশ্ন পাওয়া যায়নি</p>
-        <p className="mt-1 text-sm text-sage-gray-500">আপনার প্রথম প্রশ্নটি যোগ করুন।</p>
+        <p className="text-lg font-bold text-sage-secondary">No quiz questions found</p>
+        <p className="mt-1 text-sm text-sage-gray-500">Add your first question.</p>
       </div>
     );
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("আপনি কি নিশ্চিতভাবে এই প্রশ্নটি মুছতে চান?")) return;
+    if (!confirm("Delete this question permanently?")) return;
     try {
       const res = await deleteQuizQuestionAction(id);
       if (res.ok) {
-        toast.success("প্রশ্নটি মুছে ফেলা হয়েছে");
+        toast.success("Question deleted");
         onDeleted(id);
       } else {
-        toast.error("মুছে ফেলা যায়নি");
+        toast.error("Could not delete the question");
       }
     } catch {
-      toast.error("সার্ভারে সমস্যা হয়েছে");
+      toast.error("A server error occurred");
     }
   };
 
@@ -43,9 +43,9 @@ export function QuizQuestionTable({ questions, onEdit, onDeleted }: Props) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-sage-red-50/50 text-[10px] font-black uppercase tracking-widest text-sage-primary">
-              <th className="px-6 py-4">শ্রেণী</th>
-              <th className="px-6 py-4">প্রশ্ন</th>
-              <th className="px-6 py-4">সঠিক উত্তর</th>
+              <th className="px-6 py-4">Class</th>
+              <th className="px-6 py-4">Question</th>
+              <th className="px-6 py-4">Correct answer</th>
               <th className="px-6 py-4 text-center">Action</th>
             </tr>
           </thead>
@@ -54,7 +54,7 @@ export function QuizQuestionTable({ questions, onEdit, onDeleted }: Props) {
               <tr key={q._id} className="group hover:bg-sage-red-50/30 transition-colors">
                 <td className="px-6 py-4">
                   <span className="rounded-full bg-sage-primary/10 px-3 py-1 text-xs font-bold text-sage-primary">
-                    {getClassLabel(q.classLevel)}
+                    {getAdminClassLabel(q.classLevel)}
                   </span>
                 </td>
                 <td className="px-6 py-4">

@@ -60,6 +60,8 @@ export function AdmissionDocumentModal({ url, studentName, onClose }: AdmissionD
               </div>
             )}
 
+            {/* The transformed PDF preview must load as a plain image URL. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={previewUrl} 
               alt={studentName} 

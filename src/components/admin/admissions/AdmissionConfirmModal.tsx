@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Trash2, Archive, RotateCcw, Loader2 } from "lucide-react";
+import { Trash2, Archive, RotateCcw, Loader2 } from "lucide-react";
 
 interface AdmissionConfirmModalProps {
   title: string;
@@ -69,7 +69,7 @@ export function AdmissionConfirmModal({
             disabled={isProcessing}
             className="rounded-lg border border-sage-border px-4 py-2 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50 disabled:opacity-50"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             onClick={onConfirm}
@@ -77,7 +77,7 @@ export function AdmissionConfirmModal({
             className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition disabled:opacity-50 ${current.btnClass}`}
           >
             {isProcessing ? <Loader2 className="animate-spin" size={16} /> : null}
-            {isProcessing ? "প্রসেসিং..." : confirmLabel}
+            {isProcessing ? "Processing..." : confirmLabel}
           </button>
         </div>
       </div>

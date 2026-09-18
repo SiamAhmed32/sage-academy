@@ -11,15 +11,15 @@ type AdminTopbarProps = {
 
 export function AdminTopbar({ user }: AdminTopbarProps) {
   return (
-    <header className="flex min-h-16 items-center justify-between gap-3 border-b border-sage-border bg-sage-white px-4 sm:px-6 lg:px-8">
+    <header className="flex min-h-16 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
         <AdminMobileSidebar user={user} />
 
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold uppercase text-sage-gray-500">
+          <p className="truncate text-[11px] font-bold uppercase tracking-wide text-gray-400">
             SAGE Academy Admin
           </p>
-          <h1 className="truncate text-lg font-bold text-sage-secondary">
+          <h1 className="truncate text-lg font-bold text-gray-900">
             {user.name}
           </h1>
         </div>
@@ -28,16 +28,16 @@ export function AdminTopbar({ user }: AdminTopbarProps) {
       <div className="flex shrink-0 items-center gap-2">
         <Link
           href="/"
-          className="inline-flex h-9 items-center gap-2 rounded-lg border border-sage-border px-3 text-sm font-semibold text-sage-secondary"
+          className="inline-flex h-9 items-center gap-2 rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
         >
           <ExternalLink size={16} />
-          <span className="hidden sm:inline">ওয়েবসাইট</span>
+          <span className="hidden sm:inline">View website</span>
         </Link>
 
         <form action={logoutAction}>
-          <button className="inline-flex h-9 items-center gap-2 rounded-lg bg-sage-primary px-3 text-sm font-semibold text-sage-white">
+          <button className="inline-flex h-9 items-center gap-2 rounded-lg bg-sage-primary px-3 text-sm font-semibold text-white transition hover:bg-sage-primary-hover">
             <LogOut size={16} />
-            <span className="hidden sm:inline">লগআউট</span>
+            <span className="hidden sm:inline">Log out</span>
           </button>
         </form>
       </div>

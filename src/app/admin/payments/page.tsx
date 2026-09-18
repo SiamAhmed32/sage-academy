@@ -6,21 +6,20 @@ import { monthNumberFromName } from "@/lib/month-utils";
 import { billingMonthEnd, ensureAllBillingMonthsForActiveStudents } from "@/lib/billing";
 import Payment from "@/models/Payment";
 import Student from "@/models/Student";
+import {
+  escapeMongoRegex,
+  firstQueryValue,
+  normalizeAdminSearch,
+  parseAllowedInteger,
+  parsePositiveInteger,
+  parseWhitelistedValue,
+} from "@/lib/student-payment-query";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-function single(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function numberParam(value: string | undefined, fallback: number) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
-
-function limitParam(value: string | undefined) {
-  return Math.min(numberParam(value, 10), 10);
-}
+const paymentStatuses = ["all", "paid", "partial", "unpaid", "due"] as const;
+const paymentMethods = ["all", "cash", "bkash", "nagad", "rocket", "bank", "other"] as const;
+const paymentLimits = [10, 25, 50] as const;
 
 async function paymentQuery(filters: PaymentFilters) {
   const query: Record<string, unknown> = {};
@@ -39,10 +38,11 @@ async function paymentQuery(filters: PaymentFilters) {
   if (filters.status === "unpaid") query.amount = { $lte: 0 };
   if (filters.status === "due") query.dueAmount = { $gt: 0 };
   if (filters.q) {
+    const safeSearch = escapeMongoRegex(filters.q);
     const students = await Student.find({
       $or: [
-        { nameEnglish: { $regex: filters.q, $options: "i" } },
-        { studentId: { $regex: filters.q, $options: "i" } },
+        { nameEnglish: { $regex: safeSearch, $options: "i" } },
+        { studentId: { $regex: safeSearch, $options: "i" } },
       ],
     }).select("_id").lean();
     query.student = { $in: students.map((s) => s._id) };
@@ -71,14 +71,28 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
   await connectDB();
   const params = await searchParams;
   const now = new Date();
-  const page = numberParam(single(params.page), 1);
-  const limit = limitParam(single(params.limit));
+  const requestedPage = parsePositiveInteger(firstQueryValue(params.page), 1);
+  const limit = parseAllowedInteger(firstQueryValue(params.limit), paymentLimits, 10);
+  const requestedMonth = firstQueryValue(params.month);
+  const month = parseWhitelistedValue(
+    requestedMonth,
+    ["all", ...months] as [string, ...string[]],
+    months[now.getMonth()]
+  );
+  const requestedYear = firstQueryValue(params.year);
+  const year = requestedYear === "all"
+    ? "all"
+    : /^\d{4}$/.test(requestedYear ?? "") &&
+        Number(requestedYear) >= 2000 &&
+        Number(requestedYear) <= 2100
+      ? requestedYear!
+      : String(now.getFullYear());
   const filters: PaymentFilters = {
-    q: single(params.q) || "",
-    month: single(params.month) || months[now.getMonth()],
-    year: single(params.year) || String(now.getFullYear()),
-    status: single(params.status) || "all",
-    method: single(params.method) || "all",
+    q: normalizeAdminSearch(firstQueryValue(params.q)),
+    month,
+    year,
+    status: parseWhitelistedValue(firstQueryValue(params.status), paymentStatuses, "all"),
+    method: parseWhitelistedValue(firstQueryValue(params.method), paymentMethods, "all"),
   };
 
   const currentMonth = months[now.getMonth()];
@@ -99,10 +113,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
     unpaidCount: number;
     reversedCount: number;
   };
-  const [payments, totalPayments, summaryAgg] = await Promise.all([
-    Payment.find(query).populate("student", "nameEnglish studentId").populate("receivedBy", "name").populate("transactions.receivedBy", "name")
-      .populate("transactions.reversedBy", "name")
-      .sort({ year: -1, monthNumber: -1, createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+  const [totalPayments, summaryAgg] = await Promise.all([
     Payment.countDocuments(query),
     Payment.aggregate<PaymentSummary>([
       { $match: query },
@@ -154,13 +165,24 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
       },
     ]),
   ]);
+  const totalPages = Math.max(1, Math.ceil(totalPayments / limit));
+  const page = Math.min(requestedPage, totalPages);
+  const payments = await Payment.find(query)
+    .populate("student", "nameEnglish studentId")
+    .populate("receivedBy", "name")
+    .populate("transactions.receivedBy", "name")
+    .populate("transactions.reversedBy", "name")
+    .sort({ year: -1, monthNumber: -1, createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
   const summary = summaryAgg[0] || { expected: 0, paid: 0, due: 0, paidCount: 0, partialCount: 0, unpaidCount: 0, reversedCount: 0 };
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="পেমেন্ট ম্যানেজমেন্ট"
-        description="শিক্ষার্থীদের অফলাইন পেমেন্ট রেকর্ড, বকেয়া হিসাব এবং রসিদ এক জায়গা থেকে পরিচালনা করুন।"
+        title="Payment Management"
+        description="Manage offline payments, outstanding balances, and receipts."
       />
       <PaymentManager
         key={`${filters.month}-${filters.year}-${filters.status}-${filters.method}-${filters.q}-${page}`}

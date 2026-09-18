@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, Calendar, ArrowUpDown } from "lucide-react";
 import { contactStatusOptions } from "@/constants/admin";
@@ -8,20 +9,28 @@ type ContactFiltersProps = {
   q: string;
   status: string;
   sort: string;
+  dateRange: string;
 };
 
-export function ContactFilters({ q, status, sort }: ContactFiltersProps) {
+export function ContactFilters({ q, status, sort, dateRange }: ContactFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dateRange = searchParams.get("dateRange") || "all";
+  const [searchValue, setSearchValue] = useState(q);
 
-  const updateParams = (key: string, value: string) => {
+  const updateParams = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value && value !== "all") params.set(key, value);
     else params.delete(key);
     params.set("page", "1");
-    router.push(`?${params.toString()}`);
-  };
+    router.push(`?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (searchValue.trim() !== q) updateParams("q", searchValue.trim());
+    }, 450);
+    return () => window.clearTimeout(timeout);
+  }, [q, searchValue, updateParams]);
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-4">
@@ -29,13 +38,9 @@ export function ContactFilters({ q, status, sort }: ContactFiltersProps) {
         <Search className="absolute left-3 top-3 h-4 w-4 text-sage-gray-400" />
         <input
           className="h-10 w-full rounded-lg border border-sage-border bg-white pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-sage-primary"
-          placeholder="নাম বা মোবাইল নম্বর দিয়ে খুঁজুন..."
-          defaultValue={q}
-          onChange={(e) => {
-            const val = e.target.value;
-            const timeout = setTimeout(() => updateParams("q", val), 500);
-            return () => clearTimeout(timeout);
-          }}
+          placeholder="Search by name or phone number..."
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
         />
       </div>
 
@@ -47,10 +52,10 @@ export function ContactFilters({ q, status, sort }: ContactFiltersProps) {
             defaultValue={dateRange}
             onChange={(e) => updateParams("dateRange", e.target.value)}
           >
-            <option value="all">সব সময়</option>
-            <option value="today">আজকের</option>
-            <option value="week">এই সপ্তাহের</option>
-            <option value="month">এই মাসের</option>
+            <option value="all">All dates</option>
+            <option value="today">Today</option>
+            <option value="week">Last 7 days</option>
+            <option value="month">Last 30 days</option>
           </select>
         </div>
 
@@ -61,7 +66,7 @@ export function ContactFilters({ q, status, sort }: ContactFiltersProps) {
             defaultValue={status}
             onChange={(e) => updateParams("status", e.target.value)}
           >
-            <option value="all">সব স্ট্যাটাস</option>
+            <option value="all">All statuses</option>
             {contactStatusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
@@ -75,8 +80,8 @@ export function ContactFilters({ q, status, sort }: ContactFiltersProps) {
             defaultValue={sort}
             onChange={(e) => updateParams("sort", e.target.value)}
           >
-            <option value="desc">নতুন আগে</option>
-            <option value="asc">পুরানো আগে</option>
+            <option value="desc">Newest first</option>
+            <option value="asc">Oldest first</option>
           </select>
         </div>
       </div>

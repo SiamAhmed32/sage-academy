@@ -8,10 +8,6 @@ function formValue(formData: FormData, key: string) {
   return typeof value === "string" ? value : "";
 }
 
-function formBool(formData: FormData, key: string) {
-  return formValue(formData, key) === "true";
-}
-
 /** Checkbox is on unless explicitly sent as "false". */
 function formActiveFlag(formData: FormData, key: string) {
   if (!formData.has(key)) return true;

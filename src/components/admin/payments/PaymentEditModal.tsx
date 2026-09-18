@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { updatePaymentAmountAction } from "@/app/admin/actions";
 import type { AdminPayment } from "./PaymentManager";
 import { methodLabels } from "./payment-options";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type Props = { payment: AdminPayment; onClose: () => void; onUpdated: (payment: AdminPayment) => void };
 
@@ -26,11 +27,11 @@ export function PaymentEditModal({ payment, onClose, onUpdated }: Props) {
     const res = await updatePaymentAmountAction(formData);
     setIsSaving(false);
     if (res.ok && res.data) {
-      toast.success("পেমেন্ট আপডেট হয়েছে।");
+      toast.success("Payment updated.");
       onUpdated(res.data as AdminPayment);
       onClose();
     } else {
-      toast.error(res.message || "পেমেন্ট আপডেট করা যায়নি।");
+      toast.error(res.message || "Could not update the payment.");
     }
   }
 
@@ -39,8 +40,8 @@ export function PaymentEditModal({ payment, onClose, onUpdated }: Props) {
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-sage-border bg-sage-red-50/50 p-5">
           <div>
-            <h3 className="text-xl font-bold text-sage-secondary">পেমেন্ট এডিট</h3>
-            <p className="mt-1 text-sm text-sage-gray-500">বাস্তবে পাওয়া টাকার পরিমাণ ঠিক করুন।</p>
+            <h3 className="text-xl font-bold text-sage-secondary">Edit Payment</h3>
+            <p className="mt-1 text-sm text-sage-gray-500">Correct the amount actually received.</p>
           </div>
           <button type="button" onClick={onClose} className="rounded-full p-2 text-sage-gray-500 hover:bg-white hover:text-sage-primary">
             <X className="h-5 w-5" />
@@ -48,24 +49,24 @@ export function PaymentEditModal({ payment, onClose, onUpdated }: Props) {
         </div>
         <div className="grid gap-4 p-5">
           <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-            জমা টাকা
+            Amount Received
             <input type="number" min="0" value={amount} onChange={(e) => setAmount(Number(e.target.value) || 0)} className="h-12 rounded-xl border border-sage-border px-4 outline-none focus:border-sage-primary" />
           </label>
           <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-            পেমেন্ট মাধ্যম
+            Payment Method
             <select value={method} onChange={(e) => setMethod(e.target.value)} className="h-12 rounded-xl border border-sage-border bg-white px-4">
               {Object.entries(methodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
           <div className="rounded-xl border border-sage-border bg-sage-red-50/30 p-4 text-sm font-bold text-sage-secondary">
-            মোট পাওনা ৳{expected} · জমা ৳{amount} · বকেয়া ৳{due}
+            Expected {formatAdminCurrency(expected)} · Received {formatAdminCurrency(amount)} · Due {formatAdminCurrency(due)}
           </div>
           <div className="flex gap-3">
             <button type="button" disabled={isSaving} onClick={save} className="h-11 flex-1 rounded-xl bg-sage-primary font-bold text-white disabled:opacity-50">
-              {isSaving ? "সেভ হচ্ছে..." : "সেভ করুন"}
+              {isSaving ? "Saving..." : "Save"}
             </button>
             <button type="button" onClick={onClose} className="h-11 rounded-xl border border-sage-border bg-white px-5 font-bold text-sage-secondary">
-              বাতিল
+              Cancel
             </button>
           </div>
         </div>

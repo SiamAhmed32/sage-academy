@@ -3,27 +3,27 @@ import { monthNames } from "@/lib/month-utils";
 export const months = [...monthNames];
 
 export const monthLabels: Record<string, string> = {
-  January: "জানুয়ারি",
-  February: "ফেব্রুয়ারি",
-  March: "মার্চ",
-  April: "এপ্রিল",
-  May: "মে",
-  June: "জুন",
-  July: "জুলাই",
-  August: "আগস্ট",
-  September: "সেপ্টেম্বর",
-  October: "অক্টোবর",
-  November: "নভেম্বর",
-  December: "ডিসেম্বর",
+  January: "January",
+  February: "February",
+  March: "March",
+  April: "April",
+  May: "May",
+  June: "June",
+  July: "July",
+  August: "August",
+  September: "September",
+  October: "October",
+  November: "November",
+  December: "December",
 };
 
 export const methodLabels: Record<string, string> = {
-  cash: "ক্যাশ",
+  cash: "Cash",
   bkash: "bKash",
   nagad: "Nagad",
   rocket: "Rocket",
-  bank: "ব্যাংক",
-  other: "অন্যান্য",
+  bank: "Bank transfer",
+  other: "Other",
 };
 
 /** Latin-only labels for jsPDF (Helvetica cannot render Bengali). */

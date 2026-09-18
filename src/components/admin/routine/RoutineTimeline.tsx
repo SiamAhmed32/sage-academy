@@ -8,9 +8,9 @@ export function RoutineTimeline({ classes }: { classes: RoutineClass[] }) {
     return (
       <div className="rounded-xl border border-dashed border-sage-border bg-white px-4 py-12 text-center">
         <BookOpen className="mx-auto mb-3 h-10 w-10 text-sage-gray-300" />
-        <h3 className="font-bold text-sage-secondary">এই দিনে কোনো ক্লাস নেই</h3>
+        <h3 className="font-bold text-sage-secondary">No classes on this day</h3>
         <p className="mt-1 text-sm text-sage-gray-500">
-          ব্যাচ ম্যানেজমেন্ট থেকে subject routine যোগ করলে এখানে দেখা যাবে।
+          Add subject schedules in Batch Management to show them here.
         </p>
       </div>
     );

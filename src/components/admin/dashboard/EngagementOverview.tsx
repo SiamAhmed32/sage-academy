@@ -27,10 +27,10 @@ export function EngagementOverview({
           </span>
           <div>
             <h3 className="text-lg font-bold text-sage-secondary">
-              ওয়েবসাইটে আগ্রহ
+              Website engagement
             </h3>
             <p className="mt-1 text-sm leading-6 text-sage-gray-500">
-              শেষ {days} দিনে {analytics.totalInRange}টি গুরুত্বপূর্ণ ভিজিটর কাজ।
+              {analytics.totalInRange} key visitor actions in the last {days} days.
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@ export function EngagementOverview({
           href="/admin/engagement"
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-sage-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-sage-secondary"
         >
-          বিস্তারিত দেখুন
+          View details
           <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -62,7 +62,7 @@ export function EngagementOverview({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-sage-border bg-sage-red-50/30 px-4 py-8 text-center text-sm leading-6 text-sage-gray-500">
-          এখনো ভিজিটর অ্যাক্টিভিটি নেই।
+          There is no visitor activity yet.
         </div>
       )}
     </section>

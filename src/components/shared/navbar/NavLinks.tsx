@@ -16,7 +16,7 @@ export function NavLinks({ direction = "row", onNavigate }: NavLinksProps) {
   const isColumn = direction === "column";
 
   return (
-    <ul className={cn("flex gap-1", isColumn ? "flex-col" : "items-center")}>
+    <ul className={cn("flex gap-1", isColumn ? "flex-col" : "flex-wrap items-center")}>
       {navItems.map((item) => {
         const isActive =
           item.href === "/"

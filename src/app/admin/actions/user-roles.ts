@@ -39,7 +39,7 @@ export async function updateUserRoleAction(
   try {
     const currentUser = await requireRole(adminRoles);
     if (!canManageUsers(currentUser.role)) {
-      return { ok: false, message: "আপনার role পরিবর্তনের অনুমতি নেই।" };
+      return { ok: false, message: "You do not have permission to change user roles." };
     }
 
     const targetUserId = text(formData, "id");
@@ -50,11 +50,11 @@ export async function updateUserRoleAction(
       return { ok: false, message: "User not found." };
     }
     if (!isAuthRole(nextRole)) {
-      return { ok: false, message: "সঠিক role নির্বাচন করুন।" };
+      return { ok: false, message: "Select a valid role." };
     }
 
     if (!assignableUserRoles(currentUser.role).includes(nextRole)) {
-      return { ok: false, message: "এই role আপনি দিতে পারবেন না।" };
+      return { ok: false, message: "You cannot assign this role." };
     }
 
     await connectDB();
@@ -64,7 +64,7 @@ export async function updateUserRoleAction(
     }
 
     if (targetUser.role === "super_admin" && currentUser.role !== "super_admin") {
-      return { ok: false, message: "Super admin user শুধু super admin এডিট করতে পারবে।" };
+      return { ok: false, message: "Only a super admin can edit another super admin." };
     }
 
     if (targetUserId === currentUser.id) {
@@ -72,10 +72,10 @@ export async function updateUserRoleAction(
         currentUser.role === "super_admin" &&
         (nextRole !== "super_admin" || !nextIsActive)
       ) {
-        return { ok: false, message: "নিজের super admin access সরাতে পারবেন না।" };
+        return { ok: false, message: "You cannot remove your own super admin access." };
       }
       if (currentUser.role === "admin" && (nextRole !== "admin" || !nextIsActive)) {
-        return { ok: false, message: "নিজের admin access সরাতে পারবেন না।" };
+        return { ok: false, message: "You cannot remove your own admin access." };
       }
     }
 
@@ -90,7 +90,7 @@ export async function updateUserRoleAction(
       if (activeSuperAdmins <= 1) {
         return {
           ok: false,
-          message: "অন্তত একজন active super admin থাকতে হবে।",
+          message: "At least one active super admin is required.",
         };
       }
     }
@@ -103,7 +103,7 @@ export async function updateUserRoleAction(
     revalidatePath("/admin/users");
     return { ok: true };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "সেভ করা যায়নি।";
+    const message = error instanceof Error ? error.message : "Could not save changes.";
     return { ok: false, message };
   }
 }

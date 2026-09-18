@@ -55,7 +55,7 @@ export function AssessmentConfirmModal({
             {isDelete ? (
               <p className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                এই কাজটি আর ফিরিয়ে আনা যাবে না।
+                This action cannot be undone.
               </p>
             ) : null}
           </div>
@@ -68,7 +68,7 @@ export function AssessmentConfirmModal({
             disabled={isProcessing}
             className="rounded-xl border border-sage-border px-4 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50 disabled:opacity-50"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             type="button"
@@ -79,7 +79,7 @@ export function AssessmentConfirmModal({
             }`}
           >
             {isProcessing ? <Loader2 className="size-4 animate-spin" /> : null}
-            {isProcessing ? "প্রসেসিং..." : confirmLabel}
+            {isProcessing ? "Processing..." : confirmLabel}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PaymentFilters, PaymentPaginationState } from "./PaymentManager";
+import { formatAdminNumber } from "@/lib/admin-format";
 
 type Props = { filters: PaymentFilters; pagination: PaymentPaginationState };
 
@@ -19,14 +20,14 @@ export function PaymentPagination({ filters, pagination }: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-sage-border px-4 py-3 text-sm">
       <p className="text-sage-gray-500">
-        দেখানো হচ্ছে <span className="font-bold text-sage-secondary">{start}-{end}</span> / <span className="font-bold text-sage-secondary">{pagination.totalPayments}</span>
+        Showing <span className="font-bold text-sage-secondary">{formatAdminNumber(start)}-{formatAdminNumber(end)}</span> of <span className="font-bold text-sage-secondary">{formatAdminNumber(pagination.totalPayments)}</span>
       </p>
       <div className="flex items-center gap-2">
-        <PageButton disabled={pagination.page <= 1} href={pageHref(filters, pagination.page - 1, pagination.limit)}>আগের</PageButton>
+        <PageButton disabled={pagination.page <= 1} href={pageHref(filters, pagination.page - 1, pagination.limit)}>Previous</PageButton>
         <span className="rounded-lg bg-sage-red-50 px-3 py-2 text-sm font-bold text-sage-primary">
-          পৃষ্ঠা {pagination.page} / {totalPages}
+          Page {formatAdminNumber(pagination.page)} of {formatAdminNumber(totalPages)}
         </span>
-        <PageButton disabled={pagination.page >= totalPages} href={pageHref(filters, pagination.page + 1, pagination.limit)}>পরের</PageButton>
+        <PageButton disabled={pagination.page >= totalPages} href={pageHref(filters, pagination.page + 1, pagination.limit)}>Next</PageButton>
       </div>
     </div>
   );

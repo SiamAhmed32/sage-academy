@@ -29,7 +29,7 @@ function isClassActiveNow(timeStr: string): boolean {
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
     return currentMinutes >= start && currentMinutes <= end;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -79,13 +79,13 @@ function RoutineItem({ item }: { item: DashboardClass }) {
         <div className="flex items-center gap-2">
           {active && (
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
-              চলমান
+              In progress
             </span>
           )}
           <Link
             href="/admin/routine"
             className="flex h-9 w-9 items-center justify-center rounded-lg bg-sage-red-50 text-sage-primary transition hover:bg-sage-primary hover:text-white"
-            title="রুটিন দেখুন"
+            title="View schedule"
           >
             <ExternalLink className="h-4 w-4" />
           </Link>
@@ -100,7 +100,7 @@ function RoutineEmpty() {
     <div className="rounded-2xl border border-dashed border-sage-border bg-white px-4 py-12 text-center shadow-sm">
       <BookOpen className="mx-auto mb-3 h-10 w-10 text-sage-gray-300" />
       <p className="text-sm font-bold text-sage-gray-500">
-        আজ কোনো ক্লাস পাওয়া যায়নি।
+        No classes were found for today.
       </p>
     </div>
   );
@@ -120,15 +120,15 @@ export function UpcomingClasses({ classes }: { classes: DashboardClass[] }) {
             </span>
             <div>
               <h3 className="text-lg font-black text-sage-secondary">
-                আজকের রুটিন
+                Today&apos;s schedule
               </h3>
               <p className="mt-0.5 text-xs text-sage-gray-500">
-                সময় অনুযায়ী সাজানো আজকের ক্লাসসমূহের সূচি।
+                Today&apos;s classes, arranged by time.
               </p>
             </div>
           </div>
           <span className="shrink-0 rounded-full bg-sage-red-50 px-3 py-1 text-xs font-extrabold text-sage-primary ring-1 ring-sage-red-100 self-start sm:self-center">
-            {classes.length} ক্লাস
+            {classes.length} classes
           </span>
         </div>
       </div>
@@ -145,7 +145,7 @@ export function UpcomingClasses({ classes }: { classes: DashboardClass[] }) {
               href="/admin/routine"
               className="block rounded-2xl border border-dashed border-sage-border bg-white px-4 py-3.5 text-center text-xs font-bold text-sage-primary transition hover:border-sage-primary hover:bg-sage-red-50 shadow-sm"
             >
-              আরও {hiddenCount}টি ক্লাস আছে, পূর্ণ রুটিন দেখুন
+              {hiddenCount} more classes available. View the full schedule
             </Link>
           )}
         </div>

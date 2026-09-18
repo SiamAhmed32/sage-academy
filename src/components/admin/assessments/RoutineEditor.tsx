@@ -55,7 +55,7 @@ export function RoutineEditor({ title, routineTitle, routineSubtitle, scheduleNo
         filename: `${title || "class"}-routine.pdf`,
       });
     } catch {
-      toast.error("রুটিন ডাউনলোড করা যায়নি");
+      toast.error("Could not download the routine");
     } finally {
       setDownloading(false);
     }
@@ -65,8 +65,8 @@ export function RoutineEditor({ title, routineTitle, routineSubtitle, scheduleNo
     <div className="space-y-4 rounded-2xl border border-sage-border bg-white p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-black text-sage-secondary">রুটিন তৈরি</p>
-          <p className="mt-1 text-xs font-semibold text-sage-gray-500">দিন, সময় ও বিষয় দিলে নিচে রুটিন টেবিল তৈরি হবে।</p>
+          <p className="text-sm font-black text-sage-secondary">Build routine</p>
+          <p className="mt-1 text-xs font-semibold text-sage-gray-500">Add the day, time, and subject to build the routine table.</p>
         </div>
         <button
           type="button"
@@ -74,7 +74,7 @@ export function RoutineEditor({ title, routineTitle, routineSubtitle, scheduleNo
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-sage-primary px-4 text-sm font-black text-white transition hover:bg-sage-secondary"
         >
           <Plus className="h-4 w-4" />
-          রুটিন সারি
+          Add routine row
         </button>
       </div>
 
@@ -96,7 +96,7 @@ export function RoutineEditor({ title, routineTitle, routineSubtitle, scheduleNo
           </div>
         ))}
         {routine.length === 0 && (
-          <p className="text-center py-4 text-sm text-sage-gray-400">কোনো রুটিন সারি নেই। উপরের বাটন ক্লিক করে নতুন সারি যোগ করুন।</p>
+          <p className="text-center py-4 text-sm text-sage-gray-400">No routine rows yet. Use the button above to add one.</p>
         )}
       </div>
 

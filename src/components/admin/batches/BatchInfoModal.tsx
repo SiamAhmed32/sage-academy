@@ -38,8 +38,8 @@ export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
     try {
       const response = await fetch(url, { method, body: formData });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.message || "ব্যাচ সেভ করা যায়নি");
-      toast.success(isEdit ? "ব্যাচ আপডেট হয়েছে" : "নতুন ব্যাচ তৈরি হয়েছে");
+      if (!response.ok) throw new Error(data?.message || "The batch could not be saved.");
+      toast.success(isEdit ? "Batch updated." : "New batch created.");
       onClose();
       if (!isEdit && data?.data?._id) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -49,7 +49,7 @@ export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
         router.refresh();
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "ব্যাচ সেভ করা যায়নি");
+      toast.error(error instanceof Error ? error.message : "The batch could not be saved.");
     } finally {
       setIsSaving(false);
     }
@@ -59,8 +59,8 @@ export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
     <AdminModal
       open={open}
       onClose={onClose}
-      title={isEdit ? "ব্যাচ তথ্য পরিবর্তন" : "নতুন একাডেমিক ব্যাচ"}
-      description={isEdit ? "ব্যাচের মৌলিক তথ্য পরিবর্তন করুন।" : "নতুন ব্যাচ তৈরি করতে তথ্য দিন।"}
+      title={isEdit ? "Edit Batch Details" : "New Academic Batch"}
+      description={isEdit ? "Update the batch's basic information." : "Enter the details for the new batch."}
     >
       <form onSubmit={handleSubmit}>
         <BatchInfoFields
@@ -79,14 +79,14 @@ export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
             onClick={onClose}
             className="rounded-lg border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             type="submit"
             disabled={isSaving}
             className="rounded-lg bg-sage-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sage-primary/90 disabled:opacity-60"
           >
-            {isSaving ? "সেভ হচ্ছে..." : isEdit ? "আপডেট করুন" : "ব্যাচ তৈরি করুন"}
+            {isSaving ? "Saving..." : isEdit ? "Update batch" : "Create batch"}
           </button>
         </div>
       </form>

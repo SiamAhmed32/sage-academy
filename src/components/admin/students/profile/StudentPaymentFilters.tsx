@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChangeEvent, useCallback, useState } from "react";
 
 import { monthNameFromNumber } from "@/lib/month-utils";
+import { getAdminStatusLabel } from "@/constants/admin-display";
+import { formatAdminNumber } from "@/lib/admin-format";
 
 type PaymentFilterState = {
   year: string;
@@ -58,11 +60,12 @@ export function StudentPaymentFilters({ years, year, month, status }: Props) {
         name="year"
         value={filters.year}
         onChange={updateFilter}
+        aria-label="Filter payments by year"
         className={`${inputClass} lg:col-span-3`}
       >
         {years.map((optionYear) => (
           <option key={optionYear} value={optionYear}>
-            {optionYear}
+            {formatAdminNumber(optionYear)}
           </option>
         ))}
       </select>
@@ -71,6 +74,7 @@ export function StudentPaymentFilters({ years, year, month, status }: Props) {
         name="month"
         value={filters.month}
         onChange={updateFilter}
+        aria-label="Filter payments by month"
         className={`${inputClass} lg:col-span-4`}
       >
         <option value="all">All months</option>
@@ -85,12 +89,13 @@ export function StudentPaymentFilters({ years, year, month, status }: Props) {
         name="status"
         value={filters.status}
         onChange={updateFilter}
+        aria-label="Filter payments by status"
         className={`${inputClass} lg:col-span-3`}
       >
         <option value="all">All statuses</option>
-        <option value="paid">Paid</option>
-        <option value="partial">Partial</option>
-        <option value="unpaid">Unpaid</option>
+        <option value="paid">{getAdminStatusLabel("paid")}</option>
+        <option value="partial">{getAdminStatusLabel("partial")}</option>
+        <option value="unpaid">{getAdminStatusLabel("unpaid")}</option>
       </select>
 
       <Link

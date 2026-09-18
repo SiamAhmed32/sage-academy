@@ -8,7 +8,9 @@
     "dev:clean": "node -e \"require('fs').rmSync('.next/dev',{recursive:true,force:true})\"",
     "dev:fresh": "npm run dev:clean && next dev",
     "dev:fresh:webpack": "npm run dev:clean && next dev --webpack",
-    "build": "next build",
+    "build": "next build --webpack",
+    "typecheck": "tsc --noEmit",
+    "check:admin-language": "node scripts/check-admin-language.mjs",
     "generate:favicons": "node scripts/generate-favicons.mjs",
     "start": "next start",
     "lint": "eslint"

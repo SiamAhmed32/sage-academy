@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 import { reversePaymentTransactionAction } from "@/app/admin/actions";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type Props = {
   paymentId: string;
@@ -50,7 +51,7 @@ export function ReverseReceiptModal({ paymentId, transactionId, amount, onClose,
             <div>
               <h3 className="text-lg font-black text-sage-secondary">Reverse receipt</h3>
               <p className="mt-1 text-sm text-sage-gray-600">
-                This keeps the receipt for audit, but removes ৳{amount} from paid totals.
+                This keeps the receipt for audit, but removes {formatAdminCurrency(amount)} from paid totals.
               </p>
             </div>
           </div>

@@ -14,7 +14,7 @@ export function TeacherDeleteButton({ teacherId }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
-    const ok = window.confirm("আপনি কি নিশ্চিতভাবে এই শিক্ষকের তথ্য মুছে ফেলতে চান?");
+    const ok = window.confirm("Delete this teacher?");
     if (!ok || isDeleting) return;
     setIsDeleting(true);
     try {
@@ -24,11 +24,11 @@ export function TeacherDeleteButton({ teacherId }: Props) {
       });
       const contentType = res.headers.get("content-type") ?? "";
       const json = contentType.includes("application/json") ? await res.json() : null;
-      if (!res.ok || !json?.success) throw new Error(json?.message || "মুছে ফেলা সম্ভব হয়নি");
-      toast.success("সফলভাবে মুছে ফেলা হয়েছে");
+      if (!res.ok || !json?.success) throw new Error(json?.message || "The teacher could not be deleted.");
+      toast.success("Teacher deleted.");
       router.refresh();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "সাময়িক সমস্যা হয়েছে";
+      const message = error instanceof Error ? error.message : "A temporary error occurred.";
       toast.error(message);
     } finally {
       setIsDeleting(false);
@@ -41,7 +41,7 @@ export function TeacherDeleteButton({ teacherId }: Props) {
       onClick={handleDelete}
       disabled={isDeleting}
       className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:opacity-60"
-      title="মুছে ফেলুন"
+      title="Delete teacher"
     >
       {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
     </button>

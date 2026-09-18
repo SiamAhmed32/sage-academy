@@ -5,32 +5,32 @@ import { CreditCard, UserPlus, BookOpen, Bell, ArrowRight } from "lucide-react";
 
 const actions = [
   {
-    title: "পেমেন্ট সংগ্রহ",
-    desc: "শিক্ষার্থীর পেমেন্ট রেকর্ড করুন",
+    title: "Collect payment",
+    desc: "Record a student payment",
     href: "/admin/payments",
     color: "from-emerald-500 to-teal-600",
     bgLight: "bg-emerald-50 text-emerald-600",
     icon: CreditCard,
   },
   {
-    title: "নতুন শিক্ষার্থী",
-    desc: "একাডেমিতে শিক্ষার্থী ভর্তি করুন",
+    title: "New student",
+    desc: "Enroll a student at the academy",
     href: "/admin/students",
     color: "from-blue-500 to-indigo-600",
     bgLight: "bg-blue-50 text-blue-600",
     icon: UserPlus,
   },
   {
-    title: "নতুন ব্যাচ",
-    desc: "চলমান একাডেমিক ব্যাচ যুক্ত করুন",
+    title: "New batch",
+    desc: "Add an active academic batch",
     href: "/admin/academic-batches",
     color: "from-amber-500 to-orange-600",
     bgLight: "bg-amber-50 text-amber-600",
     icon: BookOpen,
   },
   {
-    title: "নোটিশ পোস্ট",
-    desc: "শিক্ষার্থী ও অভিভাবকদের জানান",
+    title: "Post notice",
+    desc: "Notify students and guardians",
     href: "/admin/notices",
     color: "from-rose-500 to-pink-600",
     bgLight: "bg-rose-50 text-rose-600",
@@ -42,7 +42,7 @@ export function QuickActions() {
   return (
     <section className="space-y-3">
       <h3 className="text-xs font-bold uppercase tracking-wider text-sage-gray-500">
-        কুইক অ্যাকশনস
+        Quick actions
       </h3>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {actions.map((action, idx) => {

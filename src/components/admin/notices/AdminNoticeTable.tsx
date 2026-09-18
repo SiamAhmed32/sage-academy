@@ -3,16 +3,17 @@
 import { useState } from "react";
 
 import { toggleNoticePublishAction } from "@/app/admin/notices/actions";
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel, getAdminStatusLabel } from "@/constants/admin-display";
+import { formatAdminDate } from "@/lib/admin-format";
 import { NoticeDeleteButton } from "./NoticeDeleteButton";
 import { NoticeEditDialog, type AdminNoticeItem } from "./NoticeEditDialog";
 import { NoticeViewModal } from "./NoticeViewModal";
 import type { NoticeBatchOption } from "./NoticeCreateForm";
 
 const typeLabel: Record<string, string> = {
-  general: "সাধারণ",
-  exam: "পরীক্ষা",
-  payment: "পেমেন্ট",
+  general: "General",
+  exam: "Exam",
+  payment: "Payment",
 };
 
 function batchLabel(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
@@ -25,10 +26,7 @@ function batchLabel(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
 }
 
 function formatDate(value?: string) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("bn-BD");
+  return formatAdminDate(value, "—");
 }
 
 export function AdminNoticeTable({
@@ -43,8 +41,8 @@ export function AdminNoticeTable({
   if (!notices.length) {
     return (
       <div className="rounded-xl border border-sage-border bg-sage-white p-8 text-center">
-        <h3 className="text-xl font-bold text-sage-secondary">এই ফিল্টারে কোনো নোটিশ নেই</h3>
-        <p className="mt-2 text-sm text-sage-gray-500">ফিল্টার পরিবর্তন করুন অথবা নতুন নোটিশ পাঠান।</p>
+        <h3 className="text-xl font-bold text-sage-secondary">No notices match these filters</h3>
+        <p className="mt-2 text-sm text-sage-gray-500">Change the filters or send a new notice.</p>
       </div>
     );
   }
@@ -55,13 +53,13 @@ export function AdminNoticeTable({
         <table className="w-full min-w-[1000px] text-left text-sm">
           <thead className="bg-sage-red-50 text-sage-secondary">
             <tr>
-              <th className="p-4">শিরোনাম</th>
-              <th className="p-4">ধরন</th>
-              <th className="p-4">শ্রেণি</th>
-              <th className="p-4">ব্যাচ</th>
-              <th className="p-4">তারিখ</th>
-              <th className="p-4">স্ট্যাটাস</th>
-              <th className="p-4">Action</th>
+              <th className="p-4">Title</th>
+              <th className="p-4">Type</th>
+              <th className="p-4">Class</th>
+              <th className="p-4">Batch</th>
+              <th className="p-4">Date</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-sage-border">
@@ -76,7 +74,7 @@ export function AdminNoticeTable({
                     {notice.title}
                   </button>
                   {notice.topic ? (
-                    <p className="mt-1 line-clamp-1 text-xs text-sage-gray-500">টপিক: {notice.topic}</p>
+                    <p className="mt-1 line-clamp-1 text-xs text-sage-gray-500">Topic: {notice.topic}</p>
                   ) : null}
                 </td>
                 <td className="p-4">
@@ -85,7 +83,7 @@ export function AdminNoticeTable({
                   </span>
                 </td>
                 <td className="p-4 font-semibold text-sage-secondary">
-                  {notice.classLevel ? getClassLabel(notice.classLevel) : "—"}
+                  {notice.classLevel ? getAdminClassLabel(notice.classLevel) : "—"}
                 </td>
                 <td className="p-4">
                   <p className="font-semibold text-sage-primary">{batchLabel(notice, batches)}</p>
@@ -99,7 +97,7 @@ export function AdminNoticeTable({
                         : "bg-amber-50 text-amber-700"
                     }`}
                   >
-                    {notice.isPublished ? "প্রকাশিত" : "ড্রাফট"}
+                    {getAdminStatusLabel(notice.isPublished ? "published" : "draft")}
                   </span>
                 </td>
                 <td className="p-4">
@@ -109,7 +107,7 @@ export function AdminNoticeTable({
                       onClick={() => setViewNotice(notice)}
                       className="rounded-lg bg-sage-red-50 px-3 py-1 text-sm font-bold text-sage-primary hover:bg-sage-primary hover:text-white"
                     >
-                      দেখুন
+                      View
                     </button>
                     <form action={toggleNoticePublishAction} className="inline-flex">
                       <input type="hidden" name="id" value={notice._id} />
@@ -118,7 +116,7 @@ export function AdminNoticeTable({
                         type="submit"
                         className="rounded-lg bg-sage-red-50 px-3 py-1 text-sm font-bold text-sage-primary hover:bg-sage-primary hover:text-white"
                       >
-                        {notice.isPublished ? "আনপাব." : "প্রকাশ"}
+                        {notice.isPublished ? "Unpublish" : "Publish"}
                       </button>
                     </form>
                     <NoticeEditDialog notice={notice} batches={batches} compact />

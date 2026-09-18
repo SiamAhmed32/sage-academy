@@ -23,6 +23,7 @@ import {
   DASHBOARD_ENGAGEMENT_DAYS,
   getAdminDashboardData,
 } from "@/lib/admin-dashboard";
+import { formatAdminCurrency } from "@/lib/admin-format";
 import type { DashboardMetric } from "@/components/admin/dashboard/types";
 
 export default async function AdminDashboardPage() {
@@ -38,31 +39,31 @@ export default async function AdminDashboardPage() {
 
   const metrics: DashboardMetric[] = [
     {
-      title: "আজকের নতুন লিড",
+      title: "New leads today",
       value: counts.newTodayLeads,
-      note: "ভর্তি, যোগাযোগ, ফ্রি ক্লাস, টেস্ট ও কুইজ।",
+      note: "Admissions, contacts, free classes, tests, and quizzes.",
       href: "/admin/free-class-leads?dateRange=today&status=new",
       icon: Inbox,
       urgent: counts.newTodayLeads > 0,
     },
     {
-      title: "আজকের ক্লাস",
+      title: "Classes today",
       value: classes.length,
-      note: "আজ কোন কোন ব্যাচ সচল আছে।",
+      note: "See which batches have classes today.",
       href: "/admin/routine",
       icon: CalendarDays,
     },
     {
-      title: "চলতি মাসের আদায়",
-      value: `৳${financials.collected.toLocaleString("en-IN")}`,
-      note: `সম্ভাব্য মোট: ৳${financials.expected.toLocaleString("en-IN")}`,
+      title: "Collected this month",
+      value: formatAdminCurrency(financials.collected),
+      note: `Expected total: ${formatAdminCurrency(financials.expected)}`,
       href: "/admin/payments",
       icon: CreditCard,
     },
     {
-      title: "সক্রিয় শিক্ষার্থী",
+      title: "Active students",
       value: counts.totalStudents,
-      note: "একাডেমিতে মোট সচল শিক্ষার্থী।",
+      note: "Total active students at the academy.",
       href: "/admin/students",
       icon: Users,
     },
@@ -71,8 +72,8 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="একাডেমি ড্যাশবোর্ড"
-        description="আজ কী দেখবেন, কাকে আগে যোগাযোগ করবেন, আর পুরো একাডেমির অবস্থাটা কোথায় দাঁড়িয়ে আছে।"
+        title="Academy Dashboard"
+        description="See today's priorities, who to contact first, and the academy's overall status."
       />
 
       <DashboardGuide />
@@ -102,35 +103,35 @@ export default async function AdminDashboardPage() {
           />
           <section className="rounded-xl border border-sage-border bg-white p-4 shadow-sm sm:p-5">
             <h3 className="text-lg font-bold text-sage-secondary">
-              সিস্টেমের সারাংশ
+              System summary
             </h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                 <BookOpen className="h-5 w-5 text-sage-primary shrink-0" />
-                <span>चलমান ব্যাচ: <strong>{counts.activeBatches}</strong></span>
+                <span>Active batches: <strong>{counts.activeBatches}</strong></span>
               </p>
               <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                 <GraduationCap className="h-5 w-5 text-sage-primary shrink-0" />
-                <span>শিক্ষক: <strong>{counts.totalTeachers}</strong></span>
+                <span>Teachers: <strong>{counts.totalTeachers}</strong></span>
               </p>
               <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                 <Inbox className="h-5 w-5 text-sage-primary shrink-0" />
-                <span>মোট ভর্তি আবেদন: <strong>{counts.totalAdmissions}</strong></span>
+                <span>Total admission applications: <strong>{counts.totalAdmissions}</strong></span>
               </p>
               <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                 <Gift className="h-5 w-5 text-sage-primary shrink-0" />
-                <span>ফ্রি ক্লাস লিড: <strong>{counts.totalFreeClassLeads}</strong></span>
+                <span>Free class leads: <strong>{counts.totalFreeClassLeads}</strong></span>
               </p>
               {counts.totalAssessments !== undefined && (
                 <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                   <ClipboardCheck className="h-5 w-5 text-sage-primary shrink-0" />
-                  <span>টেস্ট/Exam লিড: <strong>{counts.totalAssessments}</strong></span>
+                  <span>Test/exam leads: <strong>{counts.totalAssessments}</strong></span>
                 </p>
               )}
               {counts.totalQuizzes !== undefined && (
                 <p className="rounded-lg bg-sage-red-50/50 p-3 text-sm text-sage-gray-600 flex items-center gap-3">
                   <Users className="h-5 w-5 text-sage-primary shrink-0" />
-                  <span>কুইজ লিড (সর্বমোট): <strong>{counts.totalQuizzes}</strong></span>
+                  <span>Total quiz leads: <strong>{counts.totalQuizzes}</strong></span>
                 </p>
               )}
             </div>

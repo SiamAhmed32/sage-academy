@@ -185,6 +185,10 @@ const AdmissionRequestSchema = new Schema(
   { timestamps: true }
 );
 
+AdmissionRequestSchema.index({ isArchived: 1, createdAt: -1 });
+AdmissionRequestSchema.index({ isArchived: 1, status: 1, createdAt: -1 });
+AdmissionRequestSchema.index({ isArchived: 1, className: 1, createdAt: -1 });
+
 const AdmissionRequest = models.AdmissionRequest || model("AdmissionRequest", AdmissionRequestSchema);
 
 export default AdmissionRequest;

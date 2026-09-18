@@ -10,17 +10,18 @@ import QuizSubmission from "@/models/QuizSubmission";
 import AssessmentRegistration from "@/models/AssessmentRegistration";
 import { getEngagementAnalytics } from "@/lib/engagement-analytics-server";
 import type { DashboardClass, DashboardLead } from "@/components/admin/dashboard/types";
+import { formatAdminNumber } from "@/lib/admin-format";
 import { getRoutineDayValues, type RoutineDay } from "@/lib/admin-routine";
 import { monthNames } from "@/lib/month-utils";
 
 const DAYS = [
-  "রবিবার",
-  "সোমবার",
-  "মঙ্গলবার",
-  "বুধবার",
-  "বৃহস্পতিবার",
-  "শুক্রবার",
-  "শনিবার",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
 ] as RoutineDay[];
 
 type LeanAdmissionRow = {
@@ -220,7 +221,7 @@ export async function getAdminDashboardData() {
       className: item.className ?? "",
       source: "Admission" as const,
       status: item.status ?? "new",
-      time: new Date(item.createdAt).toLocaleTimeString("bn-BD", {
+      time: new Date(item.createdAt).toLocaleTimeString("en-BD", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -234,7 +235,7 @@ export async function getAdminDashboardData() {
       className: "",
       source: "Contact" as const,
       status: item.status ?? "new",
-      time: new Date(item.createdAt).toLocaleTimeString("bn-BD", {
+      time: new Date(item.createdAt).toLocaleTimeString("en-BD", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -248,7 +249,7 @@ export async function getAdminDashboardData() {
       className: [item.classLabel, item.subject].filter(Boolean).join(" · ") || "",
       source: "Free class" as const,
       status: item.status ?? "new",
-      time: new Date(item.createdAt).toLocaleTimeString("bn-BD", {
+      time: new Date(item.createdAt).toLocaleTimeString("en-BD", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -262,7 +263,7 @@ export async function getAdminDashboardData() {
       className: item.classLabel ?? "",
       source: "Assessment" as const,
       status: item.status ?? "new",
-      time: new Date(item.createdAt).toLocaleTimeString("bn-BD", {
+      time: new Date(item.createdAt).toLocaleTimeString("en-BD", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -273,10 +274,10 @@ export async function getAdminDashboardData() {
       id: item._id.toString(),
       name: item.name ?? "",
       phone: item.phone ?? "",
-      className: item.classLevel ? `${item.classLevel} শ্রেণি` : "",
+      className: item.classLevel ? `Class ${formatAdminNumber(item.classLevel)}` : "",
       source: "Quiz" as const,
       status: item.status ?? "new",
-      time: new Date(item.createdAt).toLocaleTimeString("bn-BD", {
+      time: new Date(item.createdAt).toLocaleTimeString("en-BD", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -292,11 +293,11 @@ export async function getAdminDashboardData() {
       )
       .map((subject) => ({
         id: `${batch._id.toString()}-${subject.subjectName ?? "subject"}`,
-        title: batch.title ?? "ব্যাচ",
-        subject: subject.subjectName ?? "বিষয়",
+        title: batch.title ?? "Batch",
+        subject: subject.subjectName ?? "Subject",
         time: subject.startTime
           ? `${subject.startTime} - ${subject.endTime ?? ""}`.trim()
-          : "সময় নির্ধারণ হয়নি",
+          : "Time not scheduled",
       }))
   ).sort((a, b) => a.time.localeCompare(b.time));
 

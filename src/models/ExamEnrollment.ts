@@ -42,6 +42,7 @@ const ExamEnrollmentSchema = new Schema(
 
 ExamEnrollmentSchema.index({ programId: 1, phone: 1, createdAt: -1 });
 ExamEnrollmentSchema.index({ paymentStatus: 1, status: 1, createdAt: -1 });
+ExamEnrollmentSchema.index({ programId: 1, status: 1, paymentStatus: 1, createdAt: -1 });
 
 const ExamEnrollment = models.ExamEnrollment || model("ExamEnrollment", ExamEnrollmentSchema);
 

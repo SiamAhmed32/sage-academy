@@ -137,6 +137,11 @@ const AcademicBatchSchema = new Schema(
   }
 );
 
+AcademicBatchSchema.index({ isArchived: 1, createdAt: -1 });
+AcademicBatchSchema.index({ isArchived: 1, order: 1, createdAt: -1 });
+AcademicBatchSchema.index({ isActive: 1, isArchived: 1, classLevel: 1, title: 1 });
+AcademicBatchSchema.index({ isActive: 1, isArchived: 1, "subjects.days": 1 });
+
 const AcademicBatch = models.AcademicBatch || model("AcademicBatch", AcademicBatchSchema, "batches");
 
 export default AcademicBatch;

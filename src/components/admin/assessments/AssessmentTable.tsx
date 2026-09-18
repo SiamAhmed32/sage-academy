@@ -18,12 +18,12 @@ export function AssessmentTable({ items, isExam, onEdit, onArchive, onRemove }: 
         <table className="w-full min-w-[1060px] text-left text-sm">
           <thead className="bg-sage-red-50/70 text-sage-primary">
             <tr>
-              <th className="p-4">শিরোনাম</th>
-              <th className="p-4">শ্রেণি / ভার্সন</th>
-              <th className="p-4">বিষয়</th>
-              <th className="p-4">স্কুল ফোকাস</th>
-              <th className="p-4">তারিখ</th>
-              <th className="p-4">স্ট্যাটাস</th>
+              <th className="p-4">Title</th>
+              <th className="p-4">Class / Version</th>
+              <th className="p-4">Subjects</th>
+              <th className="p-4">School focus</th>
+              <th className="p-4">Dates</th>
+              <th className="p-4">Status</th>
               <th className="p-4">Action</th>
             </tr>
           </thead>
@@ -41,7 +41,7 @@ export function AssessmentTable({ items, isExam, onEdit, onArchive, onRemove }: 
             {items.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-12 text-center font-bold text-sage-gray-500">
-                  কোনো আইটেম পাওয়া যায়নি
+                  No items found
                 </td>
               </tr>
             )}

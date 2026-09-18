@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
-import { ZodError } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { successResponse } from "@/lib/api-response";
+import { boundedAdminSearch, escapeAdminRegex } from "@/lib/admin-query";
 import { connectDB } from "@/lib/mongodb";
+import { requireRole, staffRoles } from "@/lib/rbac";
 import { uploadAdmissionFormFile } from "@/lib/upload-file";
 import AdmissionRequest from "@/models/AdmissionRequest";
 import { createAdmissionRequestSchema } from "@/schemas/admission-request";
@@ -14,12 +15,20 @@ function readFormValue(formData: FormData, key: string) {
 }
 
 export const GET = withApiHandler(async (req: NextRequest) => {
+  await requireRole(staffRoles);
   await connectDB();
 
   const { searchParams } = new URL(req.url);
   const formOnly = searchParams.get("formOnly") === "true";
 
   if (formOnly) {
+    const q = boundedAdminSearch(searchParams.get("q") || "");
+    const requestedLimit = Number(searchParams.get("limit") || 20);
+    const limit = Number.isSafeInteger(requestedLimit)
+      ? Math.min(20, Math.max(1, requestedLimit))
+      : 20;
+    const safeSearch = q ? new RegExp(escapeAdminRegex(q), "i") : null;
+
     // Return only text-form submissions (no uploaded PDF) with fields needed for student pre-fill
     const leads = await AdmissionRequest.find({
       $or: [
@@ -29,9 +38,23 @@ export const GET = withApiHandler(async (req: NextRequest) => {
         { "uploadedForm.url": { $exists: false } },
       ],
       studentName: { $ne: "" },
+      ...(safeSearch
+        ? {
+            $and: [
+              {
+                $or: [
+                  { studentName: safeSearch },
+                  { nameBangla: safeSearch },
+                  { phone: safeSearch },
+                  { studentWhatsapp: safeSearch },
+                ],
+              },
+            ],
+          }
+        : {}),
     })
       .sort({ createdAt: -1 })
-      .limit(200)
+      .limit(limit)
       .select(
         "_id studentName nameBangla phone studentWhatsapp studentGender academicVersion " +
         "fatherName motherName guardianName section classRoll schoolName " +
@@ -47,7 +70,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
 export const POST = withApiHandler(async (req: NextRequest) => {
   await connectDB();
 
-  let body: any;
+  let body: unknown;
   const contentType = req.headers.get("content-type") ?? "";
 
   if (contentType.includes("multipart/form-data")) {

@@ -16,10 +16,10 @@ export default function AdminError({
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
       <div className="max-w-md rounded-2xl border border-sage-border bg-white p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-sage-secondary">পেজ লোড হয়নি</h2>
+        <h2 className="text-2xl font-bold text-sage-secondary">Page could not be loaded</h2>
         <p className="mt-3 text-sm leading-6 text-sage-gray-600">
-          Admin panel এর এই পেজটি লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন অথবা
-          ড্যাশবোর্ডে ফিরে যান।
+          There was a problem loading this admin page. Try again or return to
+          the dashboard.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <button
@@ -27,13 +27,13 @@ export default function AdminError({
             onClick={reset}
             className="rounded-lg bg-sage-primary px-5 py-2.5 text-sm font-bold text-white"
           >
-            আবার চেষ্টা করুন
+            Try again
           </button>
           <a
             href="/admin"
             className="rounded-lg border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary"
           >
-            ড্যাশবোর্ড
+            Dashboard
           </a>
         </div>
       </div>

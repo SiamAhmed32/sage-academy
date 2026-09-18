@@ -30,9 +30,9 @@ export function AssessmentFormTabFeatures({
     <div className="grid gap-6 md:grid-cols-2">
       <div>
         <label className="mb-3 grid gap-1 text-sm font-bold text-sage-secondary">
-          প্রোগ্রামের বৈশিষ্ট্যসমূহ (Features)
+          Program features
           <span className="text-[11px] font-medium text-sage-gray-500">
-            শিক্ষার্থীদের আকৃষ্ট করার জন্য মূল ফিচারগুলো যুক্ত করুন
+            Add the key benefits students should see
           </span>
         </label>
         
@@ -45,7 +45,7 @@ export function AssessmentFormTabFeatures({
               <input
                 value={feature}
                 onChange={(e) => updateFeature(idx, e.target.value)}
-                placeholder="যেমন: মানসম্মত প্রশ্নপত্র"
+                placeholder="For example: High-quality question papers"
                 className={inputClass}
               />
               <button
@@ -65,15 +65,15 @@ export function AssessmentFormTabFeatures({
           className="mt-3 flex items-center gap-1.5 text-xs font-black text-sage-primary hover:text-sage-secondary transition"
         >
           <Plus className="h-3.5 w-3.5" />
-          নতুন ফিচার যুক্ত করুন
+          Add feature
         </button>
       </div>
 
       <label className="grid gap-2 text-sm font-bold text-sage-secondary self-start">
         <span className="grid gap-1">
-          বিশেষ নির্দেশিকা / রুটিন নোট
+          Special instructions / routine notes
           <span className="text-[11px] font-medium text-sage-gray-500">
-            পরীক্ষার সময়সূচি বা নিয়মের কোন বিশেষ নির্দেশনা থাকলে এখানে লিখুন
+            Add any special exam schedule or policy instructions
           </span>
         </span>
         <textarea
@@ -81,7 +81,7 @@ export function AssessmentFormTabFeatures({
           value={scheduleNote}
           onChange={(e) => onScheduleNoteChange(e.target.value)}
           className={textareaClass}
-          placeholder="যেমন: পরীক্ষায় অংশগ্রহণের জন্য ৫ মিনিট পূর্বে উপস্থিত থাকতে হবে।"
+          placeholder="For example: Arrive five minutes before the exam."
         />
       </label>
     </div>

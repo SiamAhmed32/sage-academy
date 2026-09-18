@@ -10,7 +10,7 @@ type AdminShellProps = {
 
 export function AdminShell({ user, children }: AdminShellProps) {
   return (
-    <div className="fixed inset-0 z-[100] overflow-hidden bg-sage-admin-bg text-sage-gray-700">
+    <div className="fixed inset-0 z-[100] overflow-hidden bg-gray-50 text-gray-700">
       <div className="grid h-full grid-cols-1 lg:grid-cols-[280px_1fr]">
         <AdminSidebar user={user} />
         <div className="flex min-w-0 flex-col overflow-hidden">

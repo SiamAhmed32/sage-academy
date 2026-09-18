@@ -12,9 +12,9 @@ export function BatchCreateButton() {
     <section className="mb-6">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sage-border bg-white p-4">
         <div>
-          <h3 className="text-lg font-bold text-sage-secondary">ব্যাচ তৈরি</h3>
+          <h3 className="text-lg font-bold text-sage-secondary">Create a Batch</h3>
           <p className="mt-1 text-sm text-sage-gray-500">
-            নতুন ব্যাচ দরকার হলে বাটনে ক্লিক করুন, তারপর রুটিন টেবিল থেকে সেট করুন।
+            Create a new batch, then configure its schedule from the table.
           </p>
         </div>
         <button
@@ -22,7 +22,7 @@ export function BatchCreateButton() {
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-2 h-10 rounded-lg bg-sage-primary px-4 text-sm font-bold text-white transition hover:bg-sage-primary/90"
         >
-          <Plus size={16} /> নতুন ব্যাচ
+          <Plus size={16} /> New batch
         </button>
       </div>
 

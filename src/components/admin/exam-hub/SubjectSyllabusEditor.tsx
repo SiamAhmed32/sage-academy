@@ -87,7 +87,7 @@ export function SubjectSyllabusEditor({ value, onChange, maxItems = 20 }: Props)
                     "min-h-[110px] rounded-xl border-sage-border bg-white px-3 py-2.5 text-sm",
                     "font-mono leading-relaxed"
                   )}
-                  placeholder={"আনন্দ পাঠ\nব্যাকরণ\nরচনা\n...\n(one topic per line)"}
+                  placeholder={"Reading passage\nGrammar\nComposition\n...\n(one topic per line)"}
                 />
                 <p className="text-xs text-sage-gray-500">
                   One topic per line. Shown as a detailed list on the public exam page.

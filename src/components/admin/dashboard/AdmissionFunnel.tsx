@@ -15,29 +15,29 @@ type FunnelProps = {
 const steps = [
   {
     key: "new",
-    label: "নতুন",
-    meaning: "এখনই যোগাযোগ দরকার",
+    label: "New",
+    meaning: "Needs immediate follow-up",
     icon: MessageSquare,
     color: "text-blue-500 border-blue-100 bg-blue-50/50",
   },
   {
     key: "contacted",
-    label: "যোগাযোগ হয়েছে",
-    meaning: "পরবর্তী সিদ্ধান্ত বাকি",
+    label: "Contacted",
+    meaning: "Awaiting the next decision",
     icon: PhoneCall,
     color: "text-sage-primary border-sage-red-100 bg-sage-red-50/40",
   },
   {
     key: "qualified",
-    label: "যোগ্য",
-    meaning: "ভর্তির সম্ভাবনা বেশি",
+    label: "Qualified",
+    meaning: "High likelihood of admission",
     icon: CheckCircle,
     color: "text-orange-500 border-orange-100 bg-orange-50/50",
   },
   {
     key: "admitted",
-    label: "ভর্তি",
-    meaning: "সক্রিয় শিক্ষার্থী",
+    label: "Admitted",
+    meaning: "Active student",
     icon: GraduationCap,
     color: "text-green-600 border-green-100 bg-green-50/50",
   },
@@ -51,9 +51,9 @@ export function AdmissionFunnel({ counts }: FunnelProps) {
     <section className="rounded-2xl border border-sage-border bg-white p-5 shadow-sm">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-sage-border pb-4">
         <div>
-          <h3 className="text-lg font-black text-sage-secondary">ভর্তি অবস্থার ছবি</h3>
+          <h3 className="text-lg font-black text-sage-secondary">Admission funnel</h3>
           <p className="mt-1 text-xs text-sage-gray-500">
-            নতুন আবেদন থেকে ভর্তি হওয়া পর্যন্ত প্রতিটি ধাপের সংখ্যা।
+            Counts at each stage, from a new application to admission.
           </p>
         </div>
         
@@ -61,14 +61,14 @@ export function AdmissionFunnel({ counts }: FunnelProps) {
           {totalLeads > 0 && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600 ring-1 ring-green-100">
               <TrendingUp className="h-3.5 w-3.5" />
-              ভর্তি রূপান্তর হার: {conversionRate.toFixed(0)}%
+              Admission conversion rate: {conversionRate.toFixed(0)}%
             </span>
           )}
           <Link
             href="/admin/admissions"
             className="inline-flex shrink-0 items-center justify-center rounded-full bg-sage-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-sage-secondary"
           >
-            আবেদন দেখুন
+            View applications
           </Link>
         </div>
       </div>

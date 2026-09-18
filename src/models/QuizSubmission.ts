@@ -48,6 +48,12 @@ const QuizSubmissionSchema = new Schema(
   { timestamps: true }
 );
 
+QuizSubmissionSchema.index({ createdAt: -1 });
+QuizSubmissionSchema.index({ status: 1, createdAt: -1 });
+QuizSubmissionSchema.index({ classLevel: 1, createdAt: -1 });
+QuizSubmissionSchema.index({ whatsappRequested: 1, createdAt: -1 });
+QuizSubmissionSchema.index({ score: -1, createdAt: -1 });
+
 const QuizSubmission = models.QuizSubmission || model("QuizSubmission", QuizSubmissionSchema);
 
 export default QuizSubmission;

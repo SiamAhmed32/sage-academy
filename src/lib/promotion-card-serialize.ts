@@ -36,6 +36,16 @@ export type SerializedPromotionCard = {
   isArchived: boolean;
 };
 
+const adminBadgeLabels: Record<string, string> = {
+  "ভর্তি চলছে": "Enrollment open",
+  "শীঘ্রই শুরু": "Starting soon",
+  "ভর্তি বন্ধ": "Enrollment closed",
+};
+
+export function formatPromotionCardBadgeForAdmin(badge: string) {
+  return adminBadgeLabels[badge] ?? badge;
+}
+
 function serializeLinkedBatch(
   linkedBatch: PromotionCardDoc["linkedBatch"]
 ): SerializedPromotionCard["linkedBatch"] | undefined {

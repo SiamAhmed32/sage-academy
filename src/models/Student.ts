@@ -88,6 +88,15 @@ const StudentSchema = new Schema(
       ref: "AcademicBatch",
       default: null,
     },
+    // Link into the new normalized academic structure (Class/Subject/BatchGroup/
+    // SubjectBatch/Enrollment). Optional and additive — legacy students admitted
+    // through the old flow simply leave this null and keep using `classLevel`/
+    // `version` above; `version` doubles as this student's medium either way.
+    classId: {
+      type: Schema.Types.ObjectId,
+      ref: "Class",
+      default: null,
+    },
     selectedSubjects: {
       type: [
         {
@@ -143,6 +152,10 @@ const StudentSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
     note: {
       type: String,
       default: "",
@@ -166,6 +179,11 @@ StudentSchema.index({ isActive: 1, nameEnglish: 1 });
 StudentSchema.index({ isActive: 1, phone: 1 });
 StudentSchema.index({ isActive: 1, whatsapp: 1 });
 StudentSchema.index({ isActive: 1, classLevel: 1, nameEnglish: 1 });
+StudentSchema.index({ isActive: 1, createdAt: -1 });
+StudentSchema.index({ isActive: 1, updatedAt: -1 });
+StudentSchema.index({ isActive: 1, admissionDate: -1, createdAt: -1 });
+StudentSchema.index({ isActive: 1, classLevel: 1, createdAt: -1 });
+StudentSchema.index({ isActive: 1, batch: 1, createdAt: -1 });
 
 const Student = models.Student || model("Student", StudentSchema);
 

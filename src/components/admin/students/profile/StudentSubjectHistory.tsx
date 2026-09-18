@@ -1,6 +1,7 @@
 import { History } from "lucide-react";
 
 import type { StudentProfile } from "./types";
+import { formatAdminCurrency, formatAdminNumber } from "@/lib/admin-format";
 
 const actionLabels = {
   added: "Added",
@@ -29,14 +30,14 @@ export function StudentSubjectHistory({ student }: { student: StudentProfile }) 
               <span className="rounded-full bg-sage-red-50 px-3 py-1 text-xs font-bold text-sage-primary">
                 {actionLabels[item.action]}
               </span>
-              <p className="mt-2 text-xs text-sage-gray-500">{item.effectiveMonth} {item.effectiveYear}</p>
+              <p className="mt-2 text-xs text-sage-gray-500">{item.effectiveMonth} {formatAdminNumber(item.effectiveYear)}</p>
             </div>
             <div>
               <p className="font-bold text-sage-secondary">{item.subjectName}</p>
               {item.note && <p className="mt-1 text-sm text-sage-gray-500">{item.note}</p>}
             </div>
             <div className="text-right text-sm font-bold text-sage-secondary">
-              ৳{item.monthlyFee || 0}
+              {formatAdminCurrency(item.monthlyFee || 0)}
             </div>
           </div>
         )) : (

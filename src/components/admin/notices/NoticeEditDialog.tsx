@@ -4,7 +4,7 @@ import { Pencil, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { updateNoticeAction } from "@/app/admin/notices/actions";
-import { classLevelOptions } from "@/constants/class-levels";
+import { adminClassLevelOptions } from "@/constants/admin-display";
 import type { NoticeBatchOption } from "./NoticeCreateForm";
 
 export type AdminNoticeItem = {
@@ -59,12 +59,12 @@ export function NoticeEditDialog({
             ? "rounded-lg bg-sage-red-50 px-3 py-1 text-sm font-bold text-sage-primary hover:bg-sage-primary hover:text-white"
             : "inline-flex items-center gap-2 rounded-xl border border-sage-border px-4 py-2 text-sm font-bold text-sage-primary hover:bg-sage-red-50"
         }
-        aria-label="সম্পাদনা"
+        aria-label="Edit notice"
       >
-        {compact ? "এডিট" : (
+        {compact ? "Edit" : (
           <>
             <Pencil className="h-4 w-4" />
-            সম্পাদনা
+            Edit
           </>
         )}
       </button>
@@ -76,8 +76,8 @@ export function NoticeEditDialog({
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-sage-border bg-white p-5 shadow-2xl sm:p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-black text-sage-secondary">নোটিশ সম্পাদনা</h3>
-            <p className="mt-1 text-sm text-sage-gray-500">ব্যাচ পরিবর্তন করলে শুধু নতুন ব্যাচের শিক্ষার্থীরা দেখবে।</p>
+            <h3 className="text-xl font-black text-sage-secondary">Edit Notice</h3>
+            <p className="mt-1 text-sm text-sage-gray-500">If you change the batch, only students in the new batch will see this notice.</p>
           </div>
           <button
             type="button"
@@ -101,7 +101,7 @@ export function NoticeEditDialog({
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="md:col-span-2">
-              <span className="text-sm font-bold text-sage-secondary">শিরোনাম *</span>
+              <span className="text-sm font-bold text-sage-secondary">Title *</span>
               <input
                 name="title"
                 required
@@ -110,19 +110,19 @@ export function NoticeEditDialog({
               />
             </label>
             <label>
-              <span className="text-sm font-bold text-sage-secondary">ধরন</span>
+              <span className="text-sm font-bold text-sage-secondary">Type</span>
               <select
                 name="type"
                 defaultValue={notice.type}
                 className="mt-2 h-11 w-full rounded-xl border border-sage-border px-4 text-sm outline-none focus:border-sage-primary"
               >
-                <option value="general">সাধারণ</option>
-                <option value="exam">পরীক্ষা / কুইজ</option>
-                <option value="payment">পেমেন্ট</option>
+                <option value="general">General</option>
+                <option value="exam">Exam / Quiz</option>
+                <option value="payment">Payment</option>
               </select>
             </label>
             <label>
-              <span className="text-sm font-bold text-sage-secondary">শ্রেণি *</span>
+              <span className="text-sm font-bold text-sage-secondary">Class *</span>
               <select
                 name="classLevel"
                 required
@@ -130,8 +130,8 @@ export function NoticeEditDialog({
                 onChange={(event) => setClassLevel(event.target.value)}
                 className="mt-2 h-11 w-full rounded-xl border border-sage-border px-4 text-sm outline-none focus:border-sage-primary"
               >
-                <option value="">শ্রেণি বেছে নিন</option>
-                {classLevelOptions.map((option) => (
+                <option value="">Select a class</option>
+                {adminClassLevelOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -139,14 +139,14 @@ export function NoticeEditDialog({
               </select>
             </label>
             <label className="md:col-span-2">
-              <span className="text-sm font-bold text-sage-secondary">ব্যাচ *</span>
+              <span className="text-sm font-bold text-sage-secondary">Batch *</span>
               <select
                 name="batch"
                 required
                 defaultValue={batchId(notice.batch)}
                 className="mt-2 h-11 w-full rounded-xl border border-sage-border px-4 text-sm outline-none focus:border-sage-primary"
               >
-                <option value="">ব্যাচ বেছে নিন</option>
+                <option value="">Select a batch</option>
                 {filteredBatches.map((batch) => (
                   <option key={batch._id} value={batch._id}>
                     {batch.batchCode || batch.title}
@@ -155,7 +155,7 @@ export function NoticeEditDialog({
               </select>
             </label>
             <label>
-              <span className="text-sm font-bold text-sage-secondary">পরীক্ষার তারিখ</span>
+              <span className="text-sm font-bold text-sage-secondary">Exam date</span>
               <input
                 name="examDate"
                 type="date"
@@ -171,11 +171,11 @@ export function NoticeEditDialog({
                   defaultChecked={notice.isPublished}
                   className="h-4 w-4 accent-sage-primary"
                 />
-                প্রকাশিত রাখুন
+                Keep published
               </label>
             </label>
             <label className="md:col-span-2">
-              <span className="text-sm font-bold text-sage-secondary">টপিক</span>
+              <span className="text-sm font-bold text-sage-secondary">Topic</span>
               <input
                 name="topic"
                 defaultValue={notice.topic ?? ""}
@@ -183,7 +183,7 @@ export function NoticeEditDialog({
               />
             </label>
             <label className="md:col-span-2">
-              <span className="text-sm font-bold text-sage-secondary">বিস্তারিত</span>
+              <span className="text-sm font-bold text-sage-secondary">Details</span>
               <textarea
                 name="details"
                 rows={4}
@@ -199,13 +199,13 @@ export function NoticeEditDialog({
               onClick={() => setOpen(false)}
               className="rounded-xl border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary"
             >
-              বাতিল
+              Cancel
             </button>
             <button
               type="submit"
               className="rounded-xl bg-sage-primary px-5 py-2.5 text-sm font-bold text-white"
             >
-              আপডেট করুন
+              Update notice
             </button>
           </div>
         </form>

@@ -69,6 +69,10 @@ const PromotionCardSchema = new Schema(
   }
 );
 
+PromotionCardSchema.index({ isArchived: 1, linkedBatch: 1, order: 1, createdAt: -1 });
+PromotionCardSchema.index({ isArchived: 1, websiteVisible: 1, order: 1, createdAt: -1 });
+PromotionCardSchema.index({ isArchived: 1, featured: 1, order: 1, createdAt: -1 });
+
 const PromotionCard = models.PromotionCard || model("PromotionCard", PromotionCardSchema);
 
 export default PromotionCard;

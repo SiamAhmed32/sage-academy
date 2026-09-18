@@ -16,12 +16,12 @@ export const GET = withApiHandler(async (_req: NextRequest, context: RouteContex
   await connectDB();
   const { id } = await context.params;
   const program = await ExamProgram.findById(id).select("_id title").lean();
-  if (!program) throw new NotFoundError("Program not found");
+  if (!program) throw new NotFoundError("Exam program not found.");
 
   const questions = await ExamQuestion.find({ programId: id }).sort({ order: 1, createdAt: 1 }).lean();
   return successResponse(
     questions.map((q) => ({ ...q, _id: String(q._id), programId: String(q.programId) })),
-    "Questions fetched"
+    "Exam questions loaded successfully."
   );
 });
 
@@ -30,20 +30,20 @@ export const POST = withApiHandler(async (req: NextRequest, context: RouteContex
   await connectDB();
   const { id } = await context.params;
   const program = await ExamProgram.findById(id).select("_id deliveryMode").lean();
-  if (!program) throw new NotFoundError("Program not found");
+  if (!program) throw new NotFoundError("Exam program not found.");
   if (program.deliveryMode !== "online") {
-    throw new BadRequestError("Questions can only be added to online exams");
+    throw new BadRequestError("Questions can only be added to online exam programs.");
   }
 
   const body = await parseCreateExamQuestionBody(req, id);
   if (body.correctIndex >= body.options.length) {
-    throw new BadRequestError("Correct option index is out of range");
+    throw new BadRequestError("The correct option index is outside the available options.");
   }
 
   const question = await ExamQuestion.create({ ...body, isActive: body.isActive !== false });
   return successResponse(
     { ...question.toObject(), _id: question._id.toString(), programId: id },
-    "Question created",
+    "Exam question created successfully.",
     201
   );
 });

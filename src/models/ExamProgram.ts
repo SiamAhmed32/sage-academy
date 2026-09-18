@@ -48,7 +48,9 @@ const ExamProgramSchema = new Schema(
 );
 
 ExamProgramSchema.index({ status: 1, deliveryMode: 1, offlineType: 1, startDate: 1, order: 1 });
-ExamProgramSchema.index({ slug: 1 });
+ExamProgramSchema.index({ deliveryMode: 1, status: 1, order: 1, createdAt: -1 });
+ExamProgramSchema.index({ deliveryMode: 1, accessType: 1, order: 1, createdAt: -1 });
+ExamProgramSchema.index({ deliveryMode: 1, offlineType: 1, order: 1, createdAt: -1 });
 
 const ExamProgram = models.ExamProgram || model("ExamProgram", ExamProgramSchema);
 

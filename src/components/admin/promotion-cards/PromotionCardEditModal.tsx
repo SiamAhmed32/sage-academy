@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AdminModal } from "@/components/admin/shared/AdminModal";
@@ -21,11 +21,9 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
-  // Reset preview URL when card changes
   useEffect(() => {
-    if (card) {
-      setPreviewUrl(card.image);
-    }
+    const resetTimer = window.setTimeout(() => setPreviewUrl(card?.image ?? ""), 0);
+    return () => window.clearTimeout(resetTimer);
   }, [card]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -41,13 +39,13 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
         body: formData,
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "কার্ড আপডেট করা যায়নি");
+      if (!response.ok) throw new Error(data.message || "Could not update the card");
       
-      toast.success("প্রমোশন কার্ড আপডেট হয়েছে");
+      toast.success("Promotion card updated");
       router.refresh();
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "কার্ড আপডেট করা যায়নি");
+      toast.error(error instanceof Error ? error.message : "Could not update the card");
     } finally {
       setIsSaving(false);
     }
@@ -59,8 +57,8 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
     <AdminModal
       open={open}
       onClose={onClose}
-      title="প্রমোশন কার্ড এডিট"
-      description="কার্ডের বিস্তারিত তথ্য এবং ইমেজ আপডেট করুন।"
+      title="Edit promotion card"
+      description="Update the card details and image."
     >
       <form onSubmit={handleSubmit}>
         <PromotionCardFields
@@ -72,10 +70,10 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
 
         <div className="mt-6 flex items-center gap-4 border-t border-sage-border pt-6">
           <label className="flex items-center gap-2 text-sm font-semibold text-sage-secondary">
-            <input name="websiteVisible" type="checkbox" defaultChecked={card.websiteVisible} /> ওয়েবসাইটে দেখান
+            <input name="websiteVisible" type="checkbox" defaultChecked={card.websiteVisible} /> Show on website
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold text-sage-secondary">
-            <input name="featured" type="checkbox" defaultChecked={card.featured} /> হোমপেজে ফিচার
+            <input name="featured" type="checkbox" defaultChecked={card.featured} /> Feature on homepage
           </label>
 
           <div className="ml-auto flex gap-3">
@@ -84,14 +82,14 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
               onClick={onClose}
               className="rounded-lg border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50"
             >
-              বাতিল
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="rounded-lg bg-sage-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sage-primary/90 disabled:opacity-60"
             >
-              {isSaving ? "আপডেট হচ্ছে..." : "আপডেট সেভ করুন"}
+              {isSaving ? "Updating..." : "Save update"}
             </button>
           </div>
         </div>

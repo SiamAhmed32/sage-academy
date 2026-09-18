@@ -16,7 +16,7 @@ export function PromotionCardCreateButton({ batches }: { batches: BatchOption[] 
         className="flex h-10 items-center gap-2 rounded-lg bg-sage-primary px-4 text-sm font-bold text-white transition hover:bg-sage-secondary"
       >
         <Plus size={18} />
-        <span>নতুন প্রমোশন কার্ড</span>
+        <span>New promotion card</span>
       </button>
 
       <PromotionCardCreateModal

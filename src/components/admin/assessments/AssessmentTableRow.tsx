@@ -2,7 +2,12 @@
 
 import { Archive, Edit3, Trash2 } from "lucide-react";
 
-import { toBanglaDigits } from "@/constants/class-levels";
+import {
+  adminVersionLabels,
+  getAdminClassLabel,
+  getAdminStatusLabel,
+} from "@/constants/admin-display";
+import { formatAdminDate } from "@/lib/admin-format";
 import type { AdminAssessmentItem } from "./AssessmentManager";
 
 type Props = {
@@ -14,9 +19,7 @@ type Props = {
 };
 
 function versionLabel(version: string) {
-  if (version === "bangla") return "বাংলা";
-  if (version === "english") return "English";
-  return "Bangla + English";
+  return adminVersionLabels[version] ?? version;
 }
 
 function statusTone(status: string) {
@@ -36,7 +39,7 @@ export function AssessmentTableRow({ item, isExam, onEdit, onArchive, onRemove }
         {isExam && item.examType ? <p className="mt-1 text-xs font-bold text-sage-primary">{item.examType}</p> : null}
       </td>
       <td className="p-4">
-        <p className="font-bold text-sage-secondary">ক্লাস {item.classLevels.map(toBanglaDigits).join(", ")}</p>
+        <p className="font-bold text-sage-secondary">{item.classLevels.map(getAdminClassLabel).join(", ")}</p>
         <p className="mt-1 text-xs text-sage-gray-500">{versionLabel(item.version)}</p>
       </td>
       <td className="max-w-[220px] p-4">
@@ -50,13 +53,13 @@ export function AssessmentTableRow({ item, isExam, onEdit, onArchive, onRemove }
         </div>
       </td>
       <td className="max-w-[240px] p-4 text-xs font-semibold leading-6 text-sage-gray-700">
-        {item.schoolFocus.length ? item.schoolFocus.join(", ") : "সব স্কুল"}
+        {item.schoolFocus.length ? item.schoolFocus.join(", ") : "All schools"}
       </td>
       <td className="p-4 text-xs font-bold text-sage-gray-600">
-        {new Date(item.startDate).toLocaleDateString("bn-BD")} - {new Date(item.endDate).toLocaleDateString("bn-BD")}
+        {formatAdminDate(item.startDate)} – {formatAdminDate(item.endDate)}
       </td>
       <td className="p-4">
-        <span className={`rounded-full px-3 py-1 text-xs font-black ring-1 ${statusTone(item.status)}`}>{item.status}</span>
+        <span className={`rounded-full px-3 py-1 text-xs font-black ring-1 ${statusTone(item.status)}`}>{getAdminStatusLabel(item.status)}</span>
         {item.featured ? <p className="mt-2 text-xs font-bold text-sage-primary">Featured</p> : null}
       </td>
       <td className="p-4">

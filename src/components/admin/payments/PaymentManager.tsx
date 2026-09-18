@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PaymentFiltersPanel } from "./PaymentFiltersPanel";
 import { PaymentPagination } from "./PaymentPagination";
 import { PaymentTable } from "./PaymentTable";
+import { formatAdminCurrency, formatAdminNumber } from "@/lib/admin-format";
 
 export type PaymentFilters = { q: string; month: string; year: string; status: string; method: string };
 export type PaymentPaginationState = { page: number; limit: number; totalPayments: number };
@@ -103,19 +104,19 @@ export function PaymentManager({ initialPayments, filters, pagination, summary, 
   return (
     <div className="space-y-6 pb-24">
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Total expected" value={`৳${summary.expected}`} tone="neutral" />
-        <Metric label="Collected" value={`৳${summary.paid}`} tone="paid" />
-        <Metric label="Due" value={`৳${summary.due}`} tone="due" />
+        <Metric label="Total expected" value={formatAdminCurrency(summary.expected)} tone="neutral" />
+        <Metric label="Collected" value={formatAdminCurrency(summary.paid)} tone="paid" />
+        <Metric label="Due" value={formatAdminCurrency(summary.due)} tone="due" />
         <Metric
           label="Health"
-          value={`${summary.paidCount}/${summary.partialCount}/${summary.unpaidCount}`}
-          note={`paid / partial / unpaid · reversed ${summary.reversedCount}`}
+          value={`${formatAdminNumber(summary.paidCount)}/${formatAdminNumber(summary.partialCount)}/${formatAdminNumber(summary.unpaidCount)}`}
+          note={`paid / partial / unpaid · reversed ${formatAdminNumber(summary.reversedCount)}`}
           tone="neutral"
         />
       </div>
       {automation ? (
         <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-          Billing automation: {automation.created} bills created, {automation.refreshed} refreshed, {automation.skipped} skipped across all active students (admission through {automation.month} {automation.year}). Daily cron also runs when CRON_SECRET is set on Vercel.
+          Billing automation: {formatAdminNumber(automation.created)} bills created, {formatAdminNumber(automation.refreshed)} refreshed, {formatAdminNumber(automation.skipped)} skipped across all active students (admission through {automation.month} {formatAdminNumber(automation.year)}). Daily cron also runs when CRON_SECRET is set on Vercel.
         </div>
       ) : (
         <div className="rounded-xl border border-sage-border bg-white px-4 py-3 text-sm font-semibold text-sage-gray-600">

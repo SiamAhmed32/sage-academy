@@ -16,6 +16,7 @@ import { monthNumberFromName } from "@/lib/month-utils";
 import { connectDB } from "@/lib/mongodb";
 import Payment from "@/models/Payment";
 import Student from "@/models/Student";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -56,8 +57,11 @@ export default async function StudentPaymentsPage({ params, searchParams }: Page
 
   const years = Array.from(new Set([currentYear, ...eligiblePayments.map((payment: { year: number }) => payment.year).filter(Boolean)]))
     .sort((a, b) => b - a);
-  const selectedYear = Number(query.year) || currentYear;
-  const selectedMonth = query.month || "all";
+  const requestedYear = Number(query.year);
+  const selectedYear = years.includes(requestedYear) ? requestedYear : currentYear;
+  const selectedMonth = query.month === "all" || /^(?:[1-9]|1[0-2])$/.test(query.month ?? "")
+    ? query.month
+    : "all";
   const requestedStatus = query.status || "all";
   const selectedStatus = statusOptions.includes(requestedStatus) ? requestedStatus : "all";
 
@@ -83,7 +87,7 @@ export default async function StudentPaymentsPage({ params, searchParams }: Page
         </Link>
         <AdminPageHeader
           title={`${student.nameEnglish} - Payments`}
-          description={`Student ID: ${student.studentId} · Monthly payable ৳${monthlyTotal}`}
+          description={`Student ID: ${student.studentId} · Monthly payable ${formatAdminCurrency(monthlyTotal)}`}
         />
       </div>
 

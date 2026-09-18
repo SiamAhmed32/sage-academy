@@ -2,35 +2,35 @@ import AcademicBatch from "@/models/AcademicBatch";
 import { connectDB } from "@/lib/mongodb";
 
 export const ROUTINE_DAYS = [
-  "শনিবার",
-  "রবিবার",
-  "সোমবার",
-  "মঙ্গলবার",
-  "বুধবার",
-  "বৃহস্পতিবার",
-  "শুক্রবার",
+  "Saturday",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
 ] as const;
 
 export type RoutineDay = (typeof ROUTINE_DAYS)[number];
 
 const JS_DAY_LABELS: RoutineDay[] = [
-  "রবিবার",
-  "সোমবার",
-  "মঙ্গলবার",
-  "বুধবার",
-  "বৃহস্পতিবার",
-  "শুক্রবার",
-  "শনিবার",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
 ];
 
-const DAY_VALUE_MAP: Record<RoutineDay, string> = {
-  শনিবার: "Saturday",
-  রবিবার: "Sunday",
-  সোমবার: "Monday",
-  মঙ্গলবার: "Tuesday",
-  বুধবার: "Wednesday",
-  বৃহস্পতিবার: "Thursday",
-  শুক্রবার: "Friday",
+const LEGACY_DAY_VALUE_MAP: Record<RoutineDay, string> = {
+  Saturday: "শনিবার", // admin-language-allow: legacy stored value
+  Sunday: "রবিবার", // admin-language-allow: legacy stored value
+  Monday: "সোমবার", // admin-language-allow: legacy stored value
+  Tuesday: "মঙ্গলবার", // admin-language-allow: legacy stored value
+  Wednesday: "বুধবার", // admin-language-allow: legacy stored value
+  Thursday: "বৃহস্পতিবার", // admin-language-allow: legacy stored value
+  Friday: "শুক্রবার", // admin-language-allow: legacy stored value
 };
 
 export type RoutineClass = {
@@ -42,7 +42,8 @@ export type RoutineClass = {
   teacherName: string;
   startTime: string;
   endTime: string;
-  seats: string;
+  availableSeats: number;
+  totalSeats: number;
   status: string;
   routineNote: string;
 };
@@ -79,7 +80,7 @@ export function getRoutineDay(value?: string): RoutineDay {
 }
 
 export function getRoutineDayValues(day: RoutineDay) {
-  return [day, DAY_VALUE_MAP[day]];
+  return [day, LEGACY_DAY_VALUE_MAP[day]];
 }
 
 export async function getRoutineClasses(day: RoutineDay) {
@@ -103,14 +104,15 @@ export async function getRoutineClasses(day: RoutineDay) {
         )
         .map((subject) => ({
           id: `${batch._id.toString()}-${subject._id?.toString() ?? subject.subjectName}`,
-          batchTitle: batch.title ?? "ব্যাচ",
+          batchTitle: batch.title ?? "Batch",
           batchCode: batch.batchCode ?? "",
           classLevel: batch.classLevel ?? null,
-          subjectName: subject.subjectName ?? "বিষয়",
-          teacherName: subject.teacher?.name ?? "শিক্ষক নির্ধারণ হয়নি",
+          subjectName: subject.subjectName ?? "Subject",
+          teacherName: subject.teacher?.name ?? "Teacher not assigned",
           startTime: subject.startTime ?? "",
           endTime: subject.endTime ?? "",
-          seats: `${batch.availableSeats ?? 0}/${batch.totalSeats ?? 0}`,
+          availableSeats: batch.availableSeats ?? 0,
+          totalSeats: batch.totalSeats ?? 0,
           status: batch.status ?? "",
           routineNote: batch.routineNote ?? "",
         }))

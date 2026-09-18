@@ -50,6 +50,9 @@ const TestimonialSchema = new Schema(
   { timestamps: true }
 );
 
+TestimonialSchema.index({ role: 1, isFeatured: 1, order: 1, createdAt: -1 });
+TestimonialSchema.index({ isFeatured: 1, createdAt: -1 });
+
 const Testimonial = models.Testimonial || model("Testimonial", TestimonialSchema);
 
 export default Testimonial;

@@ -9,6 +9,7 @@ import { AdmissionFilePreview } from "@/components/admin/admissions/details/Admi
 import { AdmissionActionSidebar } from "@/components/admin/admissions/details/AdmissionActionSidebar";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { formatAdminDateTime } from "@/lib/admin-format";
 
 export const metadata: Metadata = {
   title: "Lead Details | SAGE Admin",
@@ -41,7 +42,7 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
         
         <AdminPageHeader 
           title={request.studentName || "Uploaded Form Submission"} 
-          description={`Lead ID: #${request._id.toString().slice(-8).toUpperCase()} | Submitted on ${new Date(request.createdAt).toLocaleString('bn-BD')}`}
+          description={`Lead ID: #${request._id.toString().slice(-8).toUpperCase()} | Submitted on ${formatAdminDateTime(request.createdAt)}`}
         />
       </div>
 

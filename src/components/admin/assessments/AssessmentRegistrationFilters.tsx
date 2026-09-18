@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, Calendar, Filter, RotateCcw, Search } from "lucide-react";
 
 import { assessmentLeadStatusOptions } from "@/schemas/assessment";
+import { getAdminStatusLabel } from "@/constants/admin-display";
 
 type Props = {
   q: string;
@@ -19,15 +20,6 @@ type Props = {
   pageSizeOptions: number[];
   assessmentTypes: string[];
   classLabels: string[];
-};
-
-const statusLabels: Record<string, string> = {
-  new: "নতুন",
-  contacted: "যোগাযোগ হয়েছে",
-  confirmed: "কনফার্মড",
-  attended: "উপস্থিত",
-  cancelled: "বাতিল",
-  invalid: "ভুল তথ্য",
 };
 
 const selectBase =
@@ -85,9 +77,9 @@ export function AssessmentRegistrationFilters({
     <div className="rounded-2xl border border-sage-border bg-white p-4 pb-6 shadow-sm sm:p-6 sm:pb-8">
       <div className="mb-6 flex flex-col gap-4 border-b border-sage-border/80 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-lg font-bold text-sage-secondary sm:text-xl">ফিল্টার ও সার্চ</h3>
+          <h3 className="text-lg font-bold text-sage-secondary sm:text-xl">Filters and Search</h3>
           <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-sage-gray-600 sm:text-base">
-            সার্চ ও ফিল্টার এখন ডাটাবেজ থেকে কাজ করে, তাই বড় লিড লিস্টেও একইভাবে দ্রুত ফলাফল পাওয়া যাবে।
+            Search and filters run against the database for consistent results on large lead lists.
           </p>
         </div>
         <button
@@ -96,21 +88,21 @@ export function AssessmentRegistrationFilters({
           className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-sage-border bg-sage-red-50/60 px-4 py-2.5 text-sm font-bold text-sage-secondary transition hover:border-sage-primary hover:bg-sage-primary hover:text-white sm:px-5 sm:text-base"
         >
           <RotateCcw className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" aria-hidden />
-          ফিল্টার সাফ করুন
+          Clear filters
         </button>
       </div>
 
       <div className="flex flex-col gap-5">
         <div className="min-w-0">
           <label className={labelCls} htmlFor="assessment-registration-search">
-            সার্চ
+            Search
           </label>
           <div className="relative min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sage-gray-400 sm:h-5 sm:w-5" aria-hidden />
             <input
               id="assessment-registration-search"
               className={inputBase}
-              placeholder="নাম, ফোন, স্কুল, পরীক্ষা, বিষয়, নোট বা স্ট্যাটাস..."
+              placeholder="Search by name, phone, school, assessment, subject, or note..."
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               autoComplete="off"
@@ -123,14 +115,14 @@ export function AssessmentRegistrationFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                সময়
+                Date range
               </span>
             </span>
             <select className={selectBase} value={dateRange} onChange={(event) => updateParams("dateRange", event.target.value)}>
-              <option value="all">সব সময়</option>
-              <option value="today">আজকের</option>
-              <option value="week">গত ৭ দিন</option>
-              <option value="month">গত ৩০ দিন</option>
+              <option value="all">All dates</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 days</option>
+              <option value="month">Last 30 days</option>
             </select>
           </div>
 
@@ -138,32 +130,32 @@ export function AssessmentRegistrationFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <Filter className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                স্ট্যাটাস
+                Status
               </span>
             </span>
             <select className={selectBase} value={status} onChange={(event) => updateParams("status", event.target.value)}>
-              <option value="all">সব স্ট্যাটাস</option>
+              <option value="all">All statuses</option>
               {assessmentLeadStatusOptions.map((option) => (
                 <option key={option} value={option}>
-                  {statusLabels[option] || option}
+                  {getAdminStatusLabel(option)}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>প্রোগ্রাম</span>
+            <span className={labelCls}>Program</span>
             <select className={selectBase} value={assessmentKind} onChange={(event) => updateParams("assessmentKind", event.target.value)}>
-              <option value="all">সব প্রোগ্রাম</option>
+              <option value="all">All programs</option>
               <option value="modelTest">Model Test</option>
               <option value="exam">Exam</option>
             </select>
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>পরীক্ষার ধরন</span>
+            <span className={labelCls}>Assessment type</span>
             <select className={selectBase} value={assessmentType} onChange={(event) => updateParams("assessmentType", event.target.value)}>
-              <option value="all">সব ধরন</option>
+              <option value="all">All types</option>
               {assessmentTypes.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -173,9 +165,9 @@ export function AssessmentRegistrationFilters({
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>শ্রেণি</span>
+            <span className={labelCls}>Class</span>
             <select className={selectBase} value={classLabel} onChange={(event) => updateParams("classLabel", event.target.value)}>
-              <option value="all">সব শ্রেণি</option>
+              <option value="all">All classes</option>
               {classLabels.map((label) => (
                 <option key={label} value={label}>
                   {label}
@@ -185,9 +177,9 @@ export function AssessmentRegistrationFilters({
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>শিক্ষার্থী</span>
+            <span className={labelCls}>Applicant</span>
             <select className={selectBase} value={applicantType} onChange={(event) => updateParams("applicantType", event.target.value)}>
-              <option value="all">সব শিক্ষার্থী</option>
+              <option value="all">All applicants</option>
               <option value="sage">SAGE student</option>
               <option value="outside">Outside student</option>
             </select>
@@ -197,21 +189,21 @@ export function AssessmentRegistrationFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                সাজানো
+                Sort
               </span>
             </span>
             <select className={selectBase} value={sort} onChange={(event) => updateParams("sort", event.target.value)}>
-              <option value="desc">নতুন আগে</option>
-              <option value="asc">পুরানো আগে</option>
+              <option value="desc">Newest first</option>
+              <option value="asc">Oldest first</option>
             </select>
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>প্রতি পৃষ্ঠায়</span>
+            <span className={labelCls}>Per page</span>
             <select className={selectBase} value={String(limit)} onChange={(event) => updateParams("limit", event.target.value)}>
               {pageSizeOptions.map((n) => (
                 <option key={n} value={String(n)}>
-                  {n.toLocaleString("bn-BD")} টি
+                  {n} per page
                 </option>
               ))}
             </select>

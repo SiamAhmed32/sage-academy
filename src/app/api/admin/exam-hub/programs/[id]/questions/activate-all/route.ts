@@ -17,7 +17,7 @@ export const POST = withApiHandler(async (_req: NextRequest, context: RouteConte
   const { id } = await context.params;
 
   const program = await ExamProgram.findById(id).select("_id").lean();
-  if (!program) throw new NotFoundError("Program not found");
+  if (!program) throw new NotFoundError("Exam program not found.");
 
   const result = await ExamQuestion.updateMany(
     { programId: toProgramObjectId(id), isActive: false },
@@ -27,7 +27,7 @@ export const POST = withApiHandler(async (_req: NextRequest, context: RouteConte
   return successResponse(
     { updated: result.modifiedCount },
     result.modifiedCount
-      ? `${result.modifiedCount} question(s) activated`
-      : "All questions are already active"
+      ? `${result.modifiedCount} exam question${result.modifiedCount === 1 ? "" : "s"} activated successfully.`
+      : "All exam questions are already active."
   );
 });

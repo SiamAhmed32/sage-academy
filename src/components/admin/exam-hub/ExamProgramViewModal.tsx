@@ -29,6 +29,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  formatAdminCurrency,
+  formatAdminDateTime,
+  formatAdminNumber,
+} from "@/lib/admin-format";
 
 type Props = {
   program: AdminExamProgram | null;
@@ -36,14 +41,6 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   onEdit?: (program: AdminExamProgram) => void;
 };
-
-function formatDateTime(value?: string) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
 
 function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -154,7 +151,8 @@ export function ExamProgramViewModal({ program, open, onOpenChange, onEdit }: Pr
               value={
                 <span className="inline-flex items-start gap-1.5">
                   <CalendarRange className="mt-0.5 size-3.5 shrink-0 text-sage-primary" />
-                  {formatDateTime(program.startDate)} → {formatDateTime(program.endDate)}
+                  {formatAdminDateTime(program.startDate, "—")} →{" "}
+                  {formatAdminDateTime(program.endDate, "—")}
                 </span>
               }
             />
@@ -165,7 +163,7 @@ export function ExamProgramViewModal({ program, open, onOpenChange, onEdit }: Pr
                   value={
                     <span className="inline-flex items-center gap-1.5">
                       <Clock3 className="size-3.5 text-sage-primary" />
-                      {program.durationMinutes ?? 20} min
+                      {formatAdminNumber(program.durationMinutes ?? 20)} min
                     </span>
                   }
                 />
@@ -174,11 +172,11 @@ export function ExamProgramViewModal({ program, open, onOpenChange, onEdit }: Pr
                   value={
                     <span className="inline-flex items-center gap-1.5">
                       <Repeat2 className="size-3.5 text-sage-primary" />
-                      {program.maxAttempts ?? 1}
+                      {formatAdminNumber(program.maxAttempts ?? 1)}
                     </span>
                   }
                 />
-                <DetailItem label="Total marks" value={program.totalMarks ?? 25} />
+                <DetailItem label="Total marks" value={formatAdminNumber(program.totalMarks ?? 25)} />
                 <DetailItem
                   label="Marking"
                   value={`+${program.correctMark ?? 1} / ${program.wrongMark ?? 0} / ${program.unansweredMark ?? 0}`}
@@ -206,7 +204,7 @@ export function ExamProgramViewModal({ program, open, onOpenChange, onEdit }: Pr
             )}
             {isOnline ? (
               program.isPaid ? (
-                <DetailItem label="Fee (BDT)" value={program.feeAmount ?? 0} />
+                <DetailItem label="Fee" value={formatAdminCurrency(program.feeAmount ?? 0)} />
               ) : (
                 <DetailItem label="Payment" value="Free" />
               )
@@ -218,17 +216,17 @@ export function ExamProgramViewModal({ program, open, onOpenChange, onEdit }: Pr
                   <span className="inline-flex items-center gap-3">
                     <span className="inline-flex items-center gap-1">
                       <FileQuestion className="size-3.5 text-sage-primary" />
-                      {program.questionCount ?? 0}
+                      {formatAdminNumber(program.questionCount ?? 0)}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Users className="size-3.5 text-sage-primary" />
-                      {program.enrollmentCount ?? 0}
+                      {formatAdminNumber(program.enrollmentCount ?? 0)}
                     </span>
                   </span>
                 }
               />
             ) : null}
-            <DetailItem label="Display order" value={program.order ?? 0} />
+            <DetailItem label="Display order" value={formatAdminNumber(program.order ?? 0)} />
           </div>
 
           <TextBlock label="Description" text={program.description} />

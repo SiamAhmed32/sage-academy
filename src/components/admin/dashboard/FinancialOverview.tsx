@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { formatAdminCurrency } from "@/lib/admin-format";
 import type { FinancialStats, PaymentTrend } from "./types";
 
 type FinancialOverviewProps = {
@@ -29,35 +30,35 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
             <CreditCard className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="text-lg font-bold text-sage-secondary">আর্থিক ওভারভিউ</h3>
+            <h3 className="text-lg font-bold text-sage-secondary">Financial overview</h3>
             <p className="mt-1 text-xs text-sage-gray-500">
-              চলতি মাসের পেমেন্ট আদায় ও বিগত ৬ মাসের ট্রেন্ড।
+              Payments collected this month and the six-month trend.
             </p>
           </div>
         </div>
         <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600 ring-1 ring-green-100">
-          আদায় হার: {collectionRate.toFixed(1)}%
+          Collection rate: {collectionRate.toFixed(1)}%
         </span>
       </div>
 
       {/* Grid of metrics */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl bg-sage-red-50/20 p-4 border border-sage-border/50">
-          <p className="text-xs font-semibold text-sage-gray-500">চলতি মাসের সম্ভাব্য পাওনা</p>
+          <p className="text-xs font-semibold text-sage-gray-500">Expected this month</p>
           <p className="mt-2 text-2xl font-black text-sage-secondary">
-            ৳{stats.expected.toLocaleString("en-IN")}
+            {formatAdminCurrency(stats.expected)}
           </p>
         </div>
         <div className="rounded-xl bg-green-50/20 p-4 border border-green-100/50">
-          <p className="text-xs font-semibold text-green-600">চলতি মাসে মোট আদায়</p>
+          <p className="text-xs font-semibold text-green-600">Collected this month</p>
           <p className="mt-2 text-2xl font-black text-green-700">
-            ৳{stats.collected.toLocaleString("en-IN")}
+            {formatAdminCurrency(stats.collected)}
           </p>
         </div>
         <div className="rounded-xl bg-orange-50/20 p-4 border border-orange-100/50">
-          <p className="text-xs font-semibold text-orange-600">মোট বকেয়া</p>
+          <p className="text-xs font-semibold text-orange-600">Total due</p>
           <p className="mt-2 text-2xl font-black text-orange-700">
-            ৳{stats.due.toLocaleString("en-IN")}
+            {formatAdminCurrency(stats.due)}
           </p>
         </div>
       </div>
@@ -65,7 +66,7 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
       {/* Graphical Progress Bar */}
       <div className="mt-5">
         <div className="flex justify-between text-xs font-bold text-sage-gray-500 mb-1">
-          <span>আদায়কৃত প্রগতি</span>
+          <span>Collection progress</span>
           <span>{collectionRate.toFixed(0)}%</span>
         </div>
         <div className="h-3 w-full bg-sage-border/50 rounded-full overflow-hidden">
@@ -80,7 +81,7 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
       <div className="mt-8 border-t border-sage-border pt-6">
         <div className="mb-4 flex items-center gap-2 text-sm font-bold text-sage-secondary">
           <TrendingUp className="h-4 w-4 text-sage-primary" />
-          বিগত ৬ মাসের আদায়ের ট্রেন্ড (৳)
+          Six-month collection trend (BDT)
         </div>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -99,7 +100,7 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
                 tick={{ fill: "#6B7280", fontSize: 11, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(val) => `৳${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                tickFormatter={(val) => `BDT ${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
               />
               <Tooltip
                 contentStyle={{
@@ -109,7 +110,7 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
                   fontFamily: "inherit",
                 }}
-                formatter={(value: any) => [`৳${value.toLocaleString()}`, ""]}
+                formatter={(value: unknown) => [formatAdminCurrency(Number(value)), ""]}
               />
               <Legend
                 verticalAlign="top"
@@ -119,14 +120,14 @@ export function FinancialOverview({ stats, trend }: FinancialOverviewProps) {
                 wrapperStyle={{ fontSize: 12, fontWeight: 600, color: "#374151" }}
               />
               <Bar
-                name="সম্ভাব্য পাওনা"
+                name="Expected"
                 dataKey="expected"
                 fill="#E5E7EB"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={32}
               />
               <Bar
-                name="আদায়কৃত পরিমাণ"
+                name="Collected"
                 dataKey="collected"
                 fill="#881337" // tailwind rose-900 or similar deep maroon to match sage theme
                 radius={[4, 4, 0, 0]}

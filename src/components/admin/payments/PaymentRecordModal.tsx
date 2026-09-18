@@ -19,17 +19,17 @@ export function PaymentRecordModal({ onClose, onSaved, initialStudent = null, ex
         <div className="flex items-start justify-between gap-4 border-b border-sage-border bg-sage-red-50/70 px-5 py-4 sm:px-6">
           <div>
             <h3 className="text-xl font-black text-sage-secondary">
-              নতুন পেমেন্ট রেকর্ড
+              New Payment Record
             </h3>
             <p className="mt-1 text-sm text-sage-gray-500">
-              বাস্তবে পাওয়া টাকা সংরক্ষণ করুন, তারপর প্রয়োজন হলে রসিদ প্রিন্ট করুন।
+              Record the amount received, then print a receipt if needed.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-sage-gray-500 transition hover:bg-white hover:text-sage-primary"
-            aria-label="পেমেন্ট ফর্ম বন্ধ করুন"
+            aria-label="Close payment form"
           >
             <X className="h-5 w-5" />
           </button>

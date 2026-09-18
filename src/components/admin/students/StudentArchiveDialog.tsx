@@ -20,10 +20,10 @@ export function StudentArchiveDialog({ studentId, studentName }: StudentArchiveD
       const formData = new FormData();
       formData.append("id", studentId);
       await archiveStudentAction(formData);
-      toast.success(`${studentName} কে আর্কাইভ করা হয়েছে।`);
+      toast.success(`${studentName} was archived.`);
       setOpen(false);
-    } catch (error) {
-      toast.error("আর্কাইভ করা যায়নি। আবার চেষ্টা করুন।");
+    } catch {
+      toast.error("Could not archive the student. Try again.");
     } finally {
       setIsArchiving(false);
     }
@@ -35,7 +35,7 @@ export function StudentArchiveDialog({ studentId, studentName }: StudentArchiveD
         type="button"
         onClick={() => setOpen(true)}
         className="flex h-8 w-8 items-center justify-center rounded-lg bg-sage-red-50 text-sage-primary transition hover:bg-sage-primary hover:text-white"
-        title="আর্কাইভ করুন"
+        title="Archive student"
       >
         <Archive size={16} />
       </button>
@@ -46,9 +46,9 @@ export function StudentArchiveDialog({ studentId, studentName }: StudentArchiveD
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sage-red-50 text-sage-primary mb-4">
               <Archive size={24} />
             </div>
-            <h3 className="text-lg font-bold text-sage-secondary">শিক্ষার্থী আর্কাইভ করবেন?</h3>
+            <h3 className="text-lg font-bold text-sage-secondary">Archive this student?</h3>
             <p className="mt-2 text-sm text-sage-gray-600 leading-relaxed">
-              <span className="font-bold text-sage-secondary">{studentName}</span> কে আর্কাইভ করলে সক্রিয় শিক্ষার্থীর তালিকায় আর দেখা যাবে না। তবে আপনি আর্কাইভ সেকশন থেকে তাকে পুনরুদ্ধার করতে পারবেন।
+              <span className="font-bold text-sage-secondary">{studentName}</span> will no longer appear in the active student list. You can restore this record from the archive.
             </p>
             
             <div className="mt-6 flex justify-end gap-3">
@@ -58,7 +58,7 @@ export function StudentArchiveDialog({ studentId, studentName }: StudentArchiveD
                 disabled={isArchiving}
                 className="rounded-xl border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50 disabled:opacity-50"
               >
-                বাতিল
+                Cancel
               </button>
               <button
                 type="button"
@@ -66,7 +66,7 @@ export function StudentArchiveDialog({ studentId, studentName }: StudentArchiveD
                 disabled={isArchiving}
                 className="rounded-xl bg-sage-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-sage-primary/20 transition hover:bg-sage-secondary active:scale-[0.98] disabled:opacity-50"
               >
-                {isArchiving ? "আর্কাইভ হচ্ছে..." : "হ্যাঁ, আর্কাইভ করুন"}
+                {isArchiving ? "Archiving..." : "Archive Student"}
               </button>
             </div>
           </div>

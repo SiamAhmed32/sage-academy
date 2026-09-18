@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { User } from "lucide-react";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { TeacherFormModal } from "./TeacherFormModal";
 import { TeacherDeleteButton } from "./TeacherDeleteButton";
@@ -11,8 +10,6 @@ import { updateTeacherVisibilityAction, updateTeacherOrderAction } from "@/app/a
 import type { AdminTeacher } from "./types";
 
 export function TeacherRow({ teacher }: { teacher: AdminTeacher }) {
-  const router = useRouter();
-
   async function handleVisibilityUpdate(formData: FormData) {
     try {
       await updateTeacherVisibilityAction(formData);
@@ -28,10 +25,10 @@ export function TeacherRow({ teacher }: { teacher: AdminTeacher }) {
       if (result && !result.ok) {
         toast.error(result.message);
       } else {
-        toast.success("সিরিয়াল নম্বর আপডেট হয়েছে");
+        toast.success("Display order updated.");
       }
     } catch {
-      toast.error("আপডেট ব্যর্থ হয়েছে");
+      toast.error("Update failed.");
     }
   }
 
@@ -69,7 +66,7 @@ export function TeacherRow({ teacher }: { teacher: AdminTeacher }) {
             className="h-4 w-4 rounded border-sage-border text-sage-primary focus:ring-sage-primary"
           />
           <button className="rounded-md bg-sage-primary px-2.5 py-1 text-xs font-bold text-white">
-            সেভ
+            Save
           </button>
         </form>
       </TableCell>
@@ -83,7 +80,7 @@ export function TeacherRow({ teacher }: { teacher: AdminTeacher }) {
             className="w-16 rounded border-sage-border px-1.5 py-1 text-xs font-bold text-sage-secondary outline-none focus:ring-1 focus:ring-sage-primary"
           />
           <button className="rounded-md bg-sage-secondary px-2.5 py-1 text-xs font-bold text-white transition hover:bg-sage-primary">
-            সেভ
+            Save
           </button>
         </form>
       </TableCell>
@@ -93,7 +90,7 @@ export function TeacherRow({ teacher }: { teacher: AdminTeacher }) {
             teacher={teacher}
             trigger={
               <button className="rounded-lg bg-sage-red-50 px-3 py-1 text-sm font-bold text-sage-primary transition hover:bg-sage-primary hover:text-white">
-                এডিট
+                Edit
               </button>
             }
           />

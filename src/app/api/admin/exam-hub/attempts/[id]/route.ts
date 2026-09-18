@@ -18,7 +18,7 @@ export const GET = withApiHandler(async (_req: NextRequest, context: RouteContex
   const { id } = await context.params;
 
   const attempt = await ExamAttempt.findById(id).lean();
-  if (!attempt) throw new NotFoundError("Attempt not found");
+  if (!attempt) throw new NotFoundError("Exam attempt not found.");
 
   const [program, questions] = await Promise.all([
     ExamProgram.findById(attempt.programId).lean(),
@@ -52,6 +52,6 @@ export const GET = withApiHandler(async (_req: NextRequest, context: RouteContex
         };
       }),
     },
-    "Attempt fetched"
+    "Exam attempt loaded successfully."
   );
 });

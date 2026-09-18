@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 
 import type { AdminQuizQuestion } from "./QuizManager";
 import { saveQuizQuestionAction } from "@/app/admin/actions";
-import { getClassLabel, toBanglaDigits } from "@/constants/class-levels";
+import { getAdminClassLabel } from "@/constants/admin-display";
+import { formatAdminNumber } from "@/lib/admin-format";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -103,16 +104,16 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
   const validate = (): boolean => {
     for (const q of questionList) {
       if (!q.questionText.trim()) {
-        toast.error("সবগুলো প্রশ্নের টেক্সট লিখুন");
+        toast.error("Enter text for every question");
         return false;
       }
       const filledOptions = q.options.filter(o => o.text.trim().length > 0);
       if (filledOptions.length < 2) {
-        toast.error("প্রতিটি প্রশ্নের কমপক্ষে ২ টি অপশন থাকতে হবে");
+        toast.error("Each question must have at least two options");
         return false;
       }
       if (!q.options.some(o => o.isCorrect)) {
-        toast.error("প্রতিটি প্রশ্নের একটি সঠিক উত্তর নির্বাচন করুন");
+        toast.error("Select one correct answer for each question");
         return false;
       }
     }
@@ -141,14 +142,14 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
         if (res.ok && res.data) {
           results.push(res.data as AdminQuizQuestion);
         } else {
-          throw new Error(res.message || "সংরক্ষণ করা যায়নি");
+          throw new Error(res.message || "Could not save");
         }
       }
 
-      toast.success(isEdit ? "আপডেট সফল হয়েছে" : `${results.length}টি প্রশ্ন সফলভাবে যোগ করা হয়েছে`);
+      toast.success(isEdit ? "Question updated" : `${formatAdminNumber(results.length)} questions added`);
       onSaved(isEdit ? results[0] : results, closeForm);
-    } catch (err: any) {
-      toast.error(err.message || "সার্ভারে সমস্যা হয়েছে");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "A server error occurred");
     } finally {
       setIsPending(false);
     }
@@ -158,14 +159,14 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
     <div className="space-y-8 pb-4">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-sage-border pb-6">
         <label className="flex items-center gap-3 text-sm font-bold text-sage-secondary">
-          শ্রেণী নির্বাচন করুন:
+          Select class:
           <select
             value={classLevel}
             onChange={(e) => setClassLevel(Number(e.target.value))}
             className="h-10 rounded-lg border border-sage-border bg-white px-3 outline-none focus:ring-1 focus:ring-sage-primary"
           >
             {[5, 6, 7, 8, 9, 10, 11, 12].map((l) => (
-              <option key={l} value={l}>{getClassLabel(l)}</option>
+              <option key={l} value={l}>{getAdminClassLabel(l)}</option>
             ))}
           </select>
         </label>
@@ -177,7 +178,7 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
             className="flex items-center gap-2 rounded-xl bg-sage-secondary/10 px-4 py-2 text-sm font-bold text-sage-secondary transition hover:bg-sage-secondary hover:text-white"
           >
             <Plus size={16} />
-            আরও প্রশ্ন যোগ করুন
+            Add another question
           </button>
         )}
       </div>
@@ -196,26 +197,26 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
 
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sage-primary text-sm font-black text-white">
-                {toBanglaDigits(qIndex + 1)}
+                {formatAdminNumber(qIndex + 1)}
               </span>
               <h3 className="text-sm font-black uppercase tracking-wider text-sage-secondary">
-                প্রশ্ন {toBanglaDigits(qIndex + 1)}
+                Question {formatAdminNumber(qIndex + 1)}
               </h3>
             </div>
 
             <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-              প্রশ্ন লিখুন *
+              Question *
               <textarea
                 value={q.questionText}
                 onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
-                placeholder="যেমন: ফটোসিন্থেসিস কী?"
+                placeholder="For example: What is photosynthesis?"
                 className="min-h-[100px] rounded-xl border border-sage-border p-4 outline-none focus:ring-1 focus:ring-sage-primary transition"
               />
             </label>
 
             <div className="space-y-4">
               <p className="text-xs font-bold uppercase tracking-tight text-sage-gray-500">
-                অপশন এবং সঠিক উত্তর (রেডিও দিয়ে সঠিকটি বেছে নিন)
+                Options and correct answer (select one)
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {q.options.map((opt, optIndex) => (
@@ -237,7 +238,7 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
                       type="text"
                       value={opt.text}
                       onChange={(e) => updateOption(q.id, optIndex, e.target.value)}
-                      placeholder={`অপশন ${toBanglaDigits(optIndex + 1)}`}
+                      placeholder={`Option ${formatAdminNumber(optIndex + 1)}`}
                       className="h-9 min-w-0 flex-1 border-none bg-transparent text-sm font-bold outline-none placeholder:font-normal"
                     />
                   </div>
@@ -248,12 +249,12 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
             <label className="grid gap-2 text-sm font-bold text-sage-secondary">
               <div className="flex items-center gap-1.5">
                 <HelpCircle size={14} className="text-sage-primary" />
-                ব্যাখ্যা (ঐচ্ছিক)
+                Explanation (optional)
               </div>
               <textarea
                 value={q.explanation}
                 onChange={(e) => updateQuestion(q.id, { explanation: e.target.value })}
-                placeholder="সঠিক উত্তরের কারণ সংক্ষেপে লিখুন..."
+                placeholder="Briefly explain why the answer is correct..."
                 className="min-h-[80px] rounded-xl border border-sage-border p-4 text-sm outline-none focus:ring-1 focus:ring-sage-primary transition"
               />
             </label>
@@ -270,7 +271,7 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-red-50 text-sage-primary transition group-hover:bg-sage-primary group-hover:text-white">
             <Plus size={24} />
           </div>
-          <span className="text-lg font-bold">নতুন প্রশ্ন যোগ করুন</span>
+          <span className="text-lg font-bold">Add new question</span>
         </button>
       )}
 
@@ -281,7 +282,7 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
           onClick={onCancel}
           className="h-12 rounded-xl border border-sage-border bg-white px-8 font-bold text-sage-secondary transition hover:bg-sage-red-50"
         >
-          বাতিল
+          Cancel
         </button>
         <button
           type="button"
@@ -290,11 +291,11 @@ export function QuizQuestionForm({ initialData, onSaved, onCancel }: Props) {
           className="flex h-12 items-center justify-center gap-2 rounded-xl bg-sage-primary px-10 font-black text-white shadow-lg shadow-sage-primary/20 transition hover:bg-sage-secondary disabled:opacity-50"
         >
           {isPending ? (
-            "সেভ হচ্ছে..."
+            "Saving..."
           ) : (
             <>
               <Save size={18} />
-              {isEdit ? "আপডেট করুন" : "সবগুলো সেভ করুন"}
+              {isEdit ? "Update" : "Save all"}
             </>
           )}
         </button>

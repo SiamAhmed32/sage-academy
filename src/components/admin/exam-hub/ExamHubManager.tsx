@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ExamAttemptPanel } from "@/components/admin/exam-hub/ExamAttemptPanel";
@@ -47,33 +47,70 @@ export type AdminExamProgram = {
   enrollmentCount?: number;
 };
 
-export function ExamHubManager({ initialPrograms }: { initialPrograms: AdminExamProgram[] }) {
-  const [programs, setPrograms] = useState(initialPrograms);
-  const [tab, setTab] = useState("programs");
-  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+export type ExamProgramOption = Pick<
+  AdminExamProgram,
+  "_id" | "title" | "slug" | "deliveryMode" | "status"
+>;
 
-  const onlinePrograms = useMemo(
-    () => programs.filter((p) => p.deliveryMode === "online"),
-    [programs]
+function preferredOnlineProgramId(programs: ExamProgramOption[]) {
+  const onlinePrograms = programs.filter((program) => program.deliveryMode === "online");
+  return (
+    onlinePrograms.find((program) => program.status === "published")?._id ||
+    onlinePrograms[0]?._id ||
+    ""
+  );
+}
+
+export function ExamHubManager({
+  initialProgramOptions,
+}: {
+  initialProgramOptions: ExamProgramOption[];
+}) {
+  const [programOptions, setProgramOptions] = useState(initialProgramOptions);
+  const [tab, setTab] = useState("programs");
+  const [selectedProgramId, setSelectedProgramId] = useState<string>(() =>
+    preferredOnlineProgramId(initialProgramOptions)
   );
 
-  useEffect(() => {
-    if (selectedProgramId || onlinePrograms.length === 0) return;
-    const published = onlinePrograms.find((p) => p.status === "published");
-    setSelectedProgramId((published || onlinePrograms[0])._id);
-  }, [onlinePrograms, selectedProgramId]);
+  const onlinePrograms = useMemo(
+    () => programOptions.filter((p) => p.deliveryMode === "online"),
+    [programOptions]
+  );
 
-  async function refreshPrograms() {
-    const res = await fetch("/api/admin/exam-hub/programs");
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) setPrograms(data.data || []);
+  function upsertProgramOption(program: AdminExamProgram) {
+    const option: ExamProgramOption = {
+      _id: program._id,
+      title: program.title,
+      slug: program.slug,
+      deliveryMode: program.deliveryMode,
+      status: program.status,
+    };
+    const exists = programOptions.some((item) => item._id === option._id);
+    const nextOptions = exists
+      ? programOptions.map((item) => (item._id === option._id ? option : item))
+      : [...programOptions, option];
+    setProgramOptions(nextOptions);
+
+    if (selectedProgramId === option._id && option.deliveryMode !== "online") {
+      setSelectedProgramId(preferredOnlineProgramId(nextOptions));
+    } else if (!selectedProgramId && option.deliveryMode === "online") {
+      setSelectedProgramId(option._id);
+    }
+  }
+
+  function deleteProgramOption(programId: string) {
+    const nextOptions = programOptions.filter((program) => program._id !== programId);
+    setProgramOptions(nextOptions);
+    if (selectedProgramId === programId) {
+      setSelectedProgramId(preferredOnlineProgramId(nextOptions));
+    }
   }
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Exam Hub"
-        description="অনলাইন MCQ, অফলাইন সাপ্তাহিক/মাসিক পরীক্ষা, প্রশ্ন ব্যাংক, নিবন্ধন ও পেমেন্ট ভেরিফিকেশন।"
+        description="Manage online MCQ exams, offline schedules, question banks, enrollments, payments, and attempts."
       />
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
@@ -94,9 +131,8 @@ export function ExamHubManager({ initialPrograms }: { initialPrograms: AdminExam
 
         <TabsContent value="programs" className="mt-0">
           <ExamProgramsPanel
-            programs={programs}
-            onProgramsChange={setPrograms}
-            onRefresh={refreshPrograms}
+            onProgramUpsert={upsertProgramOption}
+            onProgramDelete={deleteProgramOption}
           />
         </TabsContent>
 
@@ -105,11 +141,11 @@ export function ExamHubManager({ initialPrograms }: { initialPrograms: AdminExam
         </TabsContent>
 
         <TabsContent value="enrollments">
-          <ExamEnrollmentPanel programs={programs} />
+          <ExamEnrollmentPanel programs={programOptions} />
         </TabsContent>
 
         <TabsContent value="attempts">
-          <ExamAttemptPanel programs={programs} />
+          <ExamAttemptPanel programs={programOptions} />
         </TabsContent>
       </Tabs>
     </div>

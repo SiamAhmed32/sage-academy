@@ -2,6 +2,8 @@ import Notice from "@/models/Notice";
 import { normalizeObjectId } from "@/lib/object-id";
 
 const PAGE_SIZE = 15;
+const MAX_SEARCH_LENGTH = 80;
+const NOTICE_TYPES = new Set(["general", "class", "batch", "exam", "payment"]);
 
 export type AdminNoticeQuery = {
   q?: string;
@@ -13,11 +15,14 @@ export type AdminNoticeQuery = {
 };
 
 export async function fetchAdminNotices(params: AdminNoticeQuery) {
-  const page = Math.max(1, Number(params.page) || 1);
+  const requestedPage = Number.parseInt(params.page ?? "1", 10);
   const filter: Record<string, unknown> = {};
 
-  if (params.type) filter.type = params.type;
-  if (params.classLevel) filter.classLevel = Number(params.classLevel);
+  if (params.type && NOTICE_TYPES.has(params.type)) filter.type = params.type;
+  const classLevel = Number(params.classLevel);
+  if (Number.isInteger(classLevel) && classLevel >= 1 && classLevel <= 12) {
+    filter.classLevel = classLevel;
+  }
   if (params.batch) {
     const batchId = normalizeObjectId(params.batch);
     if (batchId) filter.batch = batchId;
@@ -26,29 +31,33 @@ export async function fetchAdminNotices(params: AdminNoticeQuery) {
   if (params.status === "draft") filter.isPublished = false;
 
   if (params.q?.trim()) {
-    const q = params.q.trim();
+    const q = params.q.trim().slice(0, MAX_SEARCH_LENGTH);
+    const safe = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     filter.$or = [
-      { title: { $regex: q, $options: "i" } },
-      { topic: { $regex: q, $options: "i" } },
-      { details: { $regex: q, $options: "i" } },
+      { title: { $regex: safe, $options: "i" } },
+      { topic: { $regex: safe, $options: "i" } },
+      { details: { $regex: safe, $options: "i" } },
     ];
   }
 
-  const [total, notices] = await Promise.all([
-    Notice.countDocuments(filter),
-    Notice.find(filter)
-      .populate("batch", "title batchCode classLevel")
-      .sort({ publishedAt: -1, createdAt: -1 })
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE)
-      .lean(),
-  ]);
+  const total = await Notice.countDocuments(filter);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = Math.min(
+    Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+    totalPages
+  );
+  const notices = await Notice.find(filter)
+    .populate("batch", "title batchCode classLevel")
+    .sort({ publishedAt: -1, createdAt: -1 })
+    .skip((page - 1) * PAGE_SIZE)
+    .limit(PAGE_SIZE)
+    .lean();
 
   return {
     notices: JSON.parse(JSON.stringify(notices)),
     total,
     page,
     pageSize: PAGE_SIZE,
-    totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    totalPages,
   };
 }

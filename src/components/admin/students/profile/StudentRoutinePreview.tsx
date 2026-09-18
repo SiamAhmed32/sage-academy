@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { CalendarDays, Clock, Download, Loader2, Users } from "lucide-react";
 import { toast } from "react-toastify";
 
-import { toBanglaDigits } from "@/constants/class-levels";
+import { formatAdminNumber } from "@/lib/admin-format";
 import { downloadClassRoutinePdf, pdfSafeText } from "@/lib/class-routine-pdf";
 import {
   buildStudentRoutinePdfMeta,
@@ -56,7 +56,7 @@ export function StudentRoutinePreview({
 
   function downloadRoutine() {
     if (!routine.length) {
-      toast.error("রুটিন সেট করা নেই — আগে ব্যাচ রুটিন আপডেট করুন");
+      toast.error("No routine is configured. Update the batch routine first.");
       return;
     }
 
@@ -74,10 +74,10 @@ export function StudentRoutinePreview({
         entries: paperEntries,
         filename: pdfMeta.filename,
       });
-      toast.success("ক্লাস রুটিন PDF ডাউনলোড হয়েছে");
+      toast.success("Class routine PDF downloaded.");
     } catch (error) {
       console.error("Routine PDF failed:", error);
-      toast.error("রুটিন ডাউনলোড করা যায়নি");
+      toast.error("Could not download the routine.");
     } finally {
       setDownloading(false);
     }
@@ -96,7 +96,7 @@ export function StudentRoutinePreview({
           </p>
         </div>
         <div className="rounded-xl border border-sage-border bg-white px-4 py-3 text-sm font-bold text-sage-secondary">
-          {toBanglaDigits(classCount)} scheduled class{classCount === 1 ? "" : "es"}
+          {formatAdminNumber(classCount)} scheduled class{classCount === 1 ? "" : "es"}
         </div>
         <button
           type="button"
@@ -129,7 +129,7 @@ export function StudentRoutinePreview({
                   </p>
                 </div>
                 <div className="shrink-0 rounded-lg bg-sage-red-50 px-3 py-2 text-sm font-bold text-sage-primary">
-                  {item.dayBn}
+                  {item.day}
                 </div>
               </div>
               <p className="flex items-center gap-2 rounded-lg bg-sage-red-50/30 px-3 py-2 text-xs font-semibold text-sage-gray-600">
@@ -148,7 +148,7 @@ export function StudentRoutinePreview({
       {routine.length > 6 ? (
         <details className="border-t border-sage-border p-4">
           <summary className="cursor-pointer text-sm font-bold text-sage-primary">
-            View full weekly routine ({toBanglaDigits(routine.length)})
+            View full weekly routine ({formatAdminNumber(routine.length)})
           </summary>
           <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {routine.slice(6).map((item) => (
@@ -156,7 +156,7 @@ export function StudentRoutinePreview({
                 key={`${item.day}-${item.subjectName}-${item.startTime}`}
                 className="rounded-lg bg-sage-red-50/40 p-3 text-sm text-sage-secondary"
               >
-                {item.dayBn}: {item.subjectName} · {item.startTime} - {item.endTime}
+                {item.day}: {item.subjectName} · {item.startTime} - {item.endTime}
               </p>
             ))}
           </div>

@@ -36,12 +36,12 @@ export function BatchRoutineModal({ batch, teachers, open, onClose }: BatchRouti
         body: JSON.stringify(body),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.message || "রুটিন সেভ করা যায়নি");
-      toast.success("সাবজেক্ট ও রুটিন আপডেট হয়েছে");
+      if (!response.ok) throw new Error(data?.message || "The schedule could not be saved.");
+      toast.success("Subjects and schedule updated.");
       onClose();
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "রুটিন সেভ করা যায়নি");
+      toast.error(error instanceof Error ? error.message : "The schedule could not be saved.");
     } finally {
       setIsSaving(false);
     }
@@ -51,8 +51,8 @@ export function BatchRoutineModal({ batch, teachers, open, onClose }: BatchRouti
     <AdminModal
       open={open}
       onClose={onClose}
-      title={`রুটিন — ${batch.title}`}
-      description="সাবজেক্ট, শিক্ষক ও সময়সূচি সেট করুন।"
+      title={`Schedule — ${batch.title}`}
+      description="Configure subjects, teachers, and class times."
       maxWidth="max-w-5xl"
     >
       <form onSubmit={handleSubmit}>
@@ -64,14 +64,14 @@ export function BatchRoutineModal({ batch, teachers, open, onClose }: BatchRouti
             onClick={onClose}
             className="rounded-lg border border-sage-border px-5 py-2.5 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             type="submit"
             disabled={isSaving}
             className="rounded-lg bg-sage-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-sage-primary/90 disabled:opacity-60"
           >
-            {isSaving ? "সেভ হচ্ছে..." : "রুটিন সেভ করুন"}
+            {isSaving ? "Saving..." : "Save schedule"}
           </button>
         </div>
       </form>

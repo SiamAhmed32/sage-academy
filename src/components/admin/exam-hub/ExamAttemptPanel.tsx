@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
 import { toast } from "react-toastify";
 
-import type { AdminExamProgram } from "@/components/admin/exam-hub/ExamHubManager";
+import type { ExamProgramOption } from "@/components/admin/exam-hub/ExamHubManager";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatAdminNumber } from "@/lib/admin-format";
 
 type AttemptRow = {
   _id: string;
@@ -62,33 +65,79 @@ type AttemptDetail = {
   }>;
 };
 
-export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] }) {
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+
+type PageData = {
+  items: AttemptRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+const attemptStatusLabels: Record<string, string> = {
+  submitted: "Submitted",
+  in_progress: "In progress",
+  expired: "Expired",
+};
+
+export function ExamAttemptPanel({ programs }: { programs: ExamProgramOption[] }) {
   const [programId, setProgramId] = useState("all");
   const [status, setStatus] = useState("submitted");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("submittedAt:desc");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<number>(PAGE_SIZE_OPTIONS[0]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [rows, setRows] = useState<AttemptRow[]>([]);
   const [detail, setDetail] = useState<AttemptDetail | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const deferredQuery = useDeferredValue(query.trim());
 
-  async function load() {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (programId && programId !== "all") params.set("programId", programId);
-    if (status) params.set("status", status);
-    const res = await fetch(`/api/admin/exam-hub/attempts?${params.toString()}`);
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) setRows(data.data || []);
-    setLoading(false);
-  }
+  const load = useCallback(async (signal?: AbortSignal) => {
+    const params = new URLSearchParams({
+      sort,
+      page: String(page),
+      limit: String(limit),
+    });
+    if (deferredQuery) params.set("q", deferredQuery);
+    if (programId !== "all") params.set("programId", programId);
+    if (status !== "all") params.set("status", status);
+
+    try {
+      const res = await fetch(`/api/admin/exam-hub/attempts?${params.toString()}`, { signal });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (!signal?.aborted) {
+          toast.error(typeof data?.message === "string" ? data.message : "Could not load exam attempts");
+        }
+        return;
+      }
+      const result = (data.data || {}) as PageData;
+      if (page > Math.max(1, result.totalPages || 0)) {
+        setPage(Math.max(1, result.totalPages || 0));
+        return;
+      }
+      setRows(result.items || []);
+      setTotal(result.total || 0);
+      setTotalPages(result.totalPages || 0);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, [deferredQuery, limit, page, programId, sort, status]);
 
   useEffect(() => {
-    load();
-  }, [programId, status]);
+    const controller = new AbortController();
+    void load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   async function openDetail(id: string) {
     const res = await fetch(`/api/admin/exam-hub/attempts/${id}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      toast.error("Could not load attempt");
+      toast.error(typeof data?.message === "string" ? data.message : "Could not load the exam attempt");
       return;
     }
     setDetail(data.data);
@@ -96,9 +145,29 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Select value={programId} onValueChange={setProgramId}>
-          <SelectTrigger className="w-64"><SelectValue placeholder="All programs" /></SelectTrigger>
+      <div className="grid gap-3 rounded-xl border border-sage-border bg-white p-4 md:grid-cols-2 xl:grid-cols-6">
+        <div className="relative md:col-span-2">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-sage-gray-400" />
+          <Input
+            value={query}
+            onChange={(event) => {
+              setLoading(true);
+              setPage(1);
+              setQuery(event.target.value);
+            }}
+            placeholder="Search student, phone, or IP address..."
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={programId}
+          onValueChange={(value) => {
+            setLoading(true);
+            setPage(1);
+            setProgramId(value);
+          }}
+        >
+          <SelectTrigger><SelectValue placeholder="All programs" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All programs</SelectItem>
             {programs.filter((p) => p.deliveryMode === "online").map((p) => (
@@ -106,15 +175,51 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
             ))}
           </SelectContent>
         </Select>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+        <Select
+          value={status}
+          onValueChange={(value) => {
+            setLoading(true);
+            setPage(1);
+            setStatus(value);
+          }}
+        >
+          <SelectTrigger><SelectValue placeholder="Attempt status" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All attempt statuses</SelectItem>
             <SelectItem value="submitted">Submitted</SelectItem>
             <SelectItem value="in_progress">In progress</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" onClick={load}>Refresh</Button>
+        <Select
+          value={sort}
+          onValueChange={(value) => {
+            setLoading(true);
+            setPage(1);
+            setSort(value);
+          }}
+        >
+          <SelectTrigger><SelectValue placeholder="Sort" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="submittedAt:desc">Latest submissions</SelectItem>
+            <SelectItem value="submittedAt:asc">Earliest submissions</SelectItem>
+            <SelectItem value="score:desc">Highest scores</SelectItem>
+            <SelectItem value="score:asc">Lowest scores</SelectItem>
+            <SelectItem value="name:asc">Student name A–Z</SelectItem>
+            <SelectItem value="name:desc">Student name Z–A</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setLoading(true);
+            void load();
+          }}
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+          Refresh
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-sage-border bg-white">
@@ -132,6 +237,13 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
               </TableRow>
             </TableHeader>
             <TableBody>
+              {!loading && rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-28 text-center text-sage-gray-500">
+                    No attempts match the selected filters.
+                  </TableCell>
+                </TableRow>
+              ) : null}
               {rows.map((row) => (
                 <TableRow key={row._id}>
                   <TableCell>
@@ -139,9 +251,11 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
                     <p className="text-xs text-sage-gray-500">{row.phone}</p>
                   </TableCell>
                   <TableCell>{row.programTitle}</TableCell>
-                  <TableCell><Badge variant="outline">{row.status}</Badge></TableCell>
+                  <TableCell><Badge variant="outline">{attemptStatusLabels[row.status] || row.status}</Badge></TableCell>
                   <TableCell>
-                    {row.status === "submitted" ? `${row.score}/${row.totalMarks}` : "—"}
+                    {row.status === "submitted"
+                      ? `${formatAdminNumber(row.score)}/${formatAdminNumber(row.totalMarks)}`
+                      : "—"}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="outline" onClick={() => openDetail(row._id)}>View</Button>
@@ -151,6 +265,52 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
             </TableBody>
           </Table>
         )}
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-sage-gray-600">
+          Showing {total === 0 ? 0 : (page - 1) * limit + 1}–{Math.min(page * limit, total)} of {total}
+        </p>
+        <div className="flex items-center gap-2">
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLoading(true);
+              setPage(1);
+              setLimit(Number(value));
+            }}
+          >
+            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={String(size)}>{size} rows</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            disabled={page <= 1 || loading}
+            onClick={() => {
+              setLoading(true);
+              setPage((value) => value - 1);
+            }}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <span className="min-w-20 text-center text-sm font-semibold">{page} / {Math.max(1, totalPages)}</span>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            disabled={page >= totalPages || loading}
+            onClick={() => {
+              setLoading(true);
+              setPage((value) => value + 1);
+            }}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
       </div>
 
       <Dialog open={Boolean(detail)} onOpenChange={(open) => !open && setDetail(null)}>
@@ -166,7 +326,9 @@ export function ExamAttemptPanel({ programs }: { programs: AdminExamProgram[] })
               <div className="mt-4 space-y-4">
                 {detail.answers.map((answer, idx) => (
                   <div key={idx} className="rounded-xl border border-sage-border p-4">
-                    <p className="font-semibold text-sage-secondary">Q{idx + 1}. {answer.questionText}</p>
+                    <p className="font-semibold text-sage-secondary">
+                      Question {idx + 1}. {answer.questionText}
+                    </p>
                     {answer.image ? (
                       <div className="relative mt-3 aspect-[4/3] max-h-56 w-full overflow-hidden rounded-xl bg-sage-cream ring-1 ring-sage-border">
                         <Image src={answer.image} alt="" fill className="object-contain p-2" unoptimized />

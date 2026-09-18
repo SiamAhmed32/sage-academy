@@ -36,6 +36,9 @@ const QuizQuestionSchema = new Schema(
   { timestamps: true, collection: "quizquestions" }
 );
 
+QuizQuestionSchema.index({ classLevel: 1, isActive: 1, order: 1, createdAt: -1 });
+QuizQuestionSchema.index({ isActive: 1, createdAt: -1 });
+
 const QuizQuestion = models.QuizQuestion || model("QuizQuestion", QuizQuestionSchema);
 
 export default QuizQuestion;

@@ -30,13 +30,13 @@ export async function createNoticeAction(formData: FormData) {
   const classLevel = numberOrNull(text(formData, "classLevel"));
   const batch = text(formData, "batch");
   if (!classLevel || !batch) {
-    throw new Error("শ্রেণি ও ব্যাচ নির্বাচন করতে হবে।");
+    throw new Error("Select a class and batch.");
   }
 
   const examDate = text(formData, "examDate");
 
   const batchId = normalizeObjectId(batch);
-  if (!batchId) throw new Error("সঠিক ব্যাচ নির্বাচন করুন।");
+  if (!batchId) throw new Error("Select a valid batch.");
 
   await Notice.create({
     title: text(formData, "title"),
@@ -63,14 +63,14 @@ export async function updateNoticeAction(formData: FormData) {
   const classLevel = numberOrNull(text(formData, "classLevel"));
   const batch = text(formData, "batch");
   if (!id || !classLevel || !batch) {
-    throw new Error("শ্রেণি, ব্যাচ ও নোটিশ আইডি প্রয়োজন।");
+    throw new Error("Class, batch, and notice ID are required.");
   }
 
   const examDate = text(formData, "examDate");
   const isPublished = formData.get("isPublished") === "on";
 
   const batchId = normalizeObjectId(batch);
-  if (!batchId) throw new Error("সঠিক ব্যাচ নির্বাচন করুন।");
+  if (!batchId) throw new Error("Select a valid batch.");
 
   await Notice.findByIdAndUpdate(id, {
     title: text(formData, "title"),
@@ -108,7 +108,7 @@ export async function deleteNoticeAction(formData: FormData) {
   await connectDB();
 
   const id = text(formData, "id");
-  if (!id) throw new Error("নোটিশ আইডি পাওয়া যায়নি।");
+  if (!id) throw new Error("Notice ID was not found.");
 
   await Notice.findByIdAndDelete(id);
   revalidateNoticePaths();

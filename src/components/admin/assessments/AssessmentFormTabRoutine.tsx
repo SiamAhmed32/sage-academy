@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RoutineEditor } from "./RoutineEditor";
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel } from "@/constants/admin-display";
 
 type RoutineRow = {
   day: string;
@@ -63,17 +63,17 @@ export function AssessmentFormTabRoutine({
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-          টার্গেট স্কুল / কলেজ (লাইন ভিত্তিক আলাদা)
+          Target schools / colleges (one per line)
           <textarea name="schoolFocus" value={schoolFocus} onChange={(e) => onSchoolFocusChange(e.target.value)} className={textareaClass} placeholder="Banani Ideal&#10;National Ideal" />
         </label>
         
         <div className="space-y-4">
           <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-            রুটিন হেডলাইন
+            Routine headline
             <input name="routineTitle" value={routineTitle} onChange={(e) => onRoutineTitleChange(e.target.value)} placeholder="SSC 2027" className={inputClass} />
           </label>
           <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-            রুটিন সাব-হেডলাইন
+            Routine subheading
             <input name="routineSubtitle" value={routineSubtitle} onChange={(e) => onRoutineSubtitleChange(e.target.value)} placeholder="Batch: G10-1" className={inputClass} />
           </label>
         </div>
@@ -81,12 +81,12 @@ export function AssessmentFormTabRoutine({
 
       <div className="rounded-2xl border border-sage-border bg-sage-cream/30 p-5">
         <h3 className="mb-4 text-base font-black text-sage-secondary flex items-center gap-2">
-          শ্রেণিভিত্তিক রুটিন ও সিলেবাস
+          Class routines and syllabuses
         </h3>
 
         {classLevels.length === 0 ? (
           <p className="text-sm text-sage-red-600 font-bold bg-sage-red-50 p-3 rounded-lg border border-sage-red-200">
-            দয়া করে "বেসিক তথ্য" বা "শ্রেণি ও ফি" ট্যাব থেকে ক্লাস নির্বাচন করুন।
+            Select classes from the “Basic information” or “Classes and fees” tab.
           </p>
         ) : (
           <div className="space-y-5">
@@ -103,14 +103,14 @@ export function AssessmentFormTabRoutine({
                       : "bg-white text-sage-gray-500 border border-sage-border hover:bg-sage-cream"
                   }`}
                 >
-                  {getClassLabel(level)}
+                  {getAdminClassLabel(level)}
                 </button>
               ))}
             </div>
 
             <div className="bg-white rounded-xl border border-sage-border p-4 space-y-5 shadow-sm">
               <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-                {getClassLabel(activeClass)} - বিষয়সমূহ (লাইন ভিত্তিক আলাদা)
+                {getAdminClassLabel(activeClass)} – Subjects (one per line)
                 <textarea 
                   value={activeInfo.subjects} 
                   onChange={(e) => updateActiveInfo({ subjects: e.target.value })} 
@@ -120,7 +120,7 @@ export function AssessmentFormTabRoutine({
               </label>
 
               <div>
-                <p className="mb-2 text-sm font-bold text-sage-secondary">{getClassLabel(activeClass)} - রুটিন তৈরি</p>
+                <p className="mb-2 text-sm font-bold text-sage-secondary">{getAdminClassLabel(activeClass)} – Build routine</p>
                 <RoutineEditor
                   title={title}
                   routineTitle={routineTitle}

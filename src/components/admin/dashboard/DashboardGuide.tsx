@@ -1,21 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { HelpCircle, X } from "lucide-react";
 
-export function DashboardGuide() {
-  const [visible, setVisible] = useState(false);
+const GUIDE_STORAGE_KEY = "sage_admin_guide_dismissed";
+const GUIDE_DISMISSED_EVENT = "sage-admin-guide-dismissed";
 
-  useEffect(() => {
-    const isDismissed = localStorage.getItem("sage_admin_guide_dismissed");
-    if (!isDismissed) {
-      setVisible(true);
-    }
-  }, []);
+function subscribeToGuideState(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(GUIDE_DISMISSED_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(GUIDE_DISMISSED_EVENT, onStoreChange);
+  };
+}
+
+function getGuideVisibility() {
+  return localStorage.getItem(GUIDE_STORAGE_KEY) === null;
+}
+
+function getServerGuideVisibility() {
+  return false;
+}
+
+export function DashboardGuide() {
+  const visible = useSyncExternalStore(
+    subscribeToGuideState,
+    getGuideVisibility,
+    getServerGuideVisibility
+  );
 
   const handleDismiss = () => {
-    localStorage.setItem("sage_admin_guide_dismissed", "true");
-    setVisible(false);
+    localStorage.setItem(GUIDE_STORAGE_KEY, "true");
+    window.dispatchEvent(new Event(GUIDE_DISMISSED_EVENT));
   };
 
   if (!visible) return null;
@@ -32,12 +50,12 @@ export function DashboardGuide() {
       
       <div className="mb-2 flex items-center gap-2 font-extrabold text-sage-secondary">
         <HelpCircle className="h-4 w-4 text-sage-primary" />
-        আজ এই ড্যাশবোর্ড কীভাবে ব্যবহার করবেন
+        How to use this dashboard today
       </div>
       <p className="text-xs sm:text-sm text-sage-gray-600 font-medium">
-        প্রথমে নতুন লিডগুলোতে কল বা WhatsApp করুন। তারপর আজকের ক্লাস আছে কিনা
-        দেখুন। শেষে ভর্তি ফানেল ও ভিজিটর অ্যাক্টিভিটি দেখে বুঝুন কোন জায়গায়
-        বেশি আগ্রহ তৈরি হচ্ছে।
+        Start by calling or messaging new leads on WhatsApp. Then review
+        today&apos;s classes. Finally, check the admission funnel and visitor
+        activity to see where interest is growing.
       </p>
     </section>
   );

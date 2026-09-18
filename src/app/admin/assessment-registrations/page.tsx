@@ -3,6 +3,7 @@ import { AssessmentRegistrationFilters } from "@/components/admin/assessments/As
 import { AssessmentRegistrationTable } from "@/components/admin/assessments/AssessmentRegistrationTable";
 import { Pagination } from "@/components/admin/shared/Pagination";
 import { buildAssessmentRegistrationFilter } from "@/lib/admin-assessment-registration-query";
+import { formatAdminNumber } from "@/lib/admin-format";
 import { connectDB } from "@/lib/mongodb";
 import AssessmentRegistration from "@/models/AssessmentRegistration";
 
@@ -25,15 +26,21 @@ function parseLimit(raw: string): number {
 
 export default async function AdminAssessmentRegistrationsPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const q = getParam(params, "q").trim();
-  const status = getParam(params, "status", "all").trim();
-  const assessmentKind = getParam(params, "assessmentKind", "all").trim();
-  const assessmentType = getParam(params, "assessmentType", "all").trim();
-  const classLabel = getParam(params, "classLabel", "all").trim();
-  const applicantType = getParam(params, "applicantType", "all").trim();
-  const sort = getParam(params, "sort", "desc").trim();
-  const dateRange = getParam(params, "dateRange", "all").trim();
-  const page = Math.max(1, Number(getParam(params, "page", "1")) || 1);
+  const q = getParam(params, "q").trim().slice(0, 100);
+  const rawStatus = getParam(params, "status", "all").trim();
+  const status = ["new", "contacted", "confirmed", "attended", "cancelled", "invalid"].includes(rawStatus)
+    ? rawStatus
+    : "all";
+  const rawKind = getParam(params, "assessmentKind", "all").trim();
+  const assessmentKind = ["modelTest", "exam"].includes(rawKind) ? rawKind : "all";
+  const assessmentType = getParam(params, "assessmentType", "all").trim().slice(0, 80) || "all";
+  const classLabel = getParam(params, "classLabel", "all").trim().slice(0, 80) || "all";
+  const rawApplicantType = getParam(params, "applicantType", "all").trim();
+  const applicantType = ["sage", "outside"].includes(rawApplicantType) ? rawApplicantType : "all";
+  const sort = getParam(params, "sort") === "asc" ? "asc" : "desc";
+  const rawDateRange = getParam(params, "dateRange", "all").trim();
+  const dateRange = ["today", "week", "month"].includes(rawDateRange) ? rawDateRange : "all";
+  const page = Math.max(1, Math.trunc(Number(getParam(params, "page", "1"))) || 1);
   const limit = parseLimit(getParam(params, "limit", "25"));
   const query = buildAssessmentRegistrationFilter({
     q,
@@ -66,20 +73,20 @@ export default async function AdminAssessmentRegistrationsPage({ searchParams }:
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="মডেল টেস্ট / Exam রেজিস্ট্রেশন"
-        description="মডেল টেস্ট ও exam রেজিস্ট্রেশন আলাদা লিড হিসেবে ফলোআপ করুন।"
+        title="Model Test and Exam Registrations"
+        description="Review and follow up on model-test and exam registrations as individual leads."
       />
 
       <div className="flex flex-col gap-3 rounded-2xl border border-sage-border bg-white px-5 py-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 md:px-6 md:py-5">
         <div className="text-base font-semibold leading-snug text-sage-secondary md:text-lg">
-          <span className="font-black text-sage-primary">{totalDocs.toLocaleString("bn-BD")}</span> টি মোট রেজিস্ট্রেশন
+          <span className="font-black text-sage-primary">{formatAdminNumber(totalDocs)}</span> total registrations
           {totalDocs > 0 ? (
             <span className="mt-1 block text-sm font-medium text-sage-gray-600 sm:mt-0 sm:inline sm:before:content-['_·_']">
-              দেখানো হচ্ছে{" "}
+              Showing{" "}
               <span className="font-bold text-sage-secondary">
-                {from.toLocaleString("bn-BD")}–{to.toLocaleString("bn-BD")}
+                {formatAdminNumber(from)}–{formatAdminNumber(to)}
               </span>{" "}
-              (পৃষ্ঠা {safePage.toLocaleString("bn-BD")}/{totalPages.toLocaleString("bn-BD")})
+              (page {formatAdminNumber(safePage)} of {formatAdminNumber(totalPages)})
             </span>
           ) : null}
         </div>
@@ -98,7 +105,7 @@ export default async function AdminAssessmentRegistrationsPage({ searchParams }:
         limit={limit}
         pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
         assessmentTypes={(assessmentTypes as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b))}
-        classLabels={(classLabels as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b, "bn"))}
+        classLabels={(classLabels as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b, "en"))}
       />
 
       <AssessmentRegistrationTable key={`table-${filterKey}`} initialItems={JSON.parse(JSON.stringify(items))} />

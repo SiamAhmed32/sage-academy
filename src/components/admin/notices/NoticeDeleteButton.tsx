@@ -17,7 +17,7 @@ export function NoticeDeleteButton({
     <form
       action={deleteNoticeAction}
       onSubmit={(event) => {
-        if (!confirm(`"${title}" নোটিশটি মুছে ফেলবেন?`)) {
+        if (!confirm(`Delete the notice "${title}"?`)) {
           event.preventDefault();
         }
       }}
@@ -30,10 +30,10 @@ export function NoticeDeleteButton({
             ? "inline-flex items-center justify-center rounded-lg bg-red-50 px-3 py-1 text-sm font-bold text-red-700 hover:bg-red-600 hover:text-white"
             : "inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-100"
         }
-        aria-label="মুছুন"
+        aria-label="Delete notice"
       >
         <Trash2 className="h-4 w-4" />
-        {compact ? null : "মুছুন"}
+        {compact ? null : "Delete"}
       </button>
     </form>
   );

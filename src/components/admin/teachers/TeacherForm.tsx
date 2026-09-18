@@ -83,12 +83,12 @@ export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) 
       });
       const contentType = res.headers.get("content-type") ?? "";
       const json = contentType.includes("application/json") ? await res.json() : null;
-      if (!res.ok || !json?.success) throw new Error(json?.message || "সমস্যা হয়েছে");
-      toast.success(isEdit ? "তথ্য আপডেট করা হয়েছে" : "শিক্ষক সফলভাবে যুক্ত করা হয়েছে");
+      if (!res.ok || !json?.success) throw new Error(json?.message || "Something went wrong.");
+      toast.success(isEdit ? "Teacher details updated." : "Teacher added successfully.");
       onSuccess();
       router.refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "সাময়িক সমস্যা হয়েছে";
+      const message = err instanceof Error ? err.message : "A temporary error occurred.";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) 
   }
 
   async function handleDelete() {
-    if (!confirm("আপনি কি নিশ্চিতভাবে এই শিক্ষকের তথ্য মুছে ফেলতে চান?")) return;
+    if (!confirm("Delete this teacher?")) return;
     if (!teacher) return;
     setIsDeleting(true);
     try {
@@ -106,12 +106,12 @@ export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) 
       });
       const contentType = res.headers.get("content-type") ?? "";
       const json = contentType.includes("application/json") ? await res.json() : null;
-      if (!res.ok || !json?.success) throw new Error(json?.message || "মুছে ফেলা সম্ভব হয়নি");
-      toast.success("সফলভাবে মুছে ফেলা হয়েছে");
+      if (!res.ok || !json?.success) throw new Error(json?.message || "The teacher could not be deleted.");
+      toast.success("Teacher deleted.");
       onSuccess();
       router.refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "সাময়িক সমস্যা হয়েছে";
+      const message = err instanceof Error ? err.message : "A temporary error occurred.";
       toast.error(message);
     } finally {
       setIsDeleting(false);
@@ -129,13 +129,13 @@ export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) 
       <div className="flex items-center justify-between pt-6 mt-6 border-t border-sage-border">
         {isEdit ? (
           <button type="button" onClick={handleDelete} disabled={isDeleting} className="text-sm font-bold text-red-500 hover:text-red-600 disabled:opacity-50 flex items-center gap-2">
-            {isDeleting && <Loader2 size={16} className="animate-spin" />} মুছে ফেলুন
+            {isDeleting && <Loader2 size={16} className="animate-spin" />} Delete
           </button>
         ) : <div />}
         <div className="flex gap-4">
-          <Button type="button" variant="outline" onClick={onCancel} className="h-11 px-6 font-bold rounded-xl border-sage-border">বাতিল</Button>
+          <Button type="button" variant="outline" onClick={onCancel} className="h-11 px-6 font-bold rounded-xl border-sage-border">Cancel</Button>
           <Button disabled={loading} className="bg-sage-primary hover:bg-sage-primary-hover font-bold min-w-[140px] h-11 rounded-xl shadow-lg shadow-sage-red-100">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEdit ? "তথ্য আপডেট করুন" : "শিক্ষক যুক্ত করুন")}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEdit ? "Update teacher" : "Add teacher")}
           </Button>
         </div>
       </div>

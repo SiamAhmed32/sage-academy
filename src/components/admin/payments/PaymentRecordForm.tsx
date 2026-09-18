@@ -8,6 +8,7 @@ import type { AdminPayment, StudentOption } from "./PaymentManager";
 import { methodLabels, monthLabels, months } from "./payment-options";
 import { PaymentStudentPicker } from "./PaymentStudentPicker";
 import { PaymentFeeBreakdown } from "./PaymentFeeBreakdown";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type Props = { onSaved: (payment: AdminPayment) => void; onCancel: () => void };
 export type PaymentStudentForForm = StudentOption;
@@ -266,7 +267,7 @@ export function PaymentRecordForm({
                     <div>
                       <p className="font-bold text-sage-secondary">{subject.subjectName}</p>
                       <p className="text-xs font-semibold text-sage-gray-500">
-                        Monthly ৳{subject.monthlyFee} · paid ৳{alreadyPaid} · remaining ৳{remaining}
+                        Monthly {formatAdminCurrency(subject.monthlyFee)} · paid {formatAdminCurrency(alreadyPaid)} · remaining {formatAdminCurrency(remaining)}
                       </p>
                     </div>
                     <input
@@ -303,7 +304,7 @@ export function PaymentRecordForm({
         <Select value={method} onChange={setMethod}>{Object.entries(methodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select>
       </Field>
       <div className="rounded-xl border border-sage-border bg-sage-red-50/30 p-4 text-sm font-bold text-sage-secondary lg:col-span-2">
-        Expected ৳{expectedTotal} · Already paid ৳{alreadyPaid} · Receiving ৳{amount} · Advance balance ৳{currentAdvanceBalance + advancePaid} · Due after payment ৳{dueAmount} · {status}
+        Expected {formatAdminCurrency(expectedTotal)} · Already paid {formatAdminCurrency(alreadyPaid)} · Receiving {formatAdminCurrency(amount)} · Advance balance {formatAdminCurrency(currentAdvanceBalance + advancePaid)} · Due after payment {formatAdminCurrency(dueAmount)} · {status}
       </div>
       <div className="flex items-end gap-3 lg:col-span-3">
         <button type="submit" disabled={isPending || paymentMonthBlocked} className="h-12 flex-1 rounded-xl bg-sage-primary font-bold text-white disabled:opacity-50">{isPending ? "Saving..." : "Save payment"}</button>

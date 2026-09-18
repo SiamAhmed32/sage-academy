@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation";
 
 import { updateAdmissionRequestAction } from "@/app/admin/actions/admission";
 import { requestStatusOptions } from "@/constants/admin";
+import type { AdmissionRequestItem } from "../types";
 
 interface AdmissionActionSidebarProps {
-  request: any;
+  request: AdmissionRequestItem;
 }
 
 export function AdmissionActionSidebar({ request }: AdmissionActionSidebarProps) {
@@ -21,13 +22,13 @@ export function AdmissionActionSidebar({ request }: AdmissionActionSidebarProps)
     try {
       const result = await updateAdmissionRequestAction(formData);
       if (result.success) {
-        toast.success("আবেদন সফলভাবে আপডেট হয়েছে");
+        toast.success("Application updated");
         router.refresh();
       } else {
-        toast.error(result.message || "আপডেট করা যায়নি");
+        toast.error(result.message || "Could not update the application");
       }
-    } catch (err) {
-      toast.error("সার্ভার সমস্যা হয়েছে");
+    } catch {
+      toast.error("Server error");
     } finally {
       setIsUpdating(false);
     }

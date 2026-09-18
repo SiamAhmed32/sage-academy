@@ -30,6 +30,8 @@ NoticeSchema.index({ isPublished: 1, audience: 1, publishedAt: -1 });
 NoticeSchema.index({ classLevel: 1, isPublished: 1, publishedAt: -1 });
 NoticeSchema.index({ batch: 1, isPublished: 1, publishedAt: -1 });
 NoticeSchema.index({ student: 1, isPublished: 1, publishedAt: -1 });
+NoticeSchema.index({ publishedAt: -1, createdAt: -1 });
+NoticeSchema.index({ type: 1, classLevel: 1, batch: 1, publishedAt: -1 });
 
 const Notice = models.Notice || model("Notice", NoticeSchema);
 

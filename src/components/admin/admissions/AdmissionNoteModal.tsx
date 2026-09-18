@@ -27,14 +27,14 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
       
       const res = await updateAdmissionRequestAction(formData);
       if (res.success) {
-        toast.success("নোট সেভ হয়েছে");
+        toast.success("Note saved");
         router.refresh();
         onClose();
       } else {
-        toast.error("সেভ করা যায়নি");
+        toast.error("Could not save the note");
       }
     } catch {
-      toast.error("সার্ভার সমস্যা");
+      toast.error("Server error");
     } finally {
       setIsSaving(false);
     }
@@ -72,7 +72,7 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
           <div className="rounded-lg bg-sage-red-50/50 p-4 border border-sage-border/50">
             {initialNote ? (
               <p className="text-xs font-semibold text-sage-secondary leading-relaxed italic">
-                "{initialNote}"
+                &ldquo;{initialNote}&rdquo;
               </p>
             ) : (
               <p className="text-xs font-medium text-sage-gray-400 italic">
@@ -91,7 +91,7 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
             value={note}
             autoFocus
             onChange={(e) => setNote(e.target.value)}
-            placeholder="নতুন কোনো তথ্য লিখে রাখুন..."
+            placeholder="Add any new follow-up information..."
             className="min-h-[120px] w-full rounded-lg border border-sage-border bg-white p-3 text-sm font-medium outline-none transition focus:border-sage-primary focus:ring-4 focus:ring-sage-primary/5"
           />
         </div>
@@ -103,7 +103,7 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
             disabled={isSaving}
             className="rounded-lg border border-sage-border px-4 py-2 text-sm font-bold text-sage-secondary transition hover:bg-sage-red-50 disabled:opacity-50"
           >
-            বাতিল
+            Cancel
           </button>
           <button
             onClick={handleSave}
@@ -111,7 +111,7 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
             className="flex items-center justify-center gap-2 rounded-lg bg-sage-primary px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-sage-secondary disabled:opacity-50"
           >
             {isSaving ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-            {isSaving ? "সংরক্ষণ হচ্ছে..." : "নোট সেভ করুন"}
+            {isSaving ? "Saving..." : "Save note"}
           </button>
         </div>
       </div>

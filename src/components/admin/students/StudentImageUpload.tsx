@@ -47,6 +47,7 @@ export function StudentImageUpload({ currentImage }: StudentImageUploadProps) {
             <button
               type="button"
               onClick={removeImage}
+              aria-label="Remove student photo"
               className="absolute right-2 top-2 rounded-full bg-sage-primary p-1.5 text-white shadow-lg hover:bg-sage-secondary transition active:scale-95"
             >
               <X size={16} />
@@ -69,7 +70,7 @@ export function StudentImageUpload({ currentImage }: StudentImageUploadProps) {
               <Camera size={20} />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-sage-secondary">ছবি আপলোড করুন</p>
+              <p className="text-sm font-bold text-sage-secondary">Upload Photo</p>
               <p className="text-[10px] text-sage-gray-500 font-medium">JPG, PNG (Max 5MB)</p>
             </div>
           </div>

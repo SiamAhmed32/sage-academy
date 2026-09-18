@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { formatAdminCurrency, formatAdminDateTime } from "@/lib/admin-format";
 
 export type EnrollmentDetail = {
   _id: string;
@@ -46,14 +47,6 @@ type Props = {
   onUpdated?: () => void;
 };
 
-function formatDateTime(value?: string) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
 function DetailItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-sage-border bg-sage-cream/25 px-3 py-2.5">
@@ -61,6 +54,12 @@ function DetailItem({ label, value }: { label: string; value: React.ReactNode })
       <div className="mt-1 text-sm font-semibold text-sage-secondary">{value}</div>
     </div>
   );
+}
+
+function formatStatus(value: string) {
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 export function ExamEnrollmentReviewModal({
@@ -77,27 +76,30 @@ export function ExamEnrollmentReviewModal({
   const [adminNote, setAdminNote] = useState("");
 
   useEffect(() => {
-    if (!open || !enrollmentId) {
-      setDetail(null);
-      setRejecting(false);
-      setAdminNote("");
-      return;
-    }
+    if (!open || !enrollmentId) return;
 
     let cancelled = false;
-    setLoading(true);
+    queueMicrotask(() => {
+      if (!cancelled) setLoading(true);
+    });
 
     fetch(`/api/admin/exam-hub/enrollments/${enrollmentId}`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(typeof data?.message === "string" ? data.message : "Could not load enrollment");
+        if (!res.ok) {
+          throw new Error(
+            typeof data?.message === "string" ? data.message : "Could not load the exam enrollment"
+          );
+        }
         return data.data as EnrollmentDetail;
       })
       .then((row) => {
         if (!cancelled) setDetail(row);
       })
       .catch((error) => {
-        if (!cancelled) toast.error(error instanceof Error ? error.message : "Could not load enrollment");
+        if (!cancelled) {
+          toast.error(error instanceof Error ? error.message : "Could not load the exam enrollment");
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -110,6 +112,13 @@ export function ExamEnrollmentReviewModal({
 
   const canReview = mode === "review" && detail?.paymentStatus === "submitted";
   const proofUrl = detail?.paymentProof?.previewUrl || detail?.paymentProof?.url;
+
+  function closeDialog() {
+    setDetail(null);
+    setRejecting(false);
+    setAdminNote("");
+    onOpenChange(false);
+  }
 
   async function submitReview(status: "confirmed" | "cancelled", paymentStatus?: "verified" | "rejected") {
     if (!detail) return;
@@ -131,7 +140,7 @@ export function ExamEnrollmentReviewModal({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        toast.error(typeof data?.message === "string" ? data.message : "Update failed");
+        toast.error(typeof data?.message === "string" ? data.message : "Could not update the exam enrollment");
         return;
       }
 
@@ -143,7 +152,7 @@ export function ExamEnrollmentReviewModal({
         toast.success("Enrollment rejected and customer notified");
       }
 
-      onOpenChange(false);
+      closeDialog();
       onUpdated?.();
     } finally {
       setSubmitting(false);
@@ -151,7 +160,13 @@ export function ExamEnrollmentReviewModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (nextOpen) onOpenChange(true);
+        else closeDialog();
+      }}
+    >
       <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl">
         <DialogHeader className="border-b border-sage-border bg-sage-cream/30 px-5 py-4 text-left">
           <DialogTitle className="text-xl font-bold text-sage-secondary">
@@ -172,8 +187,8 @@ export function ExamEnrollmentReviewModal({
           ) : detail ? (
             <>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">{detail.status}</Badge>
-                <Badge variant="outline">{detail.paymentStatus}</Badge>
+                <Badge variant="outline">{formatStatus(detail.status)}</Badge>
+                <Badge variant="outline">{formatStatus(detail.paymentStatus)}</Badge>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -182,11 +197,14 @@ export function ExamEnrollmentReviewModal({
                 <DetailItem label="Email" value={detail.email?.trim() || "—"} />
                 <DetailItem label="Class" value={detail.classLabel} />
                 <DetailItem label="Exam" value={detail.programTitle} />
-                <DetailItem label="Fee" value={`৳${detail.feeAmount ?? detail.programFeeAmount ?? 0}`} />
+                <DetailItem
+                  label="Fee"
+                  value={formatAdminCurrency(detail.feeAmount ?? detail.programFeeAmount ?? 0)}
+                />
                 <DetailItem label="Transaction ID" value={detail.transactionId?.trim() || "—"} />
-                <DetailItem label="Submitted" value={formatDateTime(detail.createdAt)} />
+                <DetailItem label="Submitted" value={formatAdminDateTime(detail.createdAt, "—")} />
                 {detail.verifiedAt ? (
-                  <DetailItem label="Reviewed" value={formatDateTime(detail.verifiedAt)} />
+                  <DetailItem label="Reviewed" value={formatAdminDateTime(detail.verifiedAt, "—")} />
                 ) : null}
               </div>
 
@@ -243,7 +261,7 @@ export function ExamEnrollmentReviewModal({
         <DialogFooter className="gap-2 border-t border-sage-border bg-sage-cream/20 p-4">
           {canReview && !rejecting ? (
             <>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={closeDialog}>
                 Close
               </Button>
               <Button
@@ -277,7 +295,7 @@ export function ExamEnrollmentReviewModal({
               </Button>
             </>
           ) : (
-            <Button className="bg-sage-primary hover:bg-sage-secondary" onClick={() => onOpenChange(false)}>
+            <Button className="bg-sage-primary hover:bg-sage-secondary" onClick={closeDialog}>
               Close
             </Button>
           )}

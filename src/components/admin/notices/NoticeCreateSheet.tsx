@@ -16,7 +16,7 @@ export function NoticeCreateSheet({ batches }: { batches: NoticeBatchOption[] })
         className="inline-flex items-center gap-2 rounded-lg bg-sage-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-sage-primary-hover"
       >
         <BellPlus className="h-4 w-4" />
-        নতুন নোটিশ
+        New notice
       </button>
 
       {open ? (
@@ -32,14 +32,14 @@ export function NoticeCreateSheet({ batches }: { batches: NoticeBatchOption[] })
           >
             <div className="flex items-center justify-between border-b border-sage-border px-5 py-4">
               <div>
-                <h3 className="text-lg font-bold text-sage-secondary">নতুন নোটিশ পাঠান</h3>
-                <p className="text-sm text-sage-gray-500">শ্রেণি ও ব্যাচ বেছে নিন</p>
+                <h3 className="text-lg font-bold text-sage-secondary">Send a New Notice</h3>
+                <p className="text-sm text-sage-gray-500">Choose a class and batch</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 className="rounded-lg border border-sage-border p-2 text-sage-secondary hover:bg-sage-red-50"
-                aria-label="বন্ধ করুন"
+                aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </button>

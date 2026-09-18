@@ -9,6 +9,7 @@ import { updatePaymentAmountAction } from "@/app/admin/actions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { AdminPayment } from "./PaymentManager";
 import { methodLabels } from "./payment-options";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type EditablePayment = Pick<AdminPayment, "_id" | "amount" | "expectedAmount" | "dueAmount" | "paymentMethod">;
 type Props = { payment: EditablePayment; onUpdated?: (payment: AdminPayment) => void };
@@ -31,12 +32,12 @@ export function PaymentAmountEditor({ payment, onUpdated }: Props) {
     const res = await updatePaymentAmountAction(formData);
     setIsSaving(false);
     if (res.ok && res.data) {
-      toast.success("পেমেন্ট আপডেট হয়েছে।");
+      toast.success("Payment updated.");
       onUpdated?.(res.data as AdminPayment);
       if (!onUpdated) router.refresh();
       setOpen(false);
     } else {
-      toast.error(res.message || "পেমেন্ট আপডেট করা যায়নি।");
+      toast.error(res.message || "Could not update the payment.");
     }
   }
 
@@ -45,31 +46,31 @@ export function PaymentAmountEditor({ payment, onUpdated }: Props) {
       <DialogTrigger asChild>
         <button type="button" className="inline-flex items-center gap-1 rounded-lg border border-sage-border bg-white px-3 py-1.5 text-sm font-bold text-sage-secondary hover:border-sage-primary hover:text-sage-primary">
           <Pencil className="h-3 w-3" />
-          এডিট
+          Edit
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-md overflow-hidden border-sage-border bg-white p-0 shadow-2xl" showCloseButton>
         <DialogHeader className="border-b border-sage-border bg-sage-red-50/50 p-5">
-          <DialogTitle className="text-xl font-bold text-sage-secondary">পেমেন্ট এডিট</DialogTitle>
-          <DialogDescription className="text-sm text-sage-gray-500">বাস্তবে পাওয়া টাকার পরিমাণ ঠিক করুন।</DialogDescription>
+          <DialogTitle className="text-xl font-bold text-sage-secondary">Edit Payment</DialogTitle>
+          <DialogDescription className="text-sm text-sage-gray-500">Correct the amount actually received.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 p-5">
-          <PaymentInput label="জমা টাকা" value={amount} onChange={setAmount} />
+          <PaymentInput label="Amount Received" value={amount} onChange={setAmount} />
           <label className="grid gap-2 text-sm font-bold text-sage-secondary">
-            পেমেন্ট মাধ্যম
+            Payment Method
             <select value={method} onChange={(e) => setMethod(e.target.value)} className="h-12 rounded-xl border border-sage-border bg-white px-4">
               {Object.entries(methodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
           <div className="rounded-xl border border-sage-border bg-sage-red-50/30 p-4 text-sm font-bold text-sage-secondary">
-            মোট পাওনা ৳{expected} · জমা ৳{amount} · বকেয়া ৳{due}
+            Expected {formatAdminCurrency(expected)} · Received {formatAdminCurrency(amount)} · Due {formatAdminCurrency(due)}
           </div>
           <div className="flex gap-3">
             <button type="button" disabled={isSaving} onClick={save} className="h-11 flex-1 rounded-xl bg-sage-primary font-bold text-white disabled:opacity-50">
-              {isSaving ? "সেভ হচ্ছে..." : "সেভ করুন"}
+              {isSaving ? "Saving..." : "Save"}
             </button>
             <button type="button" onClick={() => setOpen(false)} className="h-11 rounded-xl border border-sage-border bg-white px-5 font-bold text-sage-secondary">
-              বাতিল
+              Cancel
             </button>
           </div>
         </div>

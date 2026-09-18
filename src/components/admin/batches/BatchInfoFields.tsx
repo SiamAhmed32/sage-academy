@@ -2,15 +2,24 @@
 
 import { useMemo } from "react";
 
-import { buildBatchCode, getBatchTitle } from "@/lib/batch-code";
+import {
+  adminClassLevelOptions,
+  adminGenderLabels,
+  adminVersionLabels,
+} from "@/constants/admin-display";
+import { buildBatchCode } from "@/lib/batch-code";
 import type { AdminBatch } from "./types";
 
 const INPUT_CLASS =
   "h-10 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none focus:border-sage-primary";
 const TEXTAREA_CLASS =
   "min-h-20 rounded-lg border border-sage-border bg-sage-white px-3 py-2 text-sm outline-none focus:border-sage-primary";
-const CLASSES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
-const STATUSES = ["ভর্তি চলছে", "শীঘ্রই শুরু", "ভর্তি বন্ধ"];
+const CLASSES = adminClassLevelOptions.filter((option) => option.value >= 4);
+const STATUSES = [
+  { value: "ভর্তি চলছে", label: "Admission open" }, // admin-language-allow: persisted enum value
+  { value: "শীঘ্রই শুরু", label: "Starting soon" }, // admin-language-allow: persisted enum value
+  { value: "ভর্তি বন্ধ", label: "Admission closed" }, // admin-language-allow: persisted enum value
+];
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
@@ -50,62 +59,66 @@ export function BatchInfoFields({
       <div className="grid gap-4 md:grid-cols-3">
         {/* Batch Code (auto) */}
         <label className="grid gap-2">
-          <Label required>ব্যাচ কোড</Label>
+          <Label required>Batch code</Label>
           <input value={batchCode} disabled className={`${INPUT_CLASS} bg-sage-red-50 font-bold text-sage-primary`} />
         </label>
 
         {/* Class Level */}
         <label className="grid gap-2">
-          <Label required>শ্রেণি</Label>
+          <Label required>Class</Label>
           <select value={classLevel} onChange={(e) => onClassLevelChange(Number(e.target.value))} className={INPUT_CLASS}>
-            {CLASSES.map((c) => <option key={c} value={c}>{getBatchTitle(c)}</option>)}
+            {CLASSES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
 
         {/* Status */}
         <label className="grid gap-2">
-          <Label required>স্ট্যাটাস</Label>
-          <select name="status" defaultValue={defaults.status || "ভর্তি চলছে"} className={INPUT_CLASS}>
-            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          <Label required>Status</Label>
+          <select
+            name="status"
+            defaultValue={defaults.status || "ভর্তি চলছে" /* admin-language-allow: persisted enum fallback */}
+            className={INPUT_CLASS}
+          >
+            {STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
           </select>
         </label>
 
         {/* Gender Group */}
         <label className="grid gap-2">
-          <Label required>ব্যাচ টাইপ</Label>
+          <Label required>Batch type</Label>
           <select value={genderGroup} onChange={(e) => onGenderGroupChange(e.target.value)} className={INPUT_CLASS}>
-            <option value="male">ছেলেদের ব্যাচ</option>
-            <option value="female">মেয়েদের ব্যাচ</option>
-            <option value="combined">কম্বাইন্ড ব্যাচ</option>
+            <option value="male">{adminGenderLabels.male}</option>
+            <option value="female">{adminGenderLabels.female}</option>
+            <option value="combined">{adminGenderLabels.combined}</option>
           </select>
         </label>
 
         {/* Version */}
         <label className="grid gap-2">
-          <Label required>ভার্সন</Label>
+          <Label required>Version</Label>
           <select value={version} onChange={(e) => onVersionChange(e.target.value)} className={INPUT_CLASS}>
-            <option value="bangla">বাংলা ভার্সন</option>
-            <option value="english">ইংরেজি ভার্সন</option>
+            <option value="bangla">{adminVersionLabels.bangla}</option>
+            <option value="english">{adminVersionLabels.english}</option>
           </select>
         </label>
 
         {/* Total Seats */}
         <label className="grid gap-2">
-          <Label required>মোট সিট</Label>
+          <Label required>Total seats</Label>
           <input name="totalSeats" type="number" min="0" defaultValue={defaults.totalSeats ?? 40} className={INPUT_CLASS} />
         </label>
 
         {/* Available Seats */}
         <label className="grid gap-2">
-          <Label required>উপলব্ধ সিট</Label>
+          <Label required>Available seats</Label>
           <input name="availableSeats" type="number" min="0" defaultValue={defaults.availableSeats ?? 40} className={INPUT_CLASS} />
         </label>
       </div>
 
       {/* Routine Note */}
       <label className="grid gap-2">
-        <Label>রুটিন নোট (ঐচ্ছিক)</Label>
-        <textarea name="routineNote" defaultValue={defaults.routineNote ?? ""} placeholder="রুটিন সংক্রান্ত তথ্য..." className={TEXTAREA_CLASS} />
+        <Label>Schedule note (optional)</Label>
+        <textarea name="routineNote" defaultValue={defaults.routineNote ?? ""} placeholder="Enter schedule information..." className={TEXTAREA_CLASS} />
       </label>
     </div>
   );

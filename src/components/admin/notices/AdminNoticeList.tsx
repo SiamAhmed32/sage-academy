@@ -1,17 +1,18 @@
 import { Bell, CalendarDays, Users } from "lucide-react";
 
 import { toggleNoticePublishAction } from "@/app/admin/notices/actions";
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel, getAdminStatusLabel } from "@/constants/admin-display";
+import { formatAdminDate, formatAdminNumber } from "@/lib/admin-format";
 import { NoticeDeleteButton } from "./NoticeDeleteButton";
 import { NoticeEditDialog, type AdminNoticeItem } from "./NoticeEditDialog";
 import type { NoticeBatchOption } from "./NoticeCreateForm";
 
 const typeLabel: Record<string, string> = {
-  general: "সাধারণ",
-  class: "ক্লাস",
-  batch: "ব্যাচ",
-  exam: "পরীক্ষা",
-  payment: "পেমেন্ট",
+  general: "General",
+  class: "Class",
+  batch: "Batch",
+  exam: "Exam",
+  payment: "Payment",
 };
 
 function batchMeta(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
@@ -21,14 +22,14 @@ function batchMeta(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
     const title = noticeBatch.title;
     const count = batches.find((batch) => batch._id === String(noticeBatch._id ?? ""))?.studentCount;
     return {
-      label: code && title ? `${code} · ${title}` : code || title || "ব্যাচ নেই",
+      label: code && title ? `${code} · ${title}` : code || title || "No batch",
       count,
     };
   }
   const batchId = typeof notice.batch === "string" ? notice.batch : "";
   const match = batches.find((batch) => batch._id === batchId);
   return {
-    label: match?.batchCode || match?.title || "ব্যাচ নেই",
+    label: match?.batchCode || match?.title || "No batch",
     count: match?.studentCount,
   };
 }
@@ -44,11 +45,11 @@ export function AdminNoticeList({
     <section className="overflow-hidden rounded-2xl border border-sage-border bg-white shadow-sm">
       <div className="flex items-center justify-between gap-4 border-b border-sage-border bg-sage-red-50/30 px-5 py-4 sm:px-6">
         <div>
-          <h2 className="text-xl font-bold text-sage-secondary">পাঠানো নোটিশ</h2>
-          <p className="mt-1 text-sm text-sage-gray-600">প্রকাশিত নোটিশ শুধু নির্বাচিত ব্যাচের শিক্ষার্থীরা দেখবে।</p>
+          <h2 className="text-xl font-bold text-sage-secondary">Sent Notices</h2>
+          <p className="mt-1 text-sm text-sage-gray-600">Only students in the selected batch can view published notices.</p>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-sage-primary ring-1 ring-sage-red-100">
-          {notices.length} টি
+          {formatAdminNumber(notices.length)}
         </span>
       </div>
 
@@ -71,7 +72,7 @@ export function AdminNoticeList({
                             {typeLabel[notice.type] ?? notice.type}
                           </span>
                           <span className="rounded-md bg-sage-red-50 px-2 py-1 text-xs font-semibold text-sage-primary">
-                            {notice.classLevel ? getClassLabel(notice.classLevel) : "শ্রেণি নেই"}
+                            {notice.classLevel ? getAdminClassLabel(notice.classLevel) : "No class"}
                           </span>
                           <span className="rounded-md bg-sage-red-50 px-2 py-1 text-xs font-semibold text-sage-primary">
                             {batch.label}
@@ -83,7 +84,7 @@ export function AdminNoticeList({
                                 : "bg-amber-50 text-amber-700"
                             }`}
                           >
-                            {notice.isPublished ? "প্রকাশিত" : "ড্রাফট"}
+                            {getAdminStatusLabel(notice.isPublished ? "published" : "draft")}
                           </span>
                         </div>
                       </div>
@@ -92,7 +93,7 @@ export function AdminNoticeList({
                     {(notice.topic || notice.details) && (
                       <div className="mt-4 rounded-lg border border-sage-border bg-sage-red-50/20 px-4 py-3">
                         {notice.topic && (
-                          <p className="text-sm font-semibold text-sage-secondary">টপিক: {notice.topic}</p>
+                          <p className="text-sm font-semibold text-sage-secondary">Topic: {notice.topic}</p>
                         )}
                         {notice.details && (
                           <p className="mt-1 text-sm leading-7 text-sage-gray-700">{notice.details}</p>
@@ -104,13 +105,13 @@ export function AdminNoticeList({
                       <p className="flex items-center gap-1.5">
                         <CalendarDays className="h-4 w-4" />
                         {notice.examDate
-                          ? new Date(notice.examDate).toLocaleDateString("bn-BD")
-                          : "তারিখ নির্ধারিত নয়"}
+                          ? formatAdminDate(notice.examDate)
+                          : "Date not set"}
                       </p>
                       {batch.count !== undefined && (
                         <p className="flex items-center gap-1.5">
                           <Users className="h-4 w-4" />
-                          {batch.count} জন শিক্ষার্থী দেখবে
+                          {formatAdminNumber(batch.count)} students can view
                         </p>
                       )}
                     </div>
@@ -126,9 +127,9 @@ export function AdminNoticeList({
                           defaultChecked={notice.isPublished}
                           className="h-4 w-4 accent-sage-primary"
                         />
-                        প্রকাশ
+                        Published
                       </label>
-                      <button className="text-sm font-bold text-sage-primary">সেভ</button>
+                      <button className="text-sm font-bold text-sage-primary">Save</button>
                     </form>
                     <NoticeEditDialog notice={notice} batches={batches} />
                     <NoticeDeleteButton noticeId={notice._id} title={notice.title} />
@@ -138,7 +139,7 @@ export function AdminNoticeList({
             );
           })
         ) : (
-          <div className="px-6 py-12 text-center text-sm text-sage-gray-500">এখনো কোনো নোটিশ নেই।</div>
+          <div className="px-6 py-12 text-center text-sm text-sage-gray-500">No notices yet.</div>
         )}
       </div>
     </section>

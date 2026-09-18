@@ -1,15 +1,8 @@
 import { cn } from "@/lib/utils";
+import { getAdminStatusLabel } from "@/constants/admin-display";
 
 type StatusBadgeProps = {
   value: string;
-};
-
-const labels: Record<string, string> = {
-  new: "নতুন",
-  contacted: "যোগাযোগ হয়েছে",
-  qualified: "যোগ্য",
-  closed: "বন্ধ",
-  spam: "স্প্যাম",
 };
 
 export function StatusBadge({ value }: StatusBadgeProps) {
@@ -24,7 +17,7 @@ export function StatusBadge({ value }: StatusBadgeProps) {
         value === "spam" && "bg-orange-50 text-orange-700"
       )}
     >
-      {labels[value] ?? value}
+      {getAdminStatusLabel(value)}
     </span>
   );
 }

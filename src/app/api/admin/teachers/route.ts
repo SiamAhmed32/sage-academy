@@ -58,7 +58,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (validatedData.order !== undefined) {
     const duplicate = await Teacher.findOne({ order: validatedData.order });
     if (duplicate) {
-      throw new Error(`সিরিয়াল নম্বর ${validatedData.order} ইতিমধ্যে শিক্ষক "${duplicate.name}" এর জন্য ব্যবহৃত হচ্ছে।`);
+      throw new Error(`Order number ${validatedData.order} is already assigned to teacher "${duplicate.name}".`);
     }
   }
 

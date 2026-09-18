@@ -2,14 +2,15 @@
 
 import { CalendarDays, X } from "lucide-react";
 
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel, getAdminStatusLabel } from "@/constants/admin-display";
+import { formatAdminDate } from "@/lib/admin-format";
 import type { AdminNoticeItem } from "./NoticeEditDialog";
 import type { NoticeBatchOption } from "./NoticeCreateForm";
 
 const typeLabel: Record<string, string> = {
-  general: "সাধারণ",
-  exam: "পরীক্ষা",
-  payment: "পেমেন্ট",
+  general: "General",
+  exam: "Exam",
+  payment: "Payment",
 };
 
 function batchLabel(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
@@ -25,9 +26,7 @@ function batchLabel(notice: AdminNoticeItem, batches: NoticeBatchOption[]) {
 
 function formatDate(value?: string) {
   if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric" });
+  return formatAdminDate(value, "") || null;
 }
 
 export function NoticeViewModal({
@@ -55,7 +54,7 @@ export function NoticeViewModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-sage-border bg-sage-red-50/30 px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-sage-primary">নোটিশ বিস্তারিত</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-sage-primary">Notice Details</p>
             <h3 className="mt-1 text-xl font-bold text-sage-secondary">{notice.title}</h3>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-sage-primary ring-1 ring-sage-red-100">
@@ -63,7 +62,7 @@ export function NoticeViewModal({
               </span>
               {notice.classLevel ? (
                 <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-sage-gray-600 ring-1 ring-sage-border">
-                  {getClassLabel(notice.classLevel)}
+                  {getAdminClassLabel(notice.classLevel)}
                 </span>
               ) : null}
               <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-sage-gray-600 ring-1 ring-sage-border">
@@ -76,7 +75,7 @@ export function NoticeViewModal({
                     : "bg-amber-50 text-amber-700 ring-amber-100"
                 }`}
               >
-                {notice.isPublished ? "প্রকাশিত" : "ড্রাফট"}
+                {getAdminStatusLabel(notice.isPublished ? "published" : "draft")}
               </span>
             </div>
           </div>
@@ -84,7 +83,7 @@ export function NoticeViewModal({
             type="button"
             onClick={onClose}
             className="shrink-0 rounded-lg border border-sage-border p-2 text-sage-secondary hover:bg-white"
-            aria-label="বন্ধ করুন"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -97,7 +96,7 @@ export function NoticeViewModal({
                 <p className="flex items-center gap-1.5">
                   <CalendarDays className="h-4 w-4 text-sage-primary" />
                   <span>
-                    পরীক্ষার তারিখ: <strong className="text-sage-secondary">{examDate}</strong>
+                    Exam date: <strong className="text-sage-secondary">{examDate}</strong>
                   </span>
                 </p>
               ) : null}
@@ -105,7 +104,7 @@ export function NoticeViewModal({
                 <p className="flex items-center gap-1.5">
                   <CalendarDays className="h-4 w-4 text-sage-gray-400" />
                   <span>
-                    প্রকাশ: <strong className="text-sage-secondary">{publishedDate}</strong>
+                    Published: <strong className="text-sage-secondary">{publishedDate}</strong>
                   </span>
                 </p>
               ) : null}
@@ -114,15 +113,15 @@ export function NoticeViewModal({
 
           {notice.topic ? (
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-sage-gray-500">টপিক</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-sage-gray-500">Topic</p>
               <p className="mt-1 text-base font-semibold text-sage-secondary">{notice.topic}</p>
             </div>
           ) : null}
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-sage-gray-500">বিস্তারিত</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-sage-gray-500">Details</p>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-sage-gray-700">
-              {notice.details || "কোনো বিস্তারিত লেখা নেই।"}
+              {notice.details || "No details provided."}
             </p>
           </div>
         </div>
@@ -133,7 +132,7 @@ export function NoticeViewModal({
             onClick={onClose}
             className="w-full rounded-xl bg-sage-primary py-2.5 text-sm font-bold text-white hover:bg-sage-primary-hover sm:w-auto sm:px-8"
           >
-            বন্ধ করুন
+            Close
           </button>
         </div>
       </div>

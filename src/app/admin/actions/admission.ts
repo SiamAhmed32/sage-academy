@@ -10,6 +10,13 @@ function text(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function errorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return typeof error.message === "string" ? error.message : undefined;
+  }
+  return undefined;
+}
+
 export async function updateAdmissionRequestAction(formData: FormData) {
   try {
     await requireRole(staffRoles);
@@ -23,8 +30,8 @@ export async function updateAdmissionRequestAction(formData: FormData) {
     revalidatePath("/admin/admissions");
     revalidatePath(`/admin/admissions/${id}`);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error.message };
+  } catch (error: unknown) {
+    return { success: false, message: errorMessage(error) };
   }
 }
 
@@ -35,8 +42,8 @@ export async function archiveAdmissionRequestAction(id: string) {
     await AdmissionRequest.findByIdAndUpdate(id, { isArchived: true, archivedAt: new Date() });
     revalidatePath("/admin/admissions");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error.message };
+  } catch (error: unknown) {
+    return { success: false, message: errorMessage(error) };
   }
 }
 
@@ -47,8 +54,8 @@ export async function restoreAdmissionRequestAction(id: string) {
     await AdmissionRequest.findByIdAndUpdate(id, { isArchived: false, archivedAt: null });
     revalidatePath("/admin/admissions");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error.message };
+  } catch (error: unknown) {
+    return { success: false, message: errorMessage(error) };
   }
 }
 
@@ -59,7 +66,7 @@ export async function deleteAdmissionRequestAction(id: string) {
     await AdmissionRequest.findByIdAndDelete(id);
     revalidatePath("/admin/admissions");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, message: error.message };
+  } catch (error: unknown) {
+    return { success: false, message: errorMessage(error) };
   }
 }

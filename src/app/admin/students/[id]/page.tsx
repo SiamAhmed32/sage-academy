@@ -24,6 +24,7 @@ import type { StudentProfile } from "@/components/admin/students/profile/types";
 import { connectDB } from "@/lib/mongodb";
 import Payment from "@/models/Payment";
 import Student from "@/models/Student";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -69,8 +70,8 @@ export default async function StudentProfilePage({ params }: PageProps) {
           <ArrowLeft size={20} />
         </Link>
         <AdminPageHeader
-          title={`${student.nameEnglish} - প্রোফাইল`}
-          description={`Student ID: ${student.studentId} · Monthly payable ৳${monthlyTotal}`}
+          title={`${student.nameEnglish} - Profile`}
+          description={`Student ID: ${student.studentId} · Monthly payable ${formatAdminCurrency(monthlyTotal)}`}
         />
       </div>
 

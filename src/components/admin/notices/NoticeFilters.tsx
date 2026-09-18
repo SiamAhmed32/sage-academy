@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import { classLevelOptions } from "@/constants/class-levels";
+import { adminClassLevelOptions } from "@/constants/admin-display";
 import type { NoticeBatchOption } from "./NoticeCreateForm";
 
 type NoticeFiltersProps = {
@@ -84,14 +84,15 @@ export function NoticeFilters({ q, type, classLevel, batch, status, batches }: N
         name="q"
         value={filters.q}
         onChange={updateFilter}
-        placeholder="শিরোনাম, টপিক বা বিস্তারিত দিয়ে খুঁজুন"
+        maxLength={80}
+        placeholder="Search title, topic, or details"
         className={`${inputClass} lg:col-span-3`}
       />
       <select name="type" value={filters.type} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="">সব ধরন</option>
-        <option value="general">সাধারণ</option>
-        <option value="exam">পরীক্ষা</option>
-        <option value="payment">পেমেন্ট</option>
+        <option value="">All types</option>
+        <option value="general">General</option>
+        <option value="exam">Exam</option>
+        <option value="payment">Payment</option>
       </select>
       <select
         name="classLevel"
@@ -99,15 +100,15 @@ export function NoticeFilters({ q, type, classLevel, batch, status, batches }: N
         onChange={updateFilter}
         className={`${inputClass} lg:col-span-2`}
       >
-        <option value="">সব শ্রেণি</option>
-        {classLevelOptions.map((option) => (
+        <option value="">All classes</option>
+        {adminClassLevelOptions.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
       </select>
       <select name="batch" value={filters.batch} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="">সব ব্যাচ</option>
+        <option value="">All batches</option>
         {filteredBatches.map((item) => (
           <option key={item._id} value={item._id}>
             {item.batchCode || item.title}
@@ -115,9 +116,9 @@ export function NoticeFilters({ q, type, classLevel, batch, status, batches }: N
         ))}
       </select>
       <select name="status" value={filters.status} onChange={updateFilter} className={`${inputClass} lg:col-span-2`}>
-        <option value="">সব স্ট্যাটাস</option>
-        <option value="published">প্রকাশিত</option>
-        <option value="draft">ড্রাফট</option>
+        <option value="">All statuses</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
       </select>
       <Link
         href="/admin/notices"

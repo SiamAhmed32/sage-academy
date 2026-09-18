@@ -1,4 +1,4 @@
-import { getClassLabel } from "@/constants/class-levels";
+import { getAdminClassLabel } from "@/constants/admin-display";
 
 import type { StudentProfile } from "./types";
 
@@ -6,7 +6,7 @@ const dash = "N/A";
 
 export function StudentQuickFacts({ student }: { student: StudentProfile }) {
   const facts = [
-    ["শ্রেণি", student.classLevel ? getClassLabel(student.classLevel) : dash],
+    ["Class", student.classLevel ? getAdminClassLabel(student.classLevel) : dash],
     ["Batch", student.batch?.title || dash],
     ["School/College", student.schoolName || dash],
     ["Section", student.section || dash],

@@ -21,14 +21,14 @@ export function PromotionCardFields({
   return (
     <div className="grid gap-5 md:grid-cols-2">
       <label className="grid gap-2 text-sm font-semibold text-sage-secondary">
-        কার্ড টাইটেল
-        <input name="title" defaultValue={defaults.title} required placeholder="৭ম শ্রেণি" className={inputClass} />
+        Card title
+        <input name="title" defaultValue={defaults.title} required placeholder="Class 7" className={inputClass} />
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-sage-secondary">
-        লিঙ্কড ব্যাচ (ঐচ্ছিক)
+        Linked batch (optional)
         <select name="linkedBatch" defaultValue={defaults.linkedBatch || ""} className={inputClass}>
-          <option value="">কোনোটিই নয়</option>
+          <option value="">None</option>
           {batches.map((b) => (
             <option key={b._id} value={b._id}>
               {b.title} ({b.batchCode})
@@ -38,26 +38,28 @@ export function PromotionCardFields({
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-sage-secondary">
-        ব্যাজ টেক্সট (স্ট্যাটাস)
-        <select name="badge" defaultValue={defaults.badge || "ভর্তি চলছে"} className={inputClass}>
-          <option value="ভর্তি চলছে">ভর্তি চলছে</option>
-          <option value="শীঘ্রই শুরু">শীঘ্রই শুরু</option>
-          <option value="ভর্তি বন্ধ">ভর্তি বন্ধ</option>
+        Badge text (status)
+        {/* admin-language-allow-start: canonical persisted public badge values */}
+        <select name="badge" defaultValue={defaults.badge || "ভর্তি চলছে" /* admin-language-allow: persisted public value */} className={inputClass}>
+          <option value="ভর্তি চলছে">{/* admin-language-allow: persisted public value */}Enrollment open</option>
+          <option value="শীঘ্রই শুরু">{/* admin-language-allow: persisted public value */}Starting soon</option>
+          <option value="ভর্তি বন্ধ">{/* admin-language-allow: persisted public value */}Enrollment closed</option>
         </select>
+        {/* admin-language-allow-end */}
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-sage-secondary">
-        ডিসপ্লে অর্ডার
+        Display order
         <input name="order" type="number" defaultValue={defaults.order ?? 0} className={inputClass} />
       </label>
 
       <div className="md:col-span-2">
         <label className="grid gap-2 text-sm font-semibold text-sage-secondary">
-          কার্ড ওভারভিউ (বিস্তারিত বিবরণ)
+          Card overview
           <textarea
             name="overview"
             defaultValue={defaults.overview}
-            placeholder="এই ব্যাচের বিস্তারিত বিবরণ এখানে লিখুন..."
+            placeholder="Enter a detailed description of this batch..."
             className={`${inputClass} h-32 py-2 resize-none`}
           />
         </label>
@@ -65,7 +67,7 @@ export function PromotionCardFields({
 
       <div className="md:col-span-2">
         <BatchImageUploadField
-          label="কার্ড পোস্টার ইমেজ"
+          label="Card poster image"
           previewUrl={previewUrl}
           fallbackUrl={defaults.image}
           onPreviewChange={onPreviewChange}
@@ -75,11 +77,11 @@ export function PromotionCardFields({
 
       {[1, 2, 3, 4, 5].map((num) => (
         <label key={num} className="grid gap-2 text-sm font-semibold text-sage-secondary">
-          কার্ড ফিচার {num}
+          Card feature {num}
           <input
             name={`feature${num}`}
             required
-            placeholder={`ফিচার ${num}`}
+            placeholder={`Feature ${num}`}
             defaultValue={defaults.features?.[num - 1] || ""}
             className={inputClass}
           />

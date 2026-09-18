@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { PaymentFilters } from "./PaymentManager";
 import { methodLabels, monthLabels, months } from "./payment-options";
+import { formatAdminNumber } from "@/lib/admin-format";
 
 type Props = { filters: PaymentFilters; totalPayments: number; limit: number };
 
@@ -34,10 +35,6 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
 
   const [qInput, setQInput] = useState(filters.q);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setQInput(filters.q);
-  }, [filters.q]);
 
   const navigate = useCallback(
     (next: PaymentFilters) => {
@@ -73,11 +70,11 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
     <div className="border-b border-sage-border bg-sage-red-50/10 p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-bold text-sage-secondary">পেমেন্ট লেজার</h3>
-          <p className="text-sm text-sage-gray-500">ডিফল্টভাবে চলতি মাস দেখানো হয়। পুরোনো রেকর্ড দেখতে ফিল্টার ব্যবহার করুন।</p>
+          <h3 className="font-bold text-sage-secondary">Payment Ledger</h3>
+          <p className="text-sm text-sage-gray-500">The current month is shown by default. Use filters to review older records.</p>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-sage-primary ring-1 ring-sage-border">
-          {totalPayments} রেকর্ড
+          {formatAdminNumber(totalPayments)} records
         </span>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_.8fr_.8fr_.8fr_.8fr_auto]">
@@ -90,12 +87,13 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
               setQInput(v);
               scheduleSearch(v);
             }}
-            placeholder="শিক্ষার্থীর নাম বা আইডি দিয়ে খুঁজুন..."
+            placeholder="Search by student name or ID..."
+            aria-label="Search payments"
             className="h-11 w-full rounded-xl border border-sage-border pl-10 pr-4 text-sm outline-none focus:border-sage-primary"
           />
         </label>
         <FilterSelect value={filters.month} onChange={(month) => pushPatch({ month })}>
-          <option value="all">সব মাস</option>
+          <option value="all">All Months</option>
           {months.map((m) => (
             <option key={m} value={m}>
               {monthLabels[m]}
@@ -103,7 +101,7 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
           ))}
         </FilterSelect>
         <FilterSelect value={filters.year} onChange={(year) => pushPatch({ year })}>
-          <option value="all">সব বছর</option>
+          <option value="all">All Years</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
@@ -111,14 +109,14 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
           ))}
         </FilterSelect>
         <FilterSelect value={filters.status} onChange={(status) => pushPatch({ status })}>
-          <option value="all">সব স্ট্যাটাস</option>
-          <option value="due">শুধু বকেয়া</option>
+          <option value="all">All Statuses</option>
+          <option value="due">Due Only</option>
           <option value="unpaid">Unpaid</option>
-          <option value="partial">আংশিক</option>
+          <option value="partial">Partially Paid</option>
           <option value="paid">Paid</option>
         </FilterSelect>
         <FilterSelect value={filters.method} onChange={(method) => pushPatch({ method })}>
-          <option value="all">সব মাধ্যম</option>
+          <option value="all">All Methods</option>
           {Object.entries(methodLabels).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -130,7 +128,7 @@ export function PaymentFiltersPanel({ filters, totalPayments, limit }: Props) {
             href="/admin/payments"
             className="grid h-11 w-full place-items-center rounded-xl border border-sage-border bg-white px-4 text-sm font-bold text-sage-secondary xl:w-auto"
           >
-            রিসেট
+            Reset
           </a>
         </div>
       </div>

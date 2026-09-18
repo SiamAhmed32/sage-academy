@@ -1,11 +1,12 @@
 "use client";
 
 import { MessageCircle, Phone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 import { updateFreeClassLeadAction } from "@/app/admin/actions";
 import { freeClassLeadStatusOptions } from "@/constants/admin";
+import { formatAdminDateTime } from "@/lib/admin-format";
 
 export type FreeClassLeadRow = {
   _id: string;
@@ -31,11 +32,6 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
     Object.fromEntries(initialLeads.map((l) => [l._id, l.adminNote ?? ""]))
   );
 
-  useEffect(() => {
-    setLeads(initialLeads);
-    setNotes(Object.fromEntries(initialLeads.map((l) => [l._id, l.adminNote ?? ""])));
-  }, [initialLeads]);
-
   const setStatus = async (id: string, status: string) => {
     const formData = new FormData();
     formData.append("id", id);
@@ -43,9 +39,9 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
     try {
       await updateFreeClassLeadAction(formData);
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, status } : l)));
-      toast.success("স্ট্যাটাস আপডেট হয়েছে");
+      toast.success("Status updated");
     } catch {
-      toast.error("আপডেট ব্যর্থ");
+      toast.error("Update failed");
     }
   };
 
@@ -56,17 +52,17 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
     try {
       await updateFreeClassLeadAction(formData);
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, adminNote: notes[id] ?? "" } : l)));
-      toast.success("নোট সেভ হয়েছে");
+      toast.success("Note saved");
     } catch {
-      toast.error("সেভ ব্যর্থ");
+      toast.error("Save failed");
     }
   };
 
   if (leads.length === 0) {
     return (
       <div className="rounded-2xl border border-sage-border bg-white px-6 py-14 pb-16 text-center sm:py-16">
-        <p className="text-lg font-bold text-sage-secondary sm:text-xl">কোনো লিড পাওয়া যায়নি</p>
-        <p className="mt-2 text-sm text-sage-gray-600 sm:text-base">ফিল্টার বদলে দিন অথবা সার্চ ক্লিয়ার করে আবার চেষ্টা করুন।</p>
+        <p className="text-lg font-bold text-sage-secondary sm:text-xl">No leads found</p>
+        <p className="mt-2 text-sm text-sage-gray-600 sm:text-base">Adjust the filters or clear the search and try again.</p>
       </div>
     );
   }
@@ -81,22 +77,22 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
           <thead>
             <tr className="border-b border-sage-border bg-sage-red-50/70">
               <th className="box-border w-[18%] px-4 py-4 text-xs font-black uppercase tracking-wide text-sage-primary sm:px-5 sm:py-5 sm:text-sm">
-                শিক্ষার্থী
+                Student
               </th>
               <th className="box-border w-[18%] px-4 py-4 text-xs font-black uppercase tracking-wide text-sage-primary sm:px-5 sm:py-5 sm:text-sm">
-                যোগাযোগ
+                Contact
               </th>
               <th className="box-border w-[16%] px-4 py-4 text-xs font-black uppercase tracking-wide text-sage-primary sm:px-5 sm:py-5 sm:text-sm">
-                শ্রেণী / বিষয়
+                Class / subject
               </th>
               <th className="box-border w-[10%] px-4 py-4 text-xs font-black uppercase tracking-wide text-sage-primary sm:px-5 sm:py-5 sm:text-sm">
-                উৎস
+                Source
               </th>
               <th className="box-border w-[14%] px-4 py-4 text-center text-xs font-black uppercase tracking-wide text-sage-primary sm:px-5 sm:py-5 sm:text-sm">
-                স্ট্যাটাস
+                Status
               </th>
               <th className="box-border min-w-[220px] px-4 py-4 text-xs font-black uppercase tracking-wide text-sage-primary sm:min-w-[260px] sm:px-5 sm:py-5 sm:text-sm">
-                নোট
+                Note
               </th>
             </tr>
           </thead>
@@ -106,10 +102,7 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
                 <td className="box-border px-4 pb-8 pt-5 sm:px-5 sm:pb-10 sm:pt-6">
                   <p className="break-words text-base font-bold leading-snug text-sage-secondary sm:text-lg">{l.name}</p>
                   <p className="mt-1.5 text-xs text-sage-gray-500 sm:text-sm">
-                    {new Date(l.createdAt).toLocaleString("bn-BD", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
+                    {formatAdminDateTime(l.createdAt)}
                   </p>
                 </td>
                 <td className="box-border px-4 pb-8 pt-5 sm:px-5 sm:pb-10 sm:pt-6">
@@ -118,7 +111,7 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
                     <a
                       href={`tel:${l.phone}`}
                       className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage-red-50 text-sage-primary ring-1 ring-sage-red-100 transition hover:bg-sage-primary hover:text-white sm:h-11 sm:w-11"
-                      title="কল"
+                      title="Call"
                     >
                       <Phone className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" aria-hidden />
                     </a>
@@ -146,7 +139,7 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
                         : "bg-amber-50 text-amber-900 ring-1 ring-amber-100"
                     }`}
                   >
-                    {l.source === "registered" ? "লগইন" : "অতিথি"}
+                    {l.source === "registered" ? "Signed in" : "Guest"}
                   </span>
                 </td>
                 <td className="box-border px-4 pb-8 pt-5 text-center sm:px-5 sm:pb-10 sm:pt-6">
@@ -170,7 +163,7 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
                       rows={3}
                       value={notes[l._id] ?? ""}
                       onChange={(e) => setNotes((prev) => ({ ...prev, [l._id]: e.target.value }))}
-                      placeholder="ফলো-আপ নোট লিখুন…"
+                      placeholder="Write a follow-up note..."
                       className="box-border min-h-[5.5rem] w-full resize-y rounded-xl border border-sage-border px-3 py-2.5 text-sm leading-relaxed text-sage-secondary outline-none focus:border-sage-primary focus:ring-2 focus:ring-sage-primary/15 sm:px-4 sm:text-base"
                     />
                     <div className="flex justify-end pt-1">
@@ -179,7 +172,7 @@ export function FreeClassLeadTable({ initialLeads }: { initialLeads: FreeClassLe
                         onClick={() => saveNote(l._id)}
                         className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-sage-secondary px-5 text-sm font-bold text-white shadow-sm transition hover:bg-sage-primary sm:h-11 sm:px-6 sm:text-base"
                       >
-                        নোট সেভ
+                        Save note
                       </button>
                     </div>
                   </div>

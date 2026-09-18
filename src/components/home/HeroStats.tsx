@@ -43,17 +43,17 @@ export function HeroStats() {
               key={item.label}
               className={cn(
                 "group flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-sage-red-100/70 bg-white/70 px-2 py-3 text-center shadow-sm shadow-sage-red-100/20 backdrop-blur transition-all duration-200",
-                "sm:flex-row sm:items-center sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-3.5 sm:text-left",
+                "sm:rounded-2xl sm:px-3 sm:py-3.5 md:flex-row md:items-center md:gap-3 md:px-4 md:text-left",
                 "hover:-translate-y-0.5 hover:border-sage-primary/20 hover:shadow-md hover:shadow-sage-red-100/40"
               )}
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sage-primary/8 text-sage-primary transition-colors duration-200 group-hover:bg-sage-primary/12 sm:h-9 sm:w-9 sm:rounded-xl">
                 <Icon />
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 max-w-full">
                 <p className="bn-headline text-base font-bold leading-tight text-sage-secondary sm:text-xl md:text-2xl">
                   {hasCountUpValue(item) ? (
-                    <>
+                    <span className="notranslate" translate="no">
                       <CountUp
                         from={0}
                         to={item.countTo}
@@ -62,9 +62,11 @@ export function HeroStats() {
                         className="tabular-nums"
                       />
                       {item.suffix}
-                    </>
+                    </span>
                   ) : (
-                    <span className="text-sm sm:text-base md:text-xl">{item.value}</span>
+                    <span className="notranslate text-sm sm:text-base md:text-xl" translate="no">
+                      {item.value}
+                    </span>
                   )}
                 </p>
                 <p className="bn-pill mt-0.5 text-[10px] font-medium leading-tight text-sage-gray-500 sm:text-xs md:text-sm">

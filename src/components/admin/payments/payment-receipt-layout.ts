@@ -2,6 +2,7 @@ import type jsPDF from "jspdf";
 
 import { methodLabelsReceiptEn } from "./payment-options";
 import { money, type ReceiptLineItem, type ReceiptPayment } from "./payment-receipt";
+import { formatAdminDate, formatAdminNumber } from "@/lib/admin-format";
 
 /** Formal payslip palette: black/gray structure, minimal accent. */
 const INK: [number, number, number] = [24, 24, 24];
@@ -92,11 +93,7 @@ function drawReceiptReference(doc: jsPDF, payment: ReceiptPayment) {
   doc.setTextColor(...INK);
   setFont(doc, "bold");
   doc.setFontSize(11);
-  const dateStr = new Date(payment.createdAt).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const dateStr = formatAdminDate(payment.createdAt);
   doc.text(dateStr, boxX + pad, boxY + 76);
 }
 
@@ -214,7 +211,7 @@ function studentBlock({ doc, payment, due }: DrawContext) {
   y += 16;
   labelValueRow(doc, "Student ID", payment.student.studentId, M + pad, y, labelW);
   y += 16;
-  labelValueRow(doc, "Billing period", `${payment.month} ${payment.year}`, M + pad, y, labelW);
+  labelValueRow(doc, "Billing period", `${payment.month} ${formatAdminNumber(payment.year)}`, M + pad, y, labelW);
   y += 16;
   labelValueRow(doc, "Payment method", paymentMethodEn(payment.paymentMethod), M + pad, y, labelW);
 }
@@ -279,14 +276,14 @@ function drawFeeTable(
     const displayNo = globalStartIndex + index + 1;
     setFont(doc, "normal");
     doc.setFontSize(9);
-    doc.text(String(displayNo), xNum, baseline);
+    doc.text(formatAdminNumber(displayNo), xNum, baseline);
     setFont(doc, "bold");
     const raw = item.label || item.type;
     const lines = doc.splitTextToSize(raw, descMaxW);
     const desc = lines.length > 1 ? `${String(lines[0]).replace(/\s+$/, "")}...` : raw;
     doc.text(desc, xDesc, baseline, { maxWidth: descMaxW });
     setFont(doc, "normal");
-    doc.text(`${item.month || payment.month} ${item.year || payment.year}`, xMonth, baseline, { maxWidth: monthMaxW });
+    doc.text(`${item.month || payment.month} ${formatAdminNumber(item.year || payment.year)}`, xMonth, baseline, { maxWidth: monthMaxW });
     doc.text(money(item.fee), xFeeR, baseline, { align: "right" });
     doc.text(money(item.discount), xDiscR, baseline, { align: "right" });
     doc.text(money(item.amount), xPayR, baseline, { align: "right" });

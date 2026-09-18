@@ -9,6 +9,7 @@ import {
   type SavedSubjectFee,
   type SubjectFeeSelection,
 } from "./student-subject-fees";
+import { formatAdminCurrency } from "@/lib/admin-format";
 
 export function StudentSubjectFeeSelector({
   subjects,
@@ -53,8 +54,8 @@ export function StudentSubjectFeeSelector({
     <div>
       <input type="hidden" name="selectedSubjectsJson" value={JSON.stringify(rows)} />
       <div className="mb-3 flex items-center justify-between">
-        <label className="text-xs font-bold uppercase tracking-widest text-sage-primary">বিষয়সমূহ নির্বাচন</label>
-        <span className="text-xs font-bold text-sage-secondary">মোট: ৳{total}</span>
+        <label className="text-xs font-bold uppercase tracking-widest text-sage-primary">Select Subjects</label>
+        <span className="text-xs font-bold text-sage-secondary">Total: {formatAdminCurrency(total)}</span>
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
         {subjects.map((subject) => {
@@ -70,20 +71,20 @@ export function StudentSubjectFeeSelector({
                   </span>
                   <span className="block text-[10px] text-sage-gray-500">{subject.days?.join(", ")}</span>
                 </span>
-                <span className="text-xs font-black text-sage-primary">৳{subject.monthlyFee}</span>
+                <span className="text-xs font-black text-sage-primary">{formatAdminCurrency(subject.monthlyFee)}</span>
               </label>
               {item && (
                 <div className="mt-3 grid gap-2 border-t border-sage-border pt-3 sm:grid-cols-4">
                   <select value={item.discountType} onChange={(e) => update(item.subjectName, { discountType: e.target.value as SubjectFeeSelection["discountType"], discountValue: 0 })} className="h-9 rounded-lg border border-sage-border bg-white px-2 text-xs">
                     <option value="none">No discount</option>
-                    <option value="amount">৳ Discount</option>
+                    <option value="amount">Amount discount</option>
                     <option value="percent">% Discount</option>
                     <option value="custom">Custom fee</option>
                   </select>
                   <input type="number" min="0" value={item.discountValue || ""} onChange={(e) => update(item.subjectName, { discountValue: Number(e.target.value) || 0 })} disabled={item.discountType === "none"} placeholder="Value" className="h-9 rounded-lg border border-sage-border px-2 text-xs disabled:bg-sage-red-50" />
                   <input value={item.discountNote} onChange={(e) => update(item.subjectName, { discountNote: e.target.value })} placeholder="Note" className="h-9 rounded-lg border border-sage-border px-2 text-xs" />
                   <div className="flex h-9 items-center justify-center rounded-lg bg-white px-2 text-center text-xs font-bold text-sage-secondary ring-1 ring-sage-border">
-                    Final ৳{item.monthlyFee}
+                    Final {formatAdminCurrency(item.monthlyFee)}
                   </div>
                 </div>
               )}

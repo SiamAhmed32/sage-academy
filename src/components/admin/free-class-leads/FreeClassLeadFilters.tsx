@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, Calendar, Filter, RotateCcw, Search } from "lucide-react";
 
 import { freeClassLeadStatusOptions } from "@/constants/admin";
-import { toBanglaDigits } from "@/constants/class-levels";
 import { freeClassOptions } from "@/constants/free-class";
 
 type Props = {
@@ -20,16 +19,31 @@ type Props = {
 };
 
 function classFilterChoices() {
-  const fromForm = freeClassOptions.map((o) => ({ value: o.label, label: o.label }));
+  const adminLabels: Record<string, string> = {
+    "6": "Class 6",
+    "7": "Class 7",
+    "8": "Class 8",
+    "9": "Class 9",
+    "10": "Class 10",
+    ssc: "SSC / Class 10",
+    hsc1: "HSC first year",
+    hsc2: "HSC second year",
+    admission: "Admission test preparation",
+    other: "Other",
+  };
+  const fromForm = freeClassOptions.map((option) => ({
+    value: option.label,
+    label: adminLabels[option.value] ?? option.value,
+  }));
   const english = [5, 6, 7, 8, 9, 10, 11, 12].map((n) => {
-    return { value: `Class ${n}`, label: `ক্লাস ${toBanglaDigits(n)}` };
+    return { value: `Class ${n}`, label: `Class ${n}` };
   });
-  const legacy = { value: "রেজিস্টার্ড অ্যাকাউন্ট", label: "রেজিস্টার্ড অ্যাকাউন্ট (পুরনো)" };
+  const legacy = { value: "রেজিস্টার্ড অ্যাকাউন্ট", label: "Registered account (legacy)" }; // admin-language-allow: persisted legacy filter value
   const map = new Map<string, { value: string; label: string }>();
   for (const row of [...fromForm, ...english, legacy]) {
     map.set(row.value, row);
   }
-  return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, "bn"));
+  return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, "en"));
 }
 
 const selectBase =
@@ -53,10 +67,6 @@ export function FreeClassLeadFilters({
   const [searchValue, setSearchValue] = useState(q);
 
   const classChoices = useMemo(() => classFilterChoices(), []);
-
-  useEffect(() => {
-    setSearchValue(q);
-  }, [q]);
 
   const updateParams = useCallback(
     (key: string, value: string) => {
@@ -88,9 +98,9 @@ export function FreeClassLeadFilters({
     <div className="rounded-2xl border border-sage-border bg-white p-4 pb-6 shadow-sm sm:p-6 sm:pb-8">
       <div className="mb-6 flex flex-col gap-4 border-b border-sage-border/80 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-lg font-bold text-sage-secondary sm:text-xl">ফিল্টার ও সার্চ</h3>
+          <h3 className="text-lg font-bold text-sage-secondary sm:text-xl">Filters and Search</h3>
           <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-sage-gray-600 sm:text-base">
-            একসাথে সব রেকর্ড লোড হয় না—টেবিলে শুধু এই পৃষ্ঠার লিড দেখাবে।
+            Results are queried on the server, and the table only loads leads for this page.
           </p>
         </div>
         <button
@@ -99,14 +109,14 @@ export function FreeClassLeadFilters({
           className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-sage-border bg-sage-red-50/60 px-4 py-2.5 text-sm font-bold text-sage-secondary transition hover:border-sage-primary hover:bg-sage-primary hover:text-white sm:px-5 sm:text-base"
         >
           <RotateCcw className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" aria-hidden />
-          ফিল্টার সাফ করুন
+          Clear filters
         </button>
       </div>
 
       <div className="flex flex-col gap-5">
         <div className="min-w-0">
           <label className={labelCls} htmlFor="free-lead-search">
-            সার্চ
+            Search
           </label>
           <div className="relative min-w-0">
             <Search
@@ -116,7 +126,7 @@ export function FreeClassLeadFilters({
             <input
               id="free-lead-search"
               className={inputBase}
-              placeholder="নাম, মোবাইল, বিষয় বা শ্রেণী…"
+              placeholder="Search by name, phone, subject, or class..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               autoComplete="off"
@@ -129,7 +139,7 @@ export function FreeClassLeadFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                সময়
+                Date range
               </span>
             </span>
             <select
@@ -137,10 +147,10 @@ export function FreeClassLeadFilters({
               value={dateRange}
               onChange={(e) => updateParams("dateRange", e.target.value)}
             >
-              <option value="all">সব সময়</option>
-              <option value="today">আজকের</option>
-              <option value="week">গত ৭ দিন</option>
-              <option value="month">গত ৩০ দিন</option>
+              <option value="all">All dates</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 days</option>
+              <option value="month">Last 30 days</option>
             </select>
           </div>
 
@@ -148,11 +158,11 @@ export function FreeClassLeadFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <Filter className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                স্ট্যাটাস
+                Status
               </span>
             </span>
             <select className={selectBase} value={status} onChange={(e) => updateParams("status", e.target.value)}>
-              <option value="all">সব স্ট্যাটাস</option>
+              <option value="all">All statuses</option>
               {freeClassLeadStatusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -162,22 +172,22 @@ export function FreeClassLeadFilters({
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>উৎস</span>
+            <span className={labelCls}>Source</span>
             <select className={selectBase} value={source} onChange={(e) => updateParams("source", e.target.value)}>
-              <option value="all">সব উৎস</option>
-              <option value="guest">অতিথি ফর্ম</option>
-              <option value="registered">লগইন করা</option>
+              <option value="all">All sources</option>
+              <option value="guest">Guest form</option>
+              <option value="registered">Signed-in user</option>
             </select>
           </div>
 
           <div className="min-w-0 sm:col-span-2 lg:col-span-1">
-            <span className={labelCls}>শ্রেণী</span>
+            <span className={labelCls}>Class</span>
             <select
               className={selectBase}
               value={classLabel}
               onChange={(e) => updateParams("classLabel", e.target.value)}
             >
-              <option value="all">সব শ্রেণী</option>
+              <option value="all">All classes</option>
               {classChoices.map((row) => (
                 <option key={row.value} value={row.value}>
                   {row.label}
@@ -190,17 +200,17 @@ export function FreeClassLeadFilters({
             <span className={labelCls}>
               <span className="inline-flex items-center gap-1.5">
                 <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-sage-primary sm:h-4 sm:w-4" aria-hidden />
-                সাজানো
+                Sort
               </span>
             </span>
             <select className={selectBase} value={sort} onChange={(e) => updateParams("sort", e.target.value)}>
-              <option value="desc">নতুন আগে</option>
-              <option value="asc">পুরানো আগে</option>
+              <option value="desc">Newest first</option>
+              <option value="asc">Oldest first</option>
             </select>
           </div>
 
           <div className="min-w-0">
-            <span className={labelCls}>প্রতি পৃষ্ঠায়</span>
+            <span className={labelCls}>Per page</span>
             <select
               className={selectBase}
               value={String(limit)}
@@ -208,7 +218,7 @@ export function FreeClassLeadFilters({
             >
               {pageSizeOptions.map((n) => (
                 <option key={n} value={String(n)}>
-                  {n.toLocaleString("bn-BD")} টি
+                  {n} per page
                 </option>
               ))}
             </select>

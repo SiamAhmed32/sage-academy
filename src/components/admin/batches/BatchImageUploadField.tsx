@@ -78,7 +78,7 @@ export function BatchImageUploadField({
               <Camera size={20} />
             </div>
             <div>
-              <p className="text-sm font-bold text-sage-secondary">ব্যাচ ছবি আপলোড</p>
+              <p className="text-sm font-bold text-sage-secondary">Upload batch image</p>
               <p className="text-[10px] text-sage-gray-500">JPG, PNG, WEBP (Max 5MB)</p>
             </div>
           </div>

@@ -11,7 +11,7 @@ export async function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-sage-red-100 bg-sage-white/95 backdrop-blur-md">
       <Container>
-        <nav className="flex min-h-20 items-center justify-between gap-6">
+        <nav className="flex min-h-20 flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <BrandLogo />
 
           <div className="hidden lg:block">

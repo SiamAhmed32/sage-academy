@@ -54,6 +54,8 @@ const ExamSchema = new Schema(
 );
 
 ExamSchema.index({ status: 1, featured: 1, endDate: 1, order: 1 });
+ExamSchema.index({ status: 1, classLevels: 1, order: 1, createdAt: -1 });
+ExamSchema.index({ status: 1, classLevels: 1, startDate: 1, createdAt: -1 });
 
 if (process.env.NODE_ENV !== "production" && models.Exam) {
   deleteModel("Exam");

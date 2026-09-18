@@ -21,7 +21,7 @@ function getParam(params: Record<string, string | string[] | undefined>, key: st
 
 export default async function AdminNoticesPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const q = getParam(params, "q");
+  const q = getParam(params, "q").trim().slice(0, 80);
   const type = getParam(params, "type");
   const classLevel = getParam(params, "classLevel");
   const batch = getParam(params, "batch");
@@ -49,8 +49,8 @@ export default async function AdminNoticesPage({ searchParams }: PageProps) {
   return (
     <div>
       <AdminPageHeader
-        title="নোটিশ ম্যানেজমেন্ট"
-        description="শ্রেণি ও ব্যাচ বেছে নোটিশ পাঠান — শুধুমাত্র ওই ব্যাচে ভর্তি শিক্ষার্থীরা দেখবে।"
+        title="Notice Management"
+        description="Send notices to a class and batch so only enrolled students in that batch can view them."
       />
 
       <NoticeCreatePanel batches={batchOptions} />

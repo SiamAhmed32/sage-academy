@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { LeadAttributionCapture } from "@/components/shared/LeadAttributionCapture";
+import { GoogleTranslateStability } from "@/components/shared/GoogleTranslateStability";
 
 import "./globals.css";
 
@@ -75,6 +76,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <LeadAttributionCapture />
+        <GoogleTranslateStability />
         <ToastContainer position="top-right" autoClose={3000} />
         <Navbar />
         <main className="flex-grow">

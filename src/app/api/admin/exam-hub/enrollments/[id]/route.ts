@@ -22,7 +22,7 @@ export const GET = withApiHandler(async (_req: NextRequest, context: RouteContex
   const { id } = await context.params;
 
   const enrollment = await ExamEnrollment.findById(id).lean();
-  if (!enrollment) throw new NotFoundError("Enrollment not found");
+  if (!enrollment) throw new NotFoundError("Exam enrollment not found.");
 
   const program = await ExamProgram.findById(enrollment.programId).select("title slug feeAmount deliveryMode").lean();
 
@@ -35,7 +35,7 @@ export const GET = withApiHandler(async (_req: NextRequest, context: RouteContex
       programSlug: program?.slug || "",
       programFeeAmount: program?.feeAmount || 0,
     },
-    "Enrollment fetched"
+    "Exam enrollment loaded successfully."
   );
 });
 
@@ -59,10 +59,10 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
   }
 
   const enrollment = await ExamEnrollment.findByIdAndUpdate(id, update, { new: true }).lean();
-  if (!enrollment) throw new NotFoundError("Enrollment not found");
+  if (!enrollment) throw new NotFoundError("Exam enrollment not found.");
 
   const program = await ExamProgram.findById(enrollment.programId).select("title slug feeAmount").lean();
-  if (!program) throw new NotFoundError("Program not found");
+  if (!program) throw new NotFoundError("The associated exam program was not found.");
 
   const mailContext = {
     name: enrollment.name,
@@ -94,10 +94,10 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
       }
     } catch (error) {
       console.error("[exam-hub] Enrollment status email failed:", error);
-      emailError = "Enrollment updated but email could not be sent";
+      emailError = "The enrollment was updated, but the notification email could not be sent.";
     }
   } else if (body.status === "confirmed" || body.paymentStatus === "rejected") {
-    emailError = "Enrollment updated but no customer email was found";
+    emailError = "The enrollment was updated, but no customer email address was available.";
   }
 
   return successResponse(
@@ -110,7 +110,7 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     emailError
       ? emailError
       : body.status === "confirmed"
-        ? "Enrollment approved"
-        : "Enrollment rejected"
+        ? "Exam enrollment approved successfully."
+        : "Exam enrollment rejected successfully."
   );
 });
