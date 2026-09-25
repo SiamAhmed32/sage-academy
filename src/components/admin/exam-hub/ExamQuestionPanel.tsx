@@ -1,13 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { ImageIcon, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import type { ColDef, ICellRendererParams } from "ag-grid-community";
+import { Eye, EyeOff, FileQuestion, ImageIcon, Plus, Upload } from "lucide-react";
 import { toast } from "react-toastify";
 
 import type { ExamProgramOption } from "@/components/admin/exam-hub/ExamHubManager";
-import { Badge } from "@/components/ui/badge";
+import { useExamHubTiles } from "@/components/admin/exam-hub/use-exam-hub-tiles";
+import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
+import { ActionIcons, IconAction, Pill, dateCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
+import { ButtonTitle, ConfirmDialog, ThumbTitle, yesNoOptions, type ConfirmRequest } from "@/components/admin/grids/shared";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,24 +31,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-type Question = {
-  _id: string;
+const SOURCE = "exam-questions";
+
+type Row = {
+  id: string;
+  programId: string;
   questionText: string;
-  image?: string;
+  image: string;
   options: { text: string }[];
+  optionCount: number;
   correctIndex: number;
+  explanation: string;
   marks: number;
   order: number;
   isActive: boolean;
+  status: "active" | "inactive";
+  hasImage: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type QuestionsContext = GridContext & {
+  edit: (row: Row) => void;
+  remove: (row: Row) => void;
+  toggle: (row: Row) => void;
 };
 
 const emptyForm = {
@@ -47,6 +67,22 @@ const emptyForm = {
   isActive: true,
 };
 
+const letter = (index: number) => String.fromCharCode(65 + index);
+
+function QuestionActions({ data, context }: ICellRendererParams<Row, unknown, QuestionsContext>) {
+  if (!data) return null;
+  return (
+    <ActionIcons onEdit={() => context.edit(data)} onDelete={() => context.remove(data)}>
+      <IconAction
+        icon={data.isActive ? EyeOff : Eye}
+        label={data.isActive ? "Deactivate (hide from exam)" : "Activate (show in exam)"}
+        tone={data.isActive ? undefined : "success"}
+        onClick={() => context.toggle(data)}
+      />
+    </ActionIcons>
+  );
+}
+
 export function ExamQuestionPanel({
   programs,
   selectedProgramId,
@@ -56,36 +92,52 @@ export function ExamQuestionPanel({
   selectedProgramId: string;
   onSelectProgram: (id: string) => void;
 }) {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const grid = useRef<SaDataGridHandle>(null);
+  const { tiles, reload: reloadTiles } = useExamHubTiles("questions", selectedProgramId);
+  const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Row | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState("");
   const [activatingAll, setActivatingAll] = useState(false);
+  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
+  const params = useMemo(() => (selectedProgramId ? { programId: selectedProgramId } : undefined), [selectedProgramId]);
+  const shownProgram = useRef(selectedProgramId);
   useEffect(() => {
-    if (!selectedProgramId) return;
-    const controller = new AbortController();
-    fetch(`/api/admin/exam-hub/programs/${selectedProgramId}/questions`, {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((data) => setQuestions(data.data || []))
-      .finally(() => setLoading(false));
-    return () => controller.abort();
+    if (shownProgram.current === selectedProgramId) return;
+    shownProgram.current = selectedProgramId;
+    grid.current?.refresh();
   }, [selectedProgramId]);
+
+  function reload() {
+    grid.current?.refresh(false);
+    void reloadTiles();
+    router.refresh();
+  }
 
   function resetForm() {
     setForm(emptyForm);
-    setEditingId(null);
+    setEditing(null);
     setImageFile(null);
     setExistingImage("");
   }
 
-  function startEdit(question: Question) {
-    setEditingId(question._id);
+  function closeForm() {
+    if (saving) return;
+    setFormOpen(false);
+    resetForm();
+  }
+
+  function openCreate() {
+    resetForm();
+    setFormOpen(true);
+  }
+
+  function startEdit(question: Row) {
+    setEditing(question);
     setImageFile(null);
     setExistingImage(question.image || "");
     setForm({
@@ -101,6 +153,7 @@ export function ExamQuestionPanel({
       order: question.order,
       isActive: question.isActive !== false,
     });
+    setFormOpen(true);
   }
 
   async function saveQuestion(e: React.FormEvent) {
@@ -120,6 +173,8 @@ export function ExamQuestionPanel({
     fd.append("marks", String(form.marks));
     fd.append("order", String(form.order));
     fd.append("isActive", String(form.isActive));
+    // The form has no explanation field; send the saved one so an edit keeps it.
+    if (editing?.explanation) fd.append("explanation", editing.explanation);
     if (existingImage && !imageFile) fd.append("image", existingImage);
     if (!existingImage && !imageFile) fd.append("image", "");
     if (imageFile) fd.append("imageFile", imageFile);
@@ -127,11 +182,9 @@ export function ExamQuestionPanel({
     setSaving(true);
     try {
       const res = await fetch(
-        editingId
-          ? `/api/admin/exam-hub/questions/${editingId}`
-          : `/api/admin/exam-hub/programs/${selectedProgramId}/questions`,
+        editing ? `/api/admin/exam-hub/questions/${editing.id}` : `/api/admin/exam-hub/programs/${selectedProgramId}/questions`,
         {
-          method: editingId ? "PATCH" : "POST",
+          method: editing ? "PATCH" : "POST",
           body: fd,
         }
       );
@@ -140,53 +193,150 @@ export function ExamQuestionPanel({
         toast.error(typeof data?.message === "string" ? data.message : "Could not save the exam question");
         return;
       }
-
-      if (editingId) {
-        setQuestions((prev) => prev.map((q) => (q._id === editingId ? data.data : q)));
-        toast.success("Question updated");
-      } else {
-        setQuestions((prev) => [...prev, data.data]);
-        toast.success("Question added");
-      }
+      toast.success(editing ? "Question updated" : "Question added");
+      setFormOpen(false);
       resetForm();
+      reload();
     } finally {
       setSaving(false);
     }
   }
 
-  async function removeQuestion(id: string) {
-    const res = await fetch(`/api/admin/exam-hub/questions/${id}`, { method: "DELETE" });
+  function askDelete(row: Row) {
+    setConfirm({
+      title: "Delete this question?",
+      description: `"${row.questionText.slice(0, 120)}" will be removed from the question bank.`,
+      confirmLabel: "Delete question",
+      danger: true,
+      run: async () => {
+        const res = await fetch(`/api/admin/exam-hub/questions/${row.id}`, { method: "DELETE" });
+        if (!res.ok) {
+          toast.error("Could not delete the exam question");
+          return;
+        }
+        toast.success("Question deleted");
+        if (editing?.id === row.id) resetForm();
+        reload();
+      },
+    });
+  }
+
+  async function toggleActive(row: Row) {
+    // Send the whole question: a partial update would reset marks and order to their defaults.
+    const res = await fetch(`/api/admin/exam-hub/questions/${row.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        questionText: row.questionText,
+        image: row.image,
+        options: row.options,
+        correctIndex: row.correctIndex,
+        explanation: row.explanation,
+        marks: row.marks,
+        order: row.order,
+        isActive: !row.isActive,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      toast.error("Could not delete the exam question");
+      toast.error(typeof data?.message === "string" ? data.message : "Could not update the exam question");
       return;
     }
-    setQuestions((prev) => prev.filter((q) => q._id !== id));
-    if (editingId === id) resetForm();
+    toast.success(row.isActive ? "Question hidden from the exam" : "Question is active in the exam");
+    reload();
   }
 
   async function activateAllQuestions() {
     if (!selectedProgramId) return;
     setActivatingAll(true);
     try {
-      const res = await fetch(
-        `/api/admin/exam-hub/programs/${selectedProgramId}/questions/activate-all`,
-        { method: "POST" }
-      );
+      const res = await fetch(`/api/admin/exam-hub/programs/${selectedProgramId}/questions/activate-all`, { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         toast.error(typeof data?.message === "string" ? data.message : "Could not activate the exam questions");
         return;
       }
-      setQuestions((prev) => prev.map((q) => ({ ...q, isActive: true })));
       toast.success(typeof data?.message === "string" ? data.message : "Questions activated");
+      reload();
     } finally {
       setActivatingAll(false);
     }
   }
 
+  const columnDefs = useMemo<ColDef<Row>[]>(
+    () => [
+      {
+        colId: "index",
+        headerName: "#",
+        width: 70,
+        sortable: false,
+        valueGetter: ({ node }) => (node?.rowIndex ?? 0) + 1,
+      },
+      {
+        field: "questionText",
+        headerName: "Question",
+        minWidth: 320,
+        flex: 2,
+        ...textCol(),
+        tooltipField: "questionText",
+        cellRenderer: ({ data, context }: ICellRendererParams<Row, unknown, QuestionsContext>) =>
+          data ? (
+            <ButtonTitle onClick={() => context.edit(data)}>
+              <ThumbTitle
+                image={data.image}
+                icon={FileQuestion}
+                title={data.questionText}
+                sub={data.isActive ? `Correct: ${letter(data.correctIndex)}. ${data.options[data.correctIndex]?.text ?? ""}` : "Inactive — hidden from exam"}
+              />
+            </ButtonTitle>
+          ) : null,
+      },
+      {
+        field: "optionCount",
+        headerName: "Options",
+        width: 110,
+        ...numberCol(),
+      },
+      {
+        field: "correctIndex",
+        headerName: "Correct",
+        width: 110,
+        ...numberCol(),
+        valueFormatter: ({ value }) => (value == null ? "—" : letter(Number(value))),
+      },
+      { field: "marks", headerName: "Marks", width: 100, ...numberCol() },
+      { field: "order", headerName: "Order", width: 100, ...numberCol() },
+      {
+        field: "status",
+        headerName: "Status",
+        width: 120,
+        ...setCol([
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ]),
+        cellRenderer: ({ value }: { value?: string }) =>
+          value === "inactive" ? <Pill tone="warning">Inactive</Pill> : <Pill tone="success">Active</Pill>,
+      },
+      {
+        field: "hasImage",
+        headerName: "Image",
+        width: 110,
+        hide: true,
+        ...setCol(yesNoOptions("With image", "No image")),
+        valueFormatter: ({ value }) => (value ? "Yes" : "No"),
+      },
+      { field: "createdAt", headerName: "Added", width: 125, hide: true, ...dateCol() },
+      { field: "updatedAt", headerName: "Updated", width: 125, hide: true, ...dateCol() },
+      { colId: "actions", headerName: "", width: 130, cellRenderer: QuestionActions },
+    ],
+    []
+  );
+
   const selectedProgram = programs.find((p) => p._id === selectedProgramId);
-  const activeCount = questions.filter((q) => q.isActive !== false).length;
-  const inactiveCount = questions.filter((q) => q.isActive === false).length;
+  const tileValue = (key: string) => Number(tiles.find((tile) => tile.key === key)?.value ?? 0) || 0;
+  const totalCount = tileValue("all");
+  const activeCount = tileValue("active");
+  const inactiveCount = tileValue("inactive");
   const sortedPrograms = [...programs].sort((a, b) => {
     if (a.status === "published" && b.status !== "published") return -1;
     if (b.status === "published" && a.status !== "published") return 1;
@@ -211,9 +361,8 @@ export function ExamQuestionPanel({
         </Select>
         {selectedProgram && selectedProgram.status !== "published" ? (
           <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
-            This program is <strong>{selectedProgram.status}</strong>. Students only see{" "}
-            <strong>published</strong> exams on the website — add questions to the published program with slug{" "}
-            <code className="rounded bg-white px-1">/{selectedProgram.slug}</code>.
+            This program is <strong>{selectedProgram.status}</strong>. Students only see <strong>published</strong> exams on the website — add
+            questions to the published program with slug <code className="rounded bg-white px-1">/{selectedProgram.slug}</code>.
           </p>
         ) : null}
       </div>
@@ -223,8 +372,8 @@ export function ExamQuestionPanel({
           {inactiveCount > 0 ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
               <p className="text-sm font-medium text-amber-900">
-                <strong>{inactiveCount}</strong> inactive {inactiveCount === 1 ? "question is" : "questions are"} hidden from the public exam
-                ({activeCount} active / {questions.length} total).
+                <strong>{inactiveCount}</strong> inactive {inactiveCount === 1 ? "question is" : "questions are"} hidden from the public exam (
+                {activeCount} active / {totalCount} total).
               </p>
               <Button
                 type="button"
@@ -237,119 +386,113 @@ export function ExamQuestionPanel({
               </Button>
             </div>
           ) : null}
-          <form onSubmit={saveQuestion} className="space-y-4 rounded-xl border border-sage-border bg-white p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h3 className="font-bold text-sage-secondary">{editingId ? "Edit MCQ" : "Add MCQ"}</h3>
-              {editingId ? (
-                <Button type="button" variant="outline" size="sm" onClick={resetForm}>Cancel edit</Button>
-              ) : null}
-            </div>
-            <div>
-              <Label>Question</Label>
-              <Textarea required rows={3} value={form.questionText} onChange={(e) => setForm({ ...form, questionText: e.target.value })} />
-            </div>
-            <QuestionImageField
-              existingImage={existingImage}
-              imageFile={imageFile}
-              onFileChange={setImageFile}
-              onClearExisting={() => setExistingImage("")}
-            />
-            <div className="grid gap-3 md:grid-cols-2">
-              {form.options.map((opt, idx) => (
-                <div key={idx}>
-                  <Label>Option {String.fromCharCode(65 + idx)}</Label>
-                  <Input value={opt} onChange={(e) => {
-                    const options = [...form.options];
-                    options[idx] = e.target.value;
-                    setForm({ ...form, options });
-                  }} />
-                </div>
-              ))}
-            </div>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div>
-                <Label>Correct option</Label>
-                <Select value={String(form.correctIndex)} onValueChange={(v) => setForm({ ...form, correctIndex: Number(v) })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {form.options.map((_, idx) => (
-                      <SelectItem key={idx} value={String(idx)}>{String.fromCharCode(65 + idx)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Marks</Label><Input type="number" value={form.marks} onChange={(e) => setForm({ ...form, marks: Number(e.target.value) })} /></div>
-              <div><Label>Order</Label><Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} /></div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 pb-2 text-sm font-medium">
-                  <input
-                    type="checkbox"
-                    checked={form.isActive}
-                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                  />
-                  Active (visible in exam)
-                </label>
-              </div>
-            </div>
-            <Button type="submit" disabled={saving} className="bg-sage-primary hover:bg-sage-secondary">
-              {saving ? "Saving..." : editingId ? "Update question" : "Add question"}
-            </Button>
-          </form>
 
-          <div className="rounded-xl border border-sage-border bg-white">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sage-border px-4 py-3">
-              <p className="text-sm font-semibold text-sage-secondary">
-                {questions.length} {questions.length === 1 ? "question" : "questions"} · {activeCount} active for students
-              </p>
-            </div>
-            {loading ? <p className="p-4 text-sm text-sage-gray-500">Loading...</p> : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Question</TableHead>
-                    <TableHead>Marks</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {questions.map((q, idx) => (
-                    <TableRow key={q._id}>
-                      <TableCell>{idx + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-start gap-3">
-                          {q.image ? (
-                            <div className="relative size-12 shrink-0 overflow-hidden rounded-lg ring-1 ring-sage-border">
-                              <Image src={q.image} alt="" fill className="object-cover" unoptimized />
-                            </div>
-                          ) : null}
-                        <div>
-                          <p className="max-w-xl truncate font-medium text-sage-secondary">{q.questionText}</p>
-                          {q.isActive === false ? (
-                            <Badge variant="outline" className="mt-1 text-amber-700">
-                              Inactive — hidden from exam
-                            </Badge>
-                          ) : null}
-                        </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{q.marks}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => startEdit(q)}>Edit</Button>
-                          <Button variant="destructive" size="sm" onClick={() => removeQuestion(q._id)}>Delete</Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+          <SaDataGrid<Row>
+            ref={grid}
+            source={SOURCE}
+            gridId={SOURCE}
+            columnDefs={columnDefs}
+            getRowId={(row) => row.id}
+            tiles={tiles}
+            params={params}
+            context={{ edit: startEdit, remove: askDelete, toggle: toggleActive }}
+            searchPlaceholder="Search question text, options or explanation…"
+            emptyTitle="No questions yet"
+            emptyDescription="Add the first MCQ for this program, or clear the search and filters."
+            exportName="sage-exam-questions"
+            toolbarActions={
+              <button type="button" className="sa-grid-btn primary" onClick={openCreate}>
+                <Plus size={15} /> <span className="sa-grid-btn-label">Add MCQ</span>
+              </button>
+            }
+          />
         </>
       ) : (
         <p className="text-sm text-sage-gray-500">Select an online program to manage questions.</p>
       )}
+
+      <Dialog open={formOpen} onOpenChange={(open) => (open ? setFormOpen(true) : closeForm())}>
+        <DialogContent className="max-h-[92vh] gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-3xl">
+          <form onSubmit={saveQuestion} className="flex max-h-[92vh] flex-col">
+            <DialogHeader className="shrink-0 border-b border-sage-border bg-sage-cream/30 px-5 py-4 text-left">
+              <DialogTitle className="text-xl font-bold text-sage-secondary">{editing ? "Edit MCQ" : "Add MCQ"}</DialogTitle>
+              <DialogDescription className="text-sm text-sage-gray-600">
+                {selectedProgram ? `${selectedProgram.title} · /${selectedProgram.slug}` : "Choose a program first."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+              <div>
+                <Label>Question</Label>
+                <Textarea required rows={3} value={form.questionText} onChange={(e) => setForm({ ...form, questionText: e.target.value })} />
+              </div>
+              <QuestionImageField
+                existingImage={existingImage}
+                imageFile={imageFile}
+                onFileChange={setImageFile}
+                onClearExisting={() => setExistingImage("")}
+              />
+              <div className="grid gap-3 md:grid-cols-2">
+                {form.options.map((opt, idx) => (
+                  <div key={idx}>
+                    <Label>Option {letter(idx)}</Label>
+                    <Input
+                      value={opt}
+                      onChange={(e) => {
+                        const options = [...form.options];
+                        options[idx] = e.target.value;
+                        setForm({ ...form, options });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="grid gap-4 md:grid-cols-4">
+                <div>
+                  <Label>Correct option</Label>
+                  <Select value={String(form.correctIndex)} onValueChange={(v) => setForm({ ...form, correctIndex: Number(v) })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {form.options.map((_, idx) => (
+                        <SelectItem key={idx} value={String(idx)}>
+                          {letter(idx)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Marks</Label>
+                  <Input type="number" value={form.marks} onChange={(e) => setForm({ ...form, marks: Number(e.target.value) })} />
+                </div>
+                <div>
+                  <Label>Order</Label>
+                  <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} />
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 pb-2 text-sm font-medium">
+                    <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+                    Active (visible in exam)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="shrink-0 gap-2 border-t border-sage-border bg-sage-cream/20 p-4">
+              <Button type="button" variant="outline" disabled={saving} onClick={closeForm}>
+                {editing ? "Cancel edit" : "Cancel"}
+              </Button>
+              <Button type="submit" disabled={saving || !selectedProgramId} className="bg-sage-primary hover:bg-sage-secondary">
+                {saving ? "Saving..." : editing ? "Update question" : "Add question"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog request={confirm} onClose={() => setConfirm(null)} />
     </div>
   );
 }
@@ -365,10 +508,7 @@ function QuestionImageField({
   onFileChange: (file: File | null) => void;
   onClearExisting: () => void;
 }) {
-  const previewUrl = useMemo(
-    () => (imageFile ? URL.createObjectURL(imageFile) : null),
-    [imageFile]
-  );
+  const previewUrl = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : null), [imageFile]);
 
   useEffect(
     () => () => {
@@ -407,9 +547,7 @@ function QuestionImageField({
         <div className="space-y-3">
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-sage-border bg-white px-4 py-6 text-center transition hover:border-sage-primary/40 hover:bg-sage-red-50/40">
             <Upload className="size-5 text-sage-primary" />
-            <span className="text-sm font-semibold text-sage-secondary">
-              {imageFile ? "Choose a different image" : "Upload question image"}
-            </span>
+            <span className="text-sm font-semibold text-sage-secondary">{imageFile ? "Choose a different image" : "Upload question image"}</span>
             <span className="text-xs text-sage-gray-500">JPG, PNG, WEBP · max 5MB</span>
             <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileSelect} />
           </label>

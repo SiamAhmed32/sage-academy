@@ -43,6 +43,12 @@ const PromotionCardSchema = new Schema(
       ref: "AcademicBatch",
       default: null,
     },
+    // A batch from the new academy system (takes the place of linkedBatch on public pages).
+    academyBatch: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademyBatch",
+      default: null,
+    },
     websiteVisible: {
       type: Boolean,
       default: true,

@@ -19,15 +19,6 @@ const optionalDate = z.preprocess(
   z.coerce.date().nullable().optional()
 );
 
-const uploadedFormSchema = z.object({
-  url: z.string().trim().url("Uploaded file URL is invalid"),
-  publicId: z.string().trim().min(1, "Uploaded file public id is required"),
-  resourceType: z.string().trim().min(1, "Uploaded file type is required"),
-  originalName: z.string().trim().min(1, "Uploaded file name is required"),
-  format: z.string().trim().optional().default(""),
-  bytes: z.number().nonnegative(),
-});
-
 export const admissionRequestBaseSchema = z.object({
   studentName: optionalText(120).default(""),
   nameBangla: optionalText(120).default(""),
@@ -57,22 +48,16 @@ export const admissionRequestBaseSchema = z.object({
     .default("new"),
   isRead: z.boolean().optional().default(false),
   adminNote: optionalText(800).default(""),
-  uploadedForm: uploadedFormSchema.optional().nullable().default(null),
 })
   .merge(leadAttributionSchema);
 
 export const createAdmissionRequestSchema = admissionRequestBaseSchema.refine(
-  (data) => {
-    // If a file is uploaded, validation is loose
-    if (data.uploadedForm) return true;
-    
-    // Otherwise, these are strictly required
-    return !!(
+  (data) =>
+    !!(
       data.studentName.trim() &&
       data.phone.trim() &&
       data.className.trim()
-    );
-  },
+    ),
   {
     message: "দয়া করে নাম, মোবাইল নম্বর এবং শ্রেণী প্রদান করুন",
   }

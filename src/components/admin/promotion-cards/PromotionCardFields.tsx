@@ -6,7 +6,7 @@ import type { PromotionCard } from "./types";
 const inputClass = "h-11 rounded-lg border border-sage-border bg-sage-white px-3 text-sm outline-none";
 
 type PromotionCardFieldsProps = {
-  batches: { _id: string; title: string; batchCode: string }[];
+  batches: { _id: string; title: string; batchCode: string; group?: "new" | "old" }[];
   previewUrl: string;
   onPreviewChange: (url: string) => void;
   defaults?: Partial<PromotionCard>;
@@ -29,12 +29,26 @@ export function PromotionCardFields({
         Linked batch (optional)
         <select name="linkedBatch" defaultValue={defaults.linkedBatch || ""} className={inputClass}>
           <option value="">None</option>
-          {batches.map((b) => (
-            <option key={b._id} value={b._id}>
-              {b.title} ({b.batchCode})
-            </option>
-          ))}
+          <optgroup label="New batches">
+            {batches
+              .filter((b) => b.group !== "old")
+              .map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.batchCode} ({b.title})
+                </option>
+              ))}
+          </optgroup>
+          <optgroup label="Old website batches">
+            {batches
+              .filter((b) => b.group === "old")
+              .map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.title} ({b.batchCode})
+                </option>
+              ))}
+          </optgroup>
         </select>
+        <small className="font-normal text-sage-gray-500">A new batch shows its version and teachers on the public batch page.</small>
       </label>
 
       <label className="grid gap-2 text-sm font-semibold text-sage-secondary">

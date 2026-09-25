@@ -12,9 +12,11 @@ interface PromotionCardCreateModalProps {
   batches: BatchOption[];
   open: boolean;
   onClose: () => void;
+  /** Called after a successful save (e.g. to reload a data grid). */
+  onSaved?: () => void;
 }
 
-export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCardCreateModalProps) {
+export function PromotionCardCreateModal({ batches, open, onClose, onSaved }: PromotionCardCreateModalProps) {
   const [previewUrl, setPreviewUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -35,6 +37,7 @@ export function PromotionCardCreateModal({ batches, open, onClose }: PromotionCa
       
       toast.success("Promotion card created");
       setPreviewUrl("");
+      onSaved?.();
       onClose();
       router.refresh();
     } catch (error) {

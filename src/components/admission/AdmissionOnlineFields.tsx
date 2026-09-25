@@ -1,5 +1,7 @@
 "use client";
 
+import { AdmissionBatchChoice } from "./AdmissionBatchChoice";
+
 /* =========================================================================
    PRIMITIVES — plain HTML, no Shadcn, fully customisable via className
    ========================================================================= */
@@ -145,6 +147,7 @@ type AdmissionOnlineForm = {
   studentDateOfBirth: string;
   studentGender: string;
   academicVersion: string;
+  preferredBatch: string;
   interestedSubjects: string;
   admissionDate: string;
   presentAddress: string;
@@ -156,7 +159,6 @@ type AdmissionOnlineFieldsProps = {
   updateField: (name: keyof AdmissionOnlineForm, value: string) => void;
   toggleSameAddress: (checked: boolean) => void;
   sameAddress: boolean;
-  requiresOnlineFields: boolean;
 };
 
 /* =========================================================================
@@ -168,7 +170,6 @@ export function AdmissionOnlineFields({
   updateField,
   toggleSameAddress,
   sameAddress,
-  requiresOnlineFields: req,
 }: AdmissionOnlineFieldsProps) {
   return (
     <div>
@@ -183,7 +184,7 @@ export function AdmissionOnlineFields({
             placeholder="উদা: Siam Ahmed"
             value={form.studentName}
             onChange={(e) => updateField("studentName", e.target.value)}
-            required={req}
+            required
           />
         </Field>
 
@@ -228,19 +229,16 @@ export function AdmissionOnlineFields({
             placeholder="উদা: 018XXXXXXXX"
             value={form.studentWhatsapp}
             onChange={(e) => updateField("studentWhatsapp", e.target.value)}
-            required={req}
+            required
           />
         </Field>
 
-        <Field>
-          <FormLabel htmlFor="interestedSubjects">আগ্রহী বিষয়</FormLabel>
-          <FormInput
-            id="interestedSubjects"
-            placeholder="উদা: গণিত, পদার্থবিজ্ঞান"
-            value={form.interestedSubjects}
-            onChange={(e) => updateField("interestedSubjects", e.target.value)}
-          />
-        </Field>
+        <AdmissionBatchChoice
+          batchId={form.preferredBatch}
+          subjects={form.interestedSubjects}
+          onBatchChange={(batchId) => updateField("preferredBatch", batchId)}
+          onSubjectsChange={(value) => updateField("interestedSubjects", value)}
+        />
 
       </Section>
 
@@ -254,7 +252,7 @@ export function AdmissionOnlineFields({
             placeholder="উদা: নবম অথবা SSC"
             value={form.className}
             onChange={(e) => updateField("className", e.target.value)}
-            required={req}
+            required
           />
         </Field>
 
@@ -350,7 +348,7 @@ export function AdmissionOnlineFields({
               placeholder="উদা: 01XXXXXXXXX"
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
-              required={req}
+              required
             />
           </Field>
         </div>

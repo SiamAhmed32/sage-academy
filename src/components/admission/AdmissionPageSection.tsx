@@ -10,7 +10,7 @@ import { AdmissionPageEngagementTracker } from "@/components/engagement/Admissio
 import { Container } from "@/components/shared/Container";
 import {
   admissionGuardianNote,
-  admissionHighlights,
+  admissionGuide,
   admissionPageContent,
 } from "@/constants/admission";
 
@@ -131,16 +131,23 @@ export function AdmissionPageSection() {
             className="lg:sticky lg:top-28"
           >
             <div className="rounded-lg border border-sage-red-100 bg-white p-5 shadow-sm sm:p-6">
-              <h2 className="text-2xl font-black text-sage-secondary">
-                ভর্তি করার আগে যা জানা দরকার
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-sage-primary">
+                নির্দেশনা
+              </p>
+              <h2 className="mt-2 text-2xl font-black leading-snug text-sage-secondary">
+                {admissionGuide.title}
               </h2>
               <p className="mt-3 text-sm leading-7 text-sage-gray-700">
-                অনলাইনে কয়েকটি জরুরি তথ্য দিলেই আবেদন জমা হবে। চাইলে PDF ফর্ম ডাউনলোড করে হাতে পূরণ করেও আপলোড করতে পারবেন।
+                {admissionGuide.intro}
               </p>
-              <div className="mt-6 space-y-5">
-                {admissionHighlights.map((item) => (
-                  <AdmissionHighlightItem key={item.title} {...item} />
+              <div className="mt-6 space-y-3">
+                {admissionGuide.steps.map((item) => (
+                  <AdmissionHighlightItem key={item.number} {...item} />
                 ))}
+              </div>
+              <div className="mt-4 rounded-lg bg-sage-red-50 px-4 py-4 ring-1 ring-sage-red-100">
+                <h3 className="text-sm font-bold text-sage-secondary">{admissionGuide.after.title}</h3>
+                <p className="mt-1.5 text-sm leading-7 text-sage-gray-700">{admissionGuide.after.description}</p>
               </div>
             </div>
           </motion.aside>

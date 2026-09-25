@@ -1,54 +1,51 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 
-import { StudentPageHeader } from "@/components/student/StudentPageHeader";
-import { Button } from "@/components/ui/button";
+import { MiniStat, MiniStats, PageHeading } from "@/components/admin/sa/ui";
+import { formatDate } from "@/lib/academy/codes";
+import { getPortalStudent } from "@/lib/academy/portal";
 import { sanitizePhone } from "@/lib/exam-hub";
 import { connectDB } from "@/lib/mongodb";
-import { getStudentContext } from "@/lib/student-dashboard";
 import ExamAttempt from "@/models/ExamAttempt";
 import ExamProgram from "@/models/ExamProgram";
 
 type Props = { params: Promise<{ attemptId: string }> };
 
 export default async function StudentExamResultDetailPage({ params }: Props) {
-  const ctx = await getStudentContext();
-  if ("problem" in ctx) notFound();
-
-  const phone = sanitizePhone(String(ctx.student.phone || ctx.user.phone || ""));
-  if (!phone) notFound();
+  const { ctx, detail } = await getPortalStudent();
+  if (!detail) return null;
+  const phones = [ctx.user.phone ?? "", detail.student.phone, detail.student.whatsapp].map((phone) => sanitizePhone(phone)).filter(Boolean);
+  if (phones.length === 0) notFound();
 
   const { attemptId } = await params;
   await connectDB();
-
-  const attempt = await ExamAttempt.findOne({ _id: attemptId, phone, status: "submitted" }).lean();
+  const attempt = await ExamAttempt.findOne({ _id: attemptId, phone: { $in: phones }, status: "submitted" }).lean();
   if (!attempt) notFound();
-
   const program = await ExamProgram.findById(attempt.programId).lean();
   const pct = attempt.totalMarks ? Math.round((Number(attempt.score) / Number(attempt.totalMarks)) * 100) : 0;
+  const seconds = Number(attempt.durationSeconds || 0);
 
   return (
-    <section className="space-y-6">
-      <StudentPageHeader title="পরীক্ষার ফলাফল" description={program?.title || "Exam Hub"} />
-      <div className="rounded-xl border border-sage-border bg-white p-6 text-center shadow-sm">
-        <p className="text-4xl font-black text-sage-primary">
-          {attempt.score}/{attempt.totalMarks}
-        </p>
-        <p className="mt-2 font-semibold text-sage-secondary">{pct}%</p>
-        <p className="mt-2 text-sm text-sage-gray-500">
-          সময়: {Math.floor(Number(attempt.durationSeconds || 0) / 60)}m {Number(attempt.durationSeconds || 0) % 60}s
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {program?.slug ? (
-            <Button asChild variant="outline">
-              <Link href={`/exams/${program.slug}/leaderboard`}>Leaderboard</Link>
-            </Button>
-          ) : null}
-          <Button asChild>
-            <Link href="/student/results">সব ফলাফল</Link>
-          </Button>
-        </div>
-      </div>
-    </section>
+    <div>
+      <PageHeading
+        eyebrow="Student workspace"
+        title={program?.title || "পরীক্ষার ফলাফল"}
+        description={attempt.submittedAt ? `জমা: ${formatDate(attempt.submittedAt as Date)}` : undefined}
+        back={{ href: "/student/results", label: "সব ফলাফল" }}
+        actions={
+          program?.slug ? (
+            <Link href={`/exams/${program.slug}/leaderboard`} className="btn-primary">
+              <Trophy size={17} /> লিডারবোর্ড
+            </Link>
+          ) : null
+        }
+      />
+      <MiniStats>
+        <MiniStat label="নম্বর" value={`${attempt.score}/${attempt.totalMarks}`} note="প্রাপ্ত নম্বর" />
+        <MiniStat label="শতাংশ" value={`${pct}%`} note={pct >= 80 ? "চমৎকার!" : pct >= 50 ? "ভালো" : "আরও চেষ্টা করো"} />
+        <MiniStat label="সময়" value={`${Math.floor(seconds / 60)}m ${seconds % 60}s`} note="মোট সময়" />
+      </MiniStats>
+    </div>
   );
 }

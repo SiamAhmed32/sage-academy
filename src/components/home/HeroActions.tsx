@@ -22,15 +22,15 @@ export function HeroActions() {
       <button
         type="button"
         onClick={handleFreeClassClick}
-        className="group bn-text relative inline-flex min-h-[3.75rem] max-w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-sage-primary px-8 py-4 text-base font-semibold leading-normal text-sage-white shadow-lg shadow-sage-primary/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-sage-primary-hover hover:shadow-xl hover:shadow-sage-primary/40 active:translate-y-0"
+        className="group bn-text relative inline-flex min-h-[3.5rem] max-w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-sage-primary px-7 py-3.5 text-base font-semibold leading-normal text-sage-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_20px_-8px_rgba(122,20,28,0.55)] transition-all duration-300 hover:bg-sage-primary-hover hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_12px_24px_-10px_rgba(122,20,28,0.65)] active:scale-[0.98]"
       >
         {/* shimmer sweep */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"
         />
         <span>ফ্রি ক্লাস বুক করুন</span>
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:translate-x-1">
+        <span className="flex shrink-0 items-center transition-transform duration-300 group-hover:translate-x-1">
           <FaArrowRight aria-hidden="true" className="text-xs" />
         </span>
       </button>
@@ -39,10 +39,10 @@ export function HeroActions() {
       <TrackedLink
         href="/batches"
         trackingLabel="hero_batches"
-        className="bn-text group inline-flex min-h-[3.75rem] max-w-full items-center justify-center gap-3 rounded-full border-2 border-sage-primary/30 bg-white/80 px-8 py-4 text-base font-semibold leading-normal text-sage-primary shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-sage-primary hover:bg-sage-red-50 hover:shadow-md hover:shadow-sage-red-100/50 active:translate-y-0"
+        className="bn-text group inline-flex min-h-[3.5rem] max-w-full items-center justify-center gap-2.5 rounded-xl border border-sage-gray-300/80 bg-white px-7 py-3.5 text-base font-semibold leading-normal text-sage-secondary transition-all duration-300 hover:border-sage-primary/40 hover:text-sage-primary active:scale-[0.98]"
       >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sage-primary/10 transition-all duration-300 group-hover:bg-sage-primary group-hover:text-white">
-          <FaBookOpen aria-hidden="true" className="text-xs" />
+        <span className="flex shrink-0 items-center text-sage-primary">
+          <FaBookOpen aria-hidden="true" className="text-sm" />
         </span>
         <span>ব্যাচ সম্পর্কে জানুন</span>
       </TrackedLink>

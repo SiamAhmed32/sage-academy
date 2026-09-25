@@ -147,10 +147,72 @@ export const heroTeacherSlides: HeroGallerySlide[] = [
   // },
 ];
 
-/** Academy photos first, then all teacher slides */
+/** Hero gallery: image-only slides from /public/HeroSectionFinal */
 export const heroGallerySlides: HeroGallerySlide[] = [
-  ...heroAcademySlides,
-  ...heroTeacherSlides,
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/WhatsApp Image 2026-08-24 at 2.34.53 PM (1).webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/WhatsApp Image 2026-08-24 at 2.34.54 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/WhatsApp Image 2026-08-24 at 2.34.53 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/ChatGPT Image Aug 24, 2026, 02_59_27 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/ChatGPT Image Aug 24, 2026, 02_24_53 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/ChatGPT Image Aug 24, 2026, 03_02_15 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/WhatsApp Image 2026-08-24 at 2.34.52 PM.webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
+  {
+    image: "/HeroSectionFinal/Hero section Pictures/WhatsApp Image 2026-08-24 at 2.34.53 PM (2).webp",
+    imageClass: "object-cover object-center",
+    eyebrow: "SAGE Academy",
+    title: "SAGE Academy",
+    subtitle: "",
+    badge: "",
+  },
 ];
 
 export const heroStats = [

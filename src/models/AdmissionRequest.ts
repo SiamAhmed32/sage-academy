@@ -1,40 +1,5 @@
 import { Schema, model, models } from "mongoose";
 
-const UploadedFormSchema = new Schema(
-  {
-    url: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    publicId: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    resourceType: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    originalName: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    format: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    bytes: {
-      type: Number,
-      default: 0,
-    },
-  },
-  { _id: false }
-);
-
 const AdmissionRequestSchema = new Schema(
   {
     studentName: {
@@ -166,10 +131,6 @@ const AdmissionRequestSchema = new Schema(
     },
     archivedAt: {
       type: Date,
-      default: null,
-    },
-    uploadedForm: {
-      type: UploadedFormSchema,
       default: null,
     },
     utmSource: { type: String, default: "", trim: true },

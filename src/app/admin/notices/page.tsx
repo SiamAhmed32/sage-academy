@@ -1,75 +1,39 @@
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { AdminNoticeTable } from "@/components/admin/notices/AdminNoticeTable";
-import { NoticeCreatePanel } from "@/components/admin/notices/NoticeCreatePanel";
-import { NoticeFilters } from "@/components/admin/notices/NoticeFilters";
+import { NoticeCreateButton, NoticesGrid } from "@/components/admin/grids/NoticesGrid";
 import type { NoticeBatchOption } from "@/components/admin/notices/NoticeCreateForm";
-import { Pagination } from "@/components/admin/shared/Pagination";
-import { fetchAdminNotices } from "@/lib/admin-notices";
+import { PageHeading } from "@/components/admin/sa/ui";
+import { batchStudentCounts } from "@/lib/academy/queries";
+import { noticeTiles } from "@/lib/grid/tiles-content";
 import { connectDB } from "@/lib/mongodb";
-import AcademicBatch from "@/models/AcademicBatch";
-import Student from "@/models/Student";
+import AcademyBatch from "@/models/academy/AcademyBatch";
 
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-function getParam(params: Record<string, string | string[] | undefined>, key: string) {
-  const value = params[key];
-  if (Array.isArray(value)) return value[0] ?? "";
-  return value ?? "";
+/** Notices target the new academy batches; students are counted from active enrollments. */
+async function noticeBatchOptions(): Promise<NoticeBatchOption[]> {
+  await connectDB();
+  const batches = await AcademyBatch.find({ status: "active" })
+    .select("code classLevel")
+    .sort({ classLevel: 1, code: 1 })
+    .lean<{ _id: unknown; code: string; classLevel: number }[]>();
+  const counts = await batchStudentCounts(batches.map((batch) => String(batch._id)));
+  return batches.map((batch) => ({
+    _id: String(batch._id),
+    title: batch.code,
+    batchCode: batch.code,
+    classLevel: batch.classLevel,
+    studentCount: counts.get(String(batch._id)) ?? 0,
+  }));
 }
 
-export default async function AdminNoticesPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const q = getParam(params, "q").trim().slice(0, 80);
-  const type = getParam(params, "type");
-  const classLevel = getParam(params, "classLevel");
-  const batch = getParam(params, "batch");
-  const status = getParam(params, "status");
-  const page = getParam(params, "page");
-
-  await connectDB();
-  const [batchResult, noticeResult, studentCounts] = await Promise.all([
-    AcademicBatch.find({ isActive: true }).select("title batchCode classLevel").sort({ classLevel: 1, title: 1 }).lean(),
-    fetchAdminNotices({ q, type, classLevel, batch, status, page }),
-    Student.aggregate<{ _id: unknown; count: number }>([
-      { $match: { isActive: true, batch: { $ne: null } } },
-      { $group: { _id: "$batch", count: { $sum: 1 } } },
-    ]),
-  ]);
-
-  const countMap = new Map(studentCounts.map((row) => [String(row._id), row.count]));
-  const batchOptions: NoticeBatchOption[] = JSON.parse(JSON.stringify(batchResult)).map(
-    (item: { _id: string; title: string; batchCode?: string; classLevel: number }) => ({
-      ...item,
-      studentCount: countMap.get(String(item._id)) ?? 0,
-    })
-  );
+export default async function AdminNoticesPage() {
+  const [tiles, batches] = await Promise.all([noticeTiles(), noticeBatchOptions()]);
 
   return (
     <div>
-      <AdminPageHeader
+      <PageHeading
         title="Notice Management"
         description="Send notices to a class and batch so only enrolled students in that batch can view them."
+        actions={<NoticeCreateButton batches={batches} />}
       />
-
-      <NoticeCreatePanel batches={batchOptions} />
-      <NoticeFilters
-        q={q}
-        type={type}
-        classLevel={classLevel}
-        batch={batch}
-        status={status}
-        batches={batchOptions}
-      />
-      <AdminNoticeTable notices={noticeResult.notices} batches={batchOptions} />
-      <Pagination
-        totalPages={noticeResult.totalPages}
-        currentPage={noticeResult.page}
-        totalItems={noticeResult.total}
-        pageSize={noticeResult.pageSize}
-        showWhenSinglePage
-      />
+      <NoticesGrid tiles={tiles} batches={batches} />
     </div>
   );
 }

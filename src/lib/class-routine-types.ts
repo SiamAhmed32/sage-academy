@@ -12,4 +12,6 @@ export type ClassRoutinePdfOptions = {
   footer?: string;
   entries: ClassRoutineEntry[];
   filename: string;
+  /** Rows to print, in order (English day names). Defaults to Saturday–Friday. */
+  days?: string[];
 };

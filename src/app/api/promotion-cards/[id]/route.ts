@@ -9,7 +9,7 @@ import { buildPublicSlug } from "@/lib/public-slug";
 import { adminRoles, requireRole } from "@/lib/rbac";
 import { revalidatePromotionCardPublicPages } from "@/lib/revalidate-public";
 import { uploadBatchImage } from "@/lib/upload-batch-image";
-import AcademicBatch from "@/models/AcademicBatch";
+import { resolvePromotionBatchLink } from "@/lib/academy/public-batch";
 import PromotionCard from "@/models/PromotionCard";
 
 type RouteContext = {
@@ -84,7 +84,8 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
   const featured = formHas(formData, "featured")
     ? checkboxOn(formData, "featured")
     : card.featured;
-  const linkedBatch = formData.get("linkedBatch")?.toString() || null;
+  const link = await resolvePromotionBatchLink(formData.get("linkedBatch")?.toString() || "");
+  const linkedBatch = link.linkedBatch;
 
   const features = [
     formData.get("feature1"),
@@ -111,6 +112,7 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     websiteVisible,
     featured,
     linkedBatch,
+    academyBatch: link.academyBatch,
     features,
     overview: String(formData.get("overview") ?? card.overview ?? "").trim(),
     image: imageUrl,
@@ -121,15 +123,15 @@ export const PATCH = withApiHandler(async (req: NextRequest, context: RouteConte
     updateData.archivedAt = nextArchived ? new Date() : null;
   }
 
-  if (title !== card.title || String(linkedBatch || "") !== String(card.linkedBatch || "")) {
-    const batch = linkedBatch
-      ? await AcademicBatch.findById(linkedBatch).select("batchCode classLevel").lean()
-      : null;
-
+  if (
+    title !== card.title ||
+    String(linkedBatch || "") !== String(card.linkedBatch || "") ||
+    String(link.academyBatch || "") !== String(card.academyBatch || "")
+  ) {
     updateData.slug = buildPublicSlug({
       title,
-      batchCode: batch?.batchCode,
-      classLevel: batch?.classLevel,
+      batchCode: link.batchCode,
+      classLevel: link.classLevel,
       fallback: card.slug || `batch-${Date.now()}`,
     });
   }

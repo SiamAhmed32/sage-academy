@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { FaGraduationCap } from "react-icons/fa6";
 import { Container } from "@/components/shared/Container";
 import { footerContent } from "@/constants/footer";
 
@@ -22,11 +22,15 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 lg:gap-8">
           {/* Brand and Description */}
           <div className="col-span-1 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-3">
-              <span className="flex size-12 items-center justify-center rounded-full bg-sage-white text-sage-primary">
-                <FaGraduationCap className="size-6" />
-              </span>
-              <span className="text-2xl font-bold tracking-tight">SAGE Academy</span>
+            <Link href="/" className="inline-flex" aria-label="SAGE Academy homepage">
+              <Image
+                src="/sage-wordmark.png"
+                alt="SAGE Academy"
+                width={1040}
+                height={411}
+                sizes="160px"
+                className="h-12 w-auto brightness-0 invert"
+              />
             </Link>
             <p className="mt-6 text-sm leading-7 text-sage-red-100/80">
               {description}

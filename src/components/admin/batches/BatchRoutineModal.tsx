@@ -13,9 +13,11 @@ interface BatchRoutineModalProps {
   teachers: TeacherOption[];
   open: boolean;
   onClose: () => void;
+  /** Called after a successful save (e.g. to reload a data grid). */
+  onSaved?: () => void;
 }
 
-export function BatchRoutineModal({ batch, teachers, open, onClose }: BatchRoutineModalProps) {
+export function BatchRoutineModal({ batch, teachers, open, onClose, onSaved }: BatchRoutineModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
@@ -38,6 +40,7 @@ export function BatchRoutineModal({ batch, teachers, open, onClose }: BatchRouti
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.message || "The schedule could not be saved.");
       toast.success("Subjects and schedule updated.");
+      onSaved?.();
       onClose();
       router.refresh();
     } catch (error) {

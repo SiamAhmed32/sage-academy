@@ -9,8 +9,6 @@ import { admissionPageContent } from "@/constants/admission";
 import { getLeadAttributionPayload } from "@/lib/lead-attribution";
 import { trackEngagementEvent } from "@/lib/engagement-tracker";
 
-import { AdmissionHero } from "./AdmissionHero";
-import { AdmissionFileUpload } from "./AdmissionFileUpload";
 import { AdmissionOnlineFields } from "./AdmissionOnlineFields";
 
 const initialForm = {
@@ -46,7 +44,6 @@ function getErrorMessage(error: unknown, fallback = "আবেদন পাঠ�
 
 export function AdmissionForm() {
   const [form, setForm] = useState(initialForm);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
   const [sameAddress, setSameAddress] = useState(false);
@@ -78,13 +75,15 @@ export function AdmissionForm() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     
-    // Basic Client Side Check
-    if (!uploadedFile) {
-      if (!form.studentName.trim() || !form.phone.trim() || !form.className.trim()) {
-        setFeedback("Please fill required fields (Name, Phone, শ্রেণি)");
-        setStatus("error");
-        return;
-      }
+    if (!form.studentName.trim() || !form.phone.trim() || !form.className.trim() || !form.preferredBatch.trim()) {
+      setFeedback("Please fill required fields (Name, Phone, শ্রেণি, ব্যাচ)");
+      setStatus("error");
+      return;
+    }
+    if (!form.interestedSubjects.trim()) {
+      setFeedback("ব্যাচের অন্তত একটি বিষয় নির্বাচন করুন।");
+      setStatus("error");
+      return;
     }
 
     setStatus("submitting");
@@ -93,9 +92,6 @@ export function AdmissionForm() {
     const submissionPromise = (async () => {
       const payload = new FormData();
       Object.entries(form).forEach(([key, value]) => payload.append(key, value));
-      if (uploadedFile) {
-        payload.append("uploadedForm", uploadedFile);
-      }
       const attr = getLeadAttributionPayload(
         typeof window !== "undefined" ? window.location.pathname : "/"
       );
@@ -137,7 +133,6 @@ export function AdmissionForm() {
       setStatus("success");
       setFeedback(admissionPageContent.successMessage);
       setForm(initialForm);
-      setUploadedFile(null);
       setSameAddress(false);
     } catch (err: unknown) {
       setStatus("error");
@@ -174,28 +169,11 @@ export function AdmissionForm() {
       onFocusCapture={handleFormInteractionStart}
       className="rounded-lg border border-sage-border bg-white p-5 shadow-xl shadow-sage-red-100/20 sm:p-7 lg:p-8"
     >
-      <AdmissionHero />
-      
-      <AdmissionFileUpload 
-        uploadedFile={uploadedFile} 
-        setUploadedFile={setUploadedFile} 
-        isSubmitting={isSubmitting} 
-      />
-
-      <div className="my-9 flex items-center gap-3">
-        <div className="h-px flex-1 bg-sage-border" />
-        <span className="text-center text-[10px] font-black uppercase tracking-[0.22em] text-sage-primary">
-          অথবা অনলাইনে ফর্ম পূরণ করুন
-        </span>
-        <div className="h-px flex-1 bg-sage-border" />
-      </div>
-
       <AdmissionOnlineFields 
         form={form} 
         updateField={updateField} 
         toggleSameAddress={toggleSameAddress} 
         sameAddress={sameAddress} 
-        requiresOnlineFields={!uploadedFile}
       />
 
       {feedback && (

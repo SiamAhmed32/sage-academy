@@ -1,12 +1,3 @@
-export interface AdmissionUploadedForm {
-  url: string;
-  publicId: string;
-  resourceType: string;
-  originalName: string;
-  format: string;
-  bytes: number;
-}
-
 export interface AdmissionRequestItem {
   _id: string;
   studentName: string;
@@ -34,5 +25,4 @@ export interface AdmissionRequestItem {
   adminNote: string;
   isArchived: boolean;
   createdAt: string;
-  uploadedForm: AdmissionUploadedForm | null;
 }

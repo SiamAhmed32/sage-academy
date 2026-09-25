@@ -8,15 +8,14 @@ import { HeroActions } from "@/components/home/HeroActions";
 import { HeroStats } from "@/components/home/HeroStats";
 import { HeroVisual } from "@/components/home/HeroVisual";
 
-const HIGHLIGHT_ICONS = ["✦", "◈", "✧"];
 
 const HeroCopy = memo(function HeroCopy() {
   return (
     <div className="sage-hero-in min-w-0 max-w-2xl overflow-visible [overflow-anchor:none] lg:max-w-none">
-      <span className="bn-pill mb-6 inline-flex max-w-full items-center gap-2.5 rounded-full border border-sage-red-100 bg-white/90 px-5 py-2.5 text-sm font-semibold leading-normal text-sage-primary shadow-md shadow-sage-red-100/50 backdrop-blur">
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sage-primary opacity-60" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sage-primary" />
+      <span className="bn-pill mb-7 inline-flex max-w-full items-center gap-2.5 rounded-full border border-sage-primary/15 bg-sage-primary/[0.04] py-1.5 pl-2 pr-4 text-[13px] font-semibold leading-normal text-sage-primary sm:text-sm">
+        <span className="relative flex h-2 w-2 shrink-0 translate-x-1 mr-1">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sage-primary opacity-40" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-sage-primary" />
         </span>
         <span className="min-w-0">{heroCopy.badge}</span>
       </span>
@@ -30,30 +29,32 @@ const HeroCopy = memo(function HeroCopy() {
           {heroCopy.headlineLine2}
           <span
             aria-hidden="true"
-            className="absolute -bottom-1 left-0 h-[3px] w-[72%] max-w-full rounded-full bg-gradient-to-r from-sage-primary via-[#C8161D] to-transparent opacity-30"
+            className="absolute -bottom-2 left-0 h-[2px] w-24 rounded-full bg-sage-primary/60"
           />
         </span>
       </h1>
 
-      <p className="bn-text mt-6 hidden max-w-[52ch] text-[20px] leading-8 text-sage-gray-700 sm:mt-7 sm:text-[1.25rem] lg:block">
+      <p className="bn-text mt-8 hidden max-w-[50ch] text-[1.15rem] leading-8 text-sage-gray-700/90 lg:block">
         {heroCopy.description}
       </p>
 
-      <div className="mt-6 flex max-w-2xl flex-wrap gap-2.5">
-        {heroHighlights.map((item, i) => (
-          <span
+      <ul className="mt-6 flex max-w-2xl flex-wrap gap-x-6 gap-y-3">
+        {heroHighlights.map((item) => (
+          <li
             key={item}
-            className="bn-pill inline-flex max-w-full items-center gap-2 rounded-full border border-sage-red-100 bg-white px-4 py-2.5 text-sm font-semibold leading-normal text-sage-gray-700 shadow-sm shadow-sage-red-100/30 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-sage-primary/30 hover:shadow-md hover:shadow-sage-red-100/40"
+            className="bn-pill inline-flex max-w-full items-center gap-2 text-[15px] font-semibold leading-normal text-sage-gray-700"
           >
-            <span className="shrink-0 text-xs font-bold text-sage-primary">
-              {HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]}
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sage-primary text-white">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3" aria-hidden="true">
+                <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.414 0l-3.5-3.5a1 1 0 111.414-1.42l2.793 2.794 6.793-6.794a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
             </span>
             <span className="min-w-0">{item}</span>
-          </span>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      <div className="mt-8 sm:mt-9">
+      <div className="mt-9 sm:mt-10">
         <HeroActions />
       </div>
 

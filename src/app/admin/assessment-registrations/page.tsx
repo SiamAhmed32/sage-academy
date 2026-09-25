@@ -1,121 +1,23 @@
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { AssessmentRegistrationFilters } from "@/components/admin/assessments/AssessmentRegistrationFilters";
-import { AssessmentRegistrationTable } from "@/components/admin/assessments/AssessmentRegistrationTable";
-import { Pagination } from "@/components/admin/shared/Pagination";
-import { buildAssessmentRegistrationFilter } from "@/lib/admin-assessment-registration-query";
-import { formatAdminNumber } from "@/lib/admin-format";
-import { connectDB } from "@/lib/mongodb";
-import AssessmentRegistration from "@/models/AssessmentRegistration";
+import { AssessmentRegistrationsGrid } from "@/components/admin/grids/AssessmentRegistrationsGrid";
+import { PageHeading } from "@/components/admin/sa/ui";
+import { assessmentRegistrationOptions, assessmentRegistrationTiles } from "@/lib/grid/tiles-leads";
 
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
+export const dynamic = "force-dynamic";
 
-const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
-
-function getParam(params: Record<string, string | string[] | undefined>, key: string, fallback = "") {
-  const value = params[key];
-  if (Array.isArray(value)) return value[0] ?? fallback;
-  return value ?? fallback;
-}
-
-function parseLimit(raw: string): number {
-  const n = Number(raw);
-  return PAGE_SIZE_OPTIONS.includes(n as (typeof PAGE_SIZE_OPTIONS)[number]) ? n : 25;
-}
-
-export default async function AdminAssessmentRegistrationsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const q = getParam(params, "q").trim().slice(0, 100);
-  const rawStatus = getParam(params, "status", "all").trim();
-  const status = ["new", "contacted", "confirmed", "attended", "cancelled", "invalid"].includes(rawStatus)
-    ? rawStatus
-    : "all";
-  const rawKind = getParam(params, "assessmentKind", "all").trim();
-  const assessmentKind = ["modelTest", "exam"].includes(rawKind) ? rawKind : "all";
-  const assessmentType = getParam(params, "assessmentType", "all").trim().slice(0, 80) || "all";
-  const classLabel = getParam(params, "classLabel", "all").trim().slice(0, 80) || "all";
-  const rawApplicantType = getParam(params, "applicantType", "all").trim();
-  const applicantType = ["sage", "outside"].includes(rawApplicantType) ? rawApplicantType : "all";
-  const sort = getParam(params, "sort") === "asc" ? "asc" : "desc";
-  const rawDateRange = getParam(params, "dateRange", "all").trim();
-  const dateRange = ["today", "week", "month"].includes(rawDateRange) ? rawDateRange : "all";
-  const page = Math.max(1, Math.trunc(Number(getParam(params, "page", "1"))) || 1);
-  const limit = parseLimit(getParam(params, "limit", "25"));
-  const query = buildAssessmentRegistrationFilter({
-    q,
-    status,
-    assessmentKind,
-    assessmentType,
-    classLabel,
-    applicantType,
-    dateRange,
-  });
-
-  await connectDB();
-  const totalDocs = await AssessmentRegistration.countDocuments(query);
-  const totalPages = Math.max(1, Math.ceil(totalDocs / limit));
-  const safePage = Math.min(page, totalPages);
-  const [items, assessmentTypes, classLabels] = await Promise.all([
-    AssessmentRegistration.find(query)
-      .sort({ createdAt: sort === "asc" ? 1 : -1 })
-      .skip((safePage - 1) * limit)
-      .limit(limit)
-      .lean(),
-    AssessmentRegistration.distinct("assessmentType"),
-    AssessmentRegistration.distinct("classLabel"),
-  ]);
-
-  const from = totalDocs === 0 ? 0 : (safePage - 1) * limit + 1;
-  const to = Math.min(safePage * limit, totalDocs);
-  const filterKey = [q, status, assessmentKind, assessmentType, classLabel, applicantType, sort, dateRange, safePage, limit].join("|");
+export default async function AdminAssessmentRegistrationsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const [params, tiles, options] = await Promise.all([searchParams, assessmentRegistrationTiles(), assessmentRegistrationOptions()]);
 
   return (
-    <div className="space-y-6">
-      <AdminPageHeader
+    <div>
+      <PageHeading
         title="Model Test and Exam Registrations"
         description="Review and follow up on model-test and exam registrations as individual leads."
       />
-
-      <div className="flex flex-col gap-3 rounded-2xl border border-sage-border bg-white px-5 py-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 md:px-6 md:py-5">
-        <div className="text-base font-semibold leading-snug text-sage-secondary md:text-lg">
-          <span className="font-black text-sage-primary">{formatAdminNumber(totalDocs)}</span> total registrations
-          {totalDocs > 0 ? (
-            <span className="mt-1 block text-sm font-medium text-sage-gray-600 sm:mt-0 sm:inline sm:before:content-['_·_']">
-              Showing{" "}
-              <span className="font-bold text-sage-secondary">
-                {formatAdminNumber(from)}–{formatAdminNumber(to)}
-              </span>{" "}
-              (page {formatAdminNumber(safePage)} of {formatAdminNumber(totalPages)})
-            </span>
-          ) : null}
-        </div>
-      </div>
-
-      <AssessmentRegistrationFilters
-        key={`filters-${filterKey}`}
-        q={q}
-        status={status}
-        assessmentKind={assessmentKind}
-        assessmentType={assessmentType}
-        classLabel={classLabel}
-        applicantType={applicantType}
-        sort={sort}
-        dateRange={dateRange}
-        limit={limit}
-        pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
-        assessmentTypes={(assessmentTypes as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b))}
-        classLabels={(classLabels as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b, "en"))}
-      />
-
-      <AssessmentRegistrationTable key={`table-${filterKey}`} initialItems={JSON.parse(JSON.stringify(items))} />
-
-      <Pagination
-        totalPages={totalPages}
-        currentPage={safePage}
-        totalItems={totalDocs}
-        pageSize={limit}
-        showWhenSinglePage={totalDocs > 0}
+      <AssessmentRegistrationsGrid
+        tiles={tiles}
+        assessmentTypes={options.assessmentTypes}
+        classLabels={options.classLabels}
+        initialSearch={params.q ?? ""}
       />
     </div>
   );

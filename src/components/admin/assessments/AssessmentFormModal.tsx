@@ -9,7 +9,7 @@ import { AssessmentFormTabFees } from "./AssessmentFormTabFees";
 import { AssessmentFormTabRoutine } from "./AssessmentFormTabRoutine";
 import { AssessmentFormTabFeatures } from "./AssessmentFormTabFeatures";
 import { getClassLabel } from "@/constants/class-levels";
-import type { AdminAssessmentItem } from "./AssessmentManager";
+import type { AdminAssessmentItem } from "./types";
 
 type FeeRow = { classLevel: number; label: string; sageStudentFee: number; outsideStudentFee: number };
 type RoutineRow = { day: string; time: string; subject: string };

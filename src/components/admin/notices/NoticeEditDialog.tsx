@@ -37,12 +37,23 @@ export function NoticeEditDialog({
   notice,
   batches,
   compact,
+  defaultOpen = false,
+  onClose,
+  onSaved,
 }: {
   notice: AdminNoticeItem;
   batches: NoticeBatchOption[];
   compact?: boolean;
+  /** Open straight away (e.g. from a grid row); pair with onClose. */
+  defaultOpen?: boolean;
+  onClose?: () => void;
+  onSaved?: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(defaultOpen);
+  const setOpen = (next: boolean) => {
+    setOpenState(next);
+    if (!next) onClose?.();
+  };
   const [classLevel, setClassLevel] = useState(String(notice.classLevel ?? ""));
   const filteredBatches = useMemo(
     () => batches.filter((batch) => String(batch.classLevel) === classLevel),
@@ -92,6 +103,7 @@ export function NoticeEditDialog({
         <form
           action={async (formData) => {
             await updateNoticeAction(formData);
+            onSaved?.();
             setOpen(false);
           }}
           className="space-y-4"

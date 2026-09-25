@@ -12,6 +12,10 @@ interface TeacherFormFieldsProps {
   setFormData: React.Dispatch<React.SetStateAction<TeacherFormValues>>;
   previewUrl: string;
   onImageFileChange: (file: File | null) => void;
+  /** View mode: every field locked, no photo upload. */
+  readOnly?: boolean;
+  /** Subject names from Academics, suggested while typing. */
+  subjectOptions?: string[];
 }
 
 export function TeacherFormFields({
@@ -19,13 +23,15 @@ export function TeacherFormFields({
   setFormData,
   previewUrl,
   onImageFileChange,
+  readOnly = false,
+  subjectOptions = [],
 }: TeacherFormFieldsProps) {
   const updateField = <K extends keyof TeacherFormValues>(key: K, value: TeacherFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
-    <div className="mt-6 space-y-6">
+    <fieldset disabled={readOnly} className="mt-6 space-y-6" style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-sm font-bold text-sage-secondary">Name *</Label>
@@ -41,16 +47,22 @@ export function TeacherFormFields({
           </div>
         </div>
         <div className="space-y-2">
-          <Label className="text-sm font-bold text-sage-secondary">Subject *</Label>
+          <Label className="text-sm font-bold text-sage-secondary">Teaches (shown on website) *</Label>
           <div className="relative">
             <BookOpen className="absolute left-3 top-3 h-4 w-4 text-sage-gray-400" />
             <Input
               className="pl-10 h-11 border-sage-border focus:ring-sage-primary"
-              placeholder="For example: Mathematics / Physics"
+              placeholder="For example: Physics and Mathematics"
               value={formData.subject}
               onChange={(e) => updateField("subject", e.target.value)}
+              list="teacher-subject-options"
               required
             />
+            <datalist id="teacher-subject-options">
+              {subjectOptions.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
           </div>
         </div>
       </div>
@@ -94,7 +106,7 @@ export function TeacherFormFields({
                 unoptimized
                 className="object-cover"
               />
-              <button
+              {readOnly ? null : <button
                 type="button"
                 onClick={() => {
                   onImageFileChange(null);
@@ -104,12 +116,13 @@ export function TeacherFormFields({
                 className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white shadow-md hover:bg-red-600 transition"
               >
                 <X size={12} />
-              </button>
+              </button>}
             </div>
           )}
 
+          {readOnly && !previewUrl ? <p className="text-sm text-sage-gray-500">No photo yet.</p> : null}
           {/* Custom Upload Button */}
-          <div className="relative">
+          <div className="relative" hidden={readOnly}>
             <input
               id="teacher-image-input"
               type="file"
@@ -163,6 +176,6 @@ export function TeacherFormFields({
           />
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 }

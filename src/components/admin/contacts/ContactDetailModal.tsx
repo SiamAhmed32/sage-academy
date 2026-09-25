@@ -8,9 +8,10 @@ import type { ContactRequestItem } from "./types";
 type ContactDetailModalProps = {
   item: ContactRequestItem;
   onClose: () => void;
+  onSaved?: () => void;
 };
 
-export function ContactDetailModal({ item, onClose }: ContactDetailModalProps) {
+export function ContactDetailModal({ item, onClose, onSaved }: ContactDetailModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   async function handleUpdate(formData: FormData) {
@@ -18,6 +19,7 @@ export function ContactDetailModal({ item, onClose }: ContactDetailModalProps) {
     try {
       await updateContactRequestAction(formData);
       toast.success("Contact updated");
+      onSaved?.();
       onClose();
     } catch {
       toast.error("Could not update the contact. Please try again.");

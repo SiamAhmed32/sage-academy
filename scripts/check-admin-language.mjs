@@ -8,8 +8,6 @@ const targets = [
   "src/components/admin",
   "src/constants/admin.ts",
   "src/constants/admin-display.ts",
-  "src/lib/admin-dashboard.ts",
-  "src/lib/admin-routine.ts",
   "src/lib/admin-notices.ts",
 ];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx"]);

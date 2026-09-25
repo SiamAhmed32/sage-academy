@@ -70,6 +70,24 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/v1NewImages/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/freeClassFinal/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
 };

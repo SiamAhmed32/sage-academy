@@ -373,9 +373,9 @@ export async function createBatchAction(formData: FormData) {
   });
 
   await AcademicBatch.create(payload);
-  revalidatePath("/admin/batches");
+  revalidatePath("/admin/academic-batches");
   revalidatePromotionCardPublicPages();
-  redirect("/admin/batches");
+  redirect("/admin/academic-batches");
 }
 
 export async function updateAdmissionRequestAction(formData: FormData) {
@@ -414,7 +414,7 @@ export async function updateAcademicBatchVisibilityAction(formData: FormData) {
     status: text(formData, "status"),
     isActive: bool(formData, "isActive"),
   });
-  revalidatePath("/admin/batches");
+  revalidatePath("/admin/academic-batches");
 }
 
 export async function updateAcademicBatchAction(formData: FormData) {
@@ -450,9 +450,9 @@ export async function updateAcademicBatchAction(formData: FormData) {
     { runValidators: true }
   );
 
-  revalidatePath("/admin/batches");
+  revalidatePath("/admin/academic-batches");
   revalidatePromotionCardPublicPages();
-  redirect("/admin/batches");
+  redirect("/admin/academic-batches");
 }
 
 export async function archiveAcademicBatchAction(formData: FormData) {
@@ -467,9 +467,9 @@ export async function archiveAcademicBatchAction(formData: FormData) {
     status: "আর্কাইভড", // admin-language-allow: persisted public content
   });
 
-  revalidatePath("/admin/batches");
+  revalidatePath("/admin/academic-batches");
   revalidatePromotionCardPublicPages();
-  redirect("/admin/batches");
+  redirect("/admin/academic-batches");
 }
 
 export async function restoreAcademicBatchAction(formData: FormData) {
@@ -484,7 +484,7 @@ export async function restoreAcademicBatchAction(formData: FormData) {
     status: "ভর্তি চলছে", // admin-language-allow: persisted public content
   });
 
-  revalidatePath("/admin/batches");
+  revalidatePath("/admin/academic-batches");
   revalidatePromotionCardPublicPages();
 }
 

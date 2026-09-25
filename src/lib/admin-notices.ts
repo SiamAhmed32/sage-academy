@@ -1,3 +1,4 @@
+import AcademyBatch from "@/models/academy/AcademyBatch";
 import Notice from "@/models/Notice";
 import { normalizeObjectId } from "@/lib/object-id";
 
@@ -47,14 +48,21 @@ export async function fetchAdminNotices(params: AdminNoticeQuery) {
     totalPages
   );
   const notices = await Notice.find(filter)
-    .populate("batch", "title batchCode classLevel")
+    .populate({ path: "batch", select: "code classLevel", model: AcademyBatch })
     .sort({ publishedAt: -1, createdAt: -1 })
     .skip((page - 1) * PAGE_SIZE)
     .limit(PAGE_SIZE)
     .lean();
 
+  // Present the new batch like the old one ({ title, batchCode }) for the existing notice UI.
+  const raw = JSON.parse(JSON.stringify(notices));
+  const shaped: typeof raw = raw.map((notice: { batch?: { code?: string } | null }) => ({
+    ...notice,
+    batch: notice.batch ? { ...notice.batch, title: notice.batch.code, batchCode: notice.batch.code } : null,
+  }));
+
   return {
-    notices: JSON.parse(JSON.stringify(notices)),
+    notices: shaped,
     total,
     page,
     pageSize: PAGE_SIZE,

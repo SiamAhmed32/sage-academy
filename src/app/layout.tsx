@@ -64,6 +64,14 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "SAGE Academy",
+  url: siteUrl,
+  logo: `${siteUrl}/icon-512.png`,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,6 +83,11 @@ export default function RootLayout({
       className={`${notoSansBengali.variable} ${hindSiliguri.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          // Tells Google which image is the academy's logo for search results.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <LeadAttributionCapture />
         <GoogleTranslateStability />
         <ToastContainer position="top-right" autoClose={3000} />

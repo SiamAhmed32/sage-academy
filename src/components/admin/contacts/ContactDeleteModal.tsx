@@ -1,15 +1,36 @@
 "use client";
 
+import { useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
+import { toast } from "react-toastify";
 import { deleteContactRequestAction } from "@/app/admin/actions";
 import type { ContactRequestItem } from "./types";
 
 type ContactDeleteModalProps = {
   item: ContactRequestItem;
   onClose: () => void;
+  onDeleted?: () => void;
 };
 
-export function ContactDeleteModal({ item, onClose }: ContactDeleteModalProps) {
+export function ContactDeleteModal({ item, onClose, onDeleted }: ContactDeleteModalProps) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const formData = new FormData();
+      formData.append("id", item._id.toString());
+      await deleteContactRequestAction(formData);
+      toast.success("Message deleted");
+      onDeleted?.();
+      onClose();
+    } catch {
+      toast.error("Could not delete the message. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -32,19 +53,19 @@ export function ContactDeleteModal({ item, onClose }: ContactDeleteModalProps) {
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 h-11 rounded-xl border border-sage-border text-sm font-bold text-sage-gray-600 transition hover:bg-sage-red-50"
+              disabled={deleting}
+              className="flex-1 h-11 rounded-xl border border-sage-border text-sm font-bold text-sage-gray-600 transition hover:bg-sage-red-50 disabled:opacity-60"
             >
               Cancel
             </button>
-            <form action={deleteContactRequestAction} onSubmit={() => onClose()} className="flex-1">
-              <input type="hidden" name="id" value={item._id.toString()} />
-              <button
-                type="submit"
-                className="w-full h-11 rounded-xl bg-red-600 text-sm font-bold text-white shadow-lg shadow-red-200 transition hover:bg-red-700 active:scale-95"
-              >
-                Delete
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 h-11 rounded-xl bg-red-600 text-sm font-bold text-white shadow-lg shadow-red-200 transition hover:bg-red-700 active:scale-95 disabled:opacity-60"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
           </div>
         </div>
       </div>

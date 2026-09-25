@@ -141,7 +141,8 @@ function drawWeeklyRowsRoutine(
   footer: string | undefined,
   startY: number,
   pageW: number,
-  margin: number
+  margin: number,
+  days: readonly string[] = WEEK_DAYS_EN
 ) {
   const tableW = pageW - margin * 2;
   const dayColW = 86;
@@ -149,15 +150,15 @@ function drawWeeklyRowsRoutine(
   const subjectRowH = 28;
   const dayBlockH = timeRowH + subjectRowH;
 
-  const dayRows = WEEK_DAYS_EN.map((day) => entriesForDay(entries, day));
+  const dayRows = days.map((day) => entriesForDay(entries, day));
   const busiestDay = Math.max(0, ...dayRows.map((row) => row.length));
   const slotCount = Math.min(MAX_SLOT_COLUMNS, Math.max(MIN_SLOT_COLUMNS, busiestDay));
   const slotColW = (tableW - dayColW) / slotCount;
 
   let y = startY;
 
-  for (let dayIndex = 0; dayIndex < WEEK_DAYS_EN.length; dayIndex += 1) {
-    const day = WEEK_DAYS_EN[dayIndex];
+  for (let dayIndex = 0; dayIndex < days.length; dayIndex += 1) {
+    const day = days[dayIndex];
     const dayEntries = dayRows[dayIndex];
 
     drawCellBorder(doc, margin, y, dayColW, dayBlockH);
@@ -262,7 +263,7 @@ export function downloadClassRoutinePdf(options: ClassRoutinePdfOptions) {
     y += 6;
   }
 
-  drawWeeklyRowsRoutine(doc, options.entries, footer, y, pageW, margin);
+  drawWeeklyRowsRoutine(doc, options.entries, footer, y, pageW, margin, options.days ?? WEEK_DAYS_EN);
   savePdfDocument(doc, options.filename);
 }
 

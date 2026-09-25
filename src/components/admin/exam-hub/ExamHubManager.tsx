@@ -7,6 +7,7 @@ import { ExamAttemptPanel } from "@/components/admin/exam-hub/ExamAttemptPanel";
 import { ExamEnrollmentPanel } from "@/components/admin/exam-hub/ExamEnrollmentPanel";
 import { ExamProgramsPanel } from "@/components/admin/exam-hub/ExamProgramsPanel";
 import { ExamQuestionPanel } from "@/components/admin/exam-hub/ExamQuestionPanel";
+import type { GridTile } from "@/components/admin/grid/GridTiles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type AdminExamProgram = {
@@ -61,10 +62,19 @@ function preferredOnlineProgramId(programs: ExamProgramOption[]) {
   );
 }
 
+/** Server-rendered tile counts for the tabs that start unscoped (all programs). */
+export type ExamHubInitialTiles = {
+  programs: GridTile[];
+  enrollments: GridTile[];
+  attempts: GridTile[];
+};
+
 export function ExamHubManager({
   initialProgramOptions,
+  tiles,
 }: {
   initialProgramOptions: ExamProgramOption[];
+  tiles: ExamHubInitialTiles;
 }) {
   const [programOptions, setProgramOptions] = useState(initialProgramOptions);
   const [tab, setTab] = useState("programs");
@@ -131,6 +141,7 @@ export function ExamHubManager({
 
         <TabsContent value="programs" className="mt-0">
           <ExamProgramsPanel
+            tiles={tiles.programs}
             onProgramUpsert={upsertProgramOption}
             onProgramDelete={deleteProgramOption}
           />
@@ -141,11 +152,11 @@ export function ExamHubManager({
         </TabsContent>
 
         <TabsContent value="enrollments">
-          <ExamEnrollmentPanel programs={programOptions} />
+          <ExamEnrollmentPanel programs={programOptions} tiles={tiles.enrollments} />
         </TabsContent>
 
         <TabsContent value="attempts">
-          <ExamAttemptPanel programs={programOptions} />
+          <ExamAttemptPanel programs={programOptions} tiles={tiles.attempts} />
         </TabsContent>
       </Tabs>
     </div>

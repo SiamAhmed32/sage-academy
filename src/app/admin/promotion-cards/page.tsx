@@ -1,90 +1,48 @@
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { PromotionCardCreateButton } from "@/components/admin/promotion-cards/PromotionCardCreateButton";
-import { PromotionCardTable } from "@/components/admin/promotion-cards/PromotionCardTable";
-import { Pagination } from "@/components/admin/shared/Pagination";
-import {
-  boundedAdminSearch,
-  clampAdminPage,
-  escapeAdminRegex,
-  getAdminParam,
-  parseAdminPage,
-  pickAdminSort,
-} from "@/lib/admin-query";
+import { PromotionCardCreateButton, PromotionCardsGrid, type PromotionBatchOption } from "@/components/admin/grids/PromotionCardsGrid";
+import { PageHeading } from "@/components/admin/sa/ui";
+import { promotionCardTiles } from "@/lib/grid/tiles-content";
 import { connectDB } from "@/lib/mongodb";
-import { serializePromotionCard } from "@/lib/promotion-card-serialize";
 import AcademicBatch from "@/models/AcademicBatch";
-import PromotionCard from "@/models/PromotionCard";
-import { isValidObjectId } from "mongoose";
+import AcademyBatch from "@/models/academy/AcademyBatch";
 
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const PAGE_SIZE = 20;
-const sortOptions: Record<string, Record<string, 1 | -1>> = {
-  order: { order: 1, createdAt: -1 },
-  newest: { createdAt: -1 },
-  title: { title: 1, createdAt: -1 },
-};
-
-export default async function PromotionCardsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const q = boundedAdminSearch(getAdminParam(params, "q"));
-  const batch = getAdminParam(params, "batch");
-  const visibility = getAdminParam(params, "visibility");
-  const view = getAdminParam(params, "view") === "archived" ? "archived" : "active";
-  const sort = getAdminParam(params, "sort", "order");
-  const requestedPage = parseAdminPage(getAdminParam(params, "page"));
-  const filter: Record<string, unknown> = {
-    isArchived: view === "archived" ? true : { $ne: true },
-  };
-
-  if (q) filter.title = new RegExp(escapeAdminRegex(q), "i");
-  if (batch === "none") filter.linkedBatch = null;
-  else if (isValidObjectId(batch)) filter.linkedBatch = batch;
-  if (visibility === "visible") filter.websiteVisible = true;
-  if (visibility === "hidden") filter.websiteVisible = false;
-  if (visibility === "featured") filter.featured = true;
-
+async function promotionBatchOptions(): Promise<PromotionBatchOption[]> {
   await connectDB();
-
-  const [total, academicBatches] = await Promise.all([
-    PromotionCard.countDocuments(filter),
+  const [academicBatches, academyBatches] = await Promise.all([
     AcademicBatch.find({ isArchived: { $ne: true } })
       .select("title batchCode")
       .sort({ createdAt: -1 })
-      .lean(),
+      .lean<{ _id: unknown; title: string; batchCode: string }[]>(),
+    AcademyBatch.find({ status: "active" }).select("code classLevel").sort({ classLevel: 1, code: 1 }).lean<{ _id: unknown; code: string; classLevel: number }[]>(),
   ]);
-  const { page, totalPages } = clampAdminPage(requestedPage, total, PAGE_SIZE);
-  const cards = await PromotionCard.find(filter)
-      .sort(pickAdminSort(sort, sortOptions, "order"))
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE)
-      .populate("linkedBatch", "title batchCode")
-      .lean();
 
-  const batchOptions = academicBatches.map((batch) => ({
-    _id: batch._id.toString(),
-    title: batch.title,
-    batchCode: batch.batchCode,
-  }));
+  // New academy batches first; old website batches stay selectable for existing cards.
+  return [
+    ...academyBatches.map((batch) => ({
+      _id: `academy:${String(batch._id)}`,
+      title: `Class ${batch.classLevel}`,
+      batchCode: batch.code,
+      group: "new" as const,
+    })),
+    ...academicBatches.map((batch) => ({
+      _id: String(batch._id),
+      title: batch.title,
+      batchCode: batch.batchCode,
+      group: "old" as const,
+    })),
+  ];
+}
 
-  const serializedCards = cards.map((card) => serializePromotionCard(card));
+export default async function PromotionCardsPage() {
+  const [tiles, batches] = await Promise.all([promotionCardTiles(), promotionBatchOptions()]);
 
   return (
     <div>
-      <AdminPageHeader
+      <PageHeading
         title="Promotion Cards"
         description="Create and arrange the cards displayed on the website homepage."
-        action={<PromotionCardCreateButton batches={batchOptions} />}
+        actions={<PromotionCardCreateButton batches={batches} />}
       />
-
-      <PromotionCardTable
-        cards={serializedCards}
-        batches={batchOptions}
-        filters={{ q, batch, visibility, view, sort }}
-      />
-      <Pagination totalPages={totalPages} currentPage={page} totalItems={total} pageSize={PAGE_SIZE} showWhenSinglePage />
+      <PromotionCardsGrid tiles={tiles} batches={batches} />
     </div>
   );
 }

@@ -5,9 +5,9 @@ import AdmissionRequest from "@/models/AdmissionRequest";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdmissionInfoGrid } from "@/components/admin/admissions/details/AdmissionInfoGrid";
 import { AdmissionAddressBox } from "@/components/admin/admissions/details/AdmissionAddressBox";
-import { AdmissionFilePreview } from "@/components/admin/admissions/details/AdmissionFilePreview";
 import { AdmissionActionSidebar } from "@/components/admin/admissions/details/AdmissionActionSidebar";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, UserCheck, UserPlus } from "lucide-react";
+import AcademyStudent from "@/models/academy/AcademyStudent";
 import Link from "next/link";
 import { formatAdminDateTime } from "@/lib/admin-format";
 
@@ -27,7 +27,10 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
   }
 
   const request = JSON.parse(JSON.stringify(rawRequest));
-  const isDocumentOnly = request.uploadedForm?.url && !request.studentName;
+  // If this request was already turned into a student, link to them instead.
+  const admitted = await AcademyStudent.findOne({ admissionRequestId: id })
+    .select("studentId")
+    .lean<{ _id: unknown; studentId: string }>();
 
   return (
     <div className="min-h-screen space-y-8 p-4 sm:p-6 lg:p-8 bg-sage-red-50/20">
@@ -41,45 +44,42 @@ export default async function AdmissionDetailPage({ params }: { params: Promise<
         </Link>
         
         <AdminPageHeader 
-          title={request.studentName || "Uploaded Form Submission"} 
+          title={request.studentName || "Admission Application"} 
           description={`Lead ID: #${request._id.toString().slice(-8).toUpperCase()} | Submitted on ${formatAdminDateTime(request.createdAt)}`}
+          action={
+            admitted ? (
+              <Link href={`/admin/academy/students/${String(admitted._id)}`} className="btn-secondary">
+                <UserCheck size={17} /> Admitted as {admitted.studentId}
+              </Link>
+            ) : (
+              <Link href={`/admin/academy/admission?request=${request._id}`} className="btn-primary">
+                <UserPlus size={17} /> Admit student
+              </Link>
+            )
+          }
         />
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
         <div className="space-y-8">
-          {request.uploadedForm?.url && (
-            <AdmissionFilePreview uploadedForm={request.uploadedForm} />
-          )}
-
-          {!isDocumentOnly && (
-            <div className="rounded-[2.5rem] border border-sage-border bg-white p-8 shadow-xl shadow-sage-red-100/10">
-              <h3 className="mb-8 text-xl font-black text-sage-secondary uppercase tracking-tight">
-                Student & Academic Information
-              </h3>
-              <AdmissionInfoGrid item={request} />
-              
-              <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-                <AdmissionAddressBox title="Present Address" address={request.presentAddress} />
-                <AdmissionAddressBox title="Permanent Address" address={request.permanentAddress} />
-              </div>
-
-              {request.message && (
-                <div className="mt-10 rounded-2xl bg-sage-red-50/50 p-6 border border-sage-red-100">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-sage-primary mb-2">Message from User</p>
-                  <p className="text-sm font-bold text-sage-secondary leading-relaxed">{request.message}</p>
-                </div>
-              )}
+          <div className="rounded-[2.5rem] border border-sage-border bg-white p-8 shadow-xl shadow-sage-red-100/10">
+            <h3 className="mb-8 text-xl font-black text-sage-secondary uppercase tracking-tight">
+              Student & Academic Information
+            </h3>
+            <AdmissionInfoGrid item={request} />
+            
+            <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <AdmissionAddressBox title="Present Address" address={request.presentAddress} />
+              <AdmissionAddressBox title="Permanent Address" address={request.permanentAddress} />
             </div>
-          )}
 
-          {isDocumentOnly && (
-             <div className="rounded-3xl border border-dashed border-sage-gray-300 p-12 text-center bg-white/50">
-                <p className="text-sm font-bold text-sage-gray-500">
-                  This is a document-based lead. Please review the uploaded file on the left for all details.
-                </p>
-             </div>
-          )}
+            {request.message && (
+              <div className="mt-10 rounded-2xl bg-sage-red-50/50 p-6 border border-sage-red-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-sage-primary mb-2">Message from User</p>
+                <p className="text-sm font-bold text-sage-secondary leading-relaxed">{request.message}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-8">

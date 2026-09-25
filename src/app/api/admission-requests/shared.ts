@@ -52,7 +52,6 @@ export function buildAdmissionRequestUpdate(
   if (body.status !== undefined) update.status = body.status;
   if (body.isRead !== undefined) update.isRead = body.isRead;
   if (body.adminNote !== undefined) update.adminNote = body.adminNote.trim();
-  if (body.uploadedForm !== undefined) update.uploadedForm = body.uploadedForm;
 
   return update;
 }

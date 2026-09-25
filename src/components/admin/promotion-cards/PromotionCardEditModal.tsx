@@ -14,9 +14,11 @@ interface PromotionCardEditModalProps {
   batches: BatchOption[];
   open: boolean;
   onClose: () => void;
+  /** Called after a successful save (e.g. to reload a data grid). */
+  onSaved?: () => void;
 }
 
-export function PromotionCardEditModal({ card, batches, open, onClose }: PromotionCardEditModalProps) {
+export function PromotionCardEditModal({ card, batches, open, onClose, onSaved }: PromotionCardEditModalProps) {
   const [previewUrl, setPreviewUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -43,6 +45,7 @@ export function PromotionCardEditModal({ card, batches, open, onClose }: Promoti
       
       toast.success("Promotion card updated");
       router.refresh();
+      onSaved?.();
       onClose();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not update the card");

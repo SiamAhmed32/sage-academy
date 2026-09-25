@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import PromotionCard from "@/models/PromotionCard";
 import "@/models/AcademicBatch";
+import { attachAcademyBatches } from "@/lib/academy/public-batch";
 
 export const PROMOTION_CARDS_CACHE_TAG = "promotion-cards";
 
@@ -24,20 +25,22 @@ const homeLinkedBatchPopulate = {
 async function fetchVisiblePromotionCards() {
   await connectDB();
 
-  return PromotionCard.find(visibleCardQuery)
+  const cards = await PromotionCard.find(visibleCardQuery)
     .populate(listLinkedBatchPopulate)
     .sort({ featured: -1, order: 1, createdAt: -1 })
     .lean();
+  return attachAcademyBatches(cards);
 }
 
 async function fetchHomePromotionCards(limit: number) {
   await connectDB();
 
-  return PromotionCard.find(visibleCardQuery)
+  const cards = await PromotionCard.find(visibleCardQuery)
     .populate(homeLinkedBatchPopulate)
     .sort({ featured: -1, order: 1, createdAt: -1 })
     .limit(limit)
     .lean();
+  return attachAcademyBatches(cards);
 }
 
 async function fetchVisiblePromotionCardCount() {

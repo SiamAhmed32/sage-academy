@@ -34,26 +34,26 @@ const StatIcons = [
 
 export function HeroStats() {
   return (
-    <div className="mt-9 border-t border-sage-red-100 pt-8">
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-        {heroStats.map((item, index) => {
-          const Icon = StatIcons[index % StatIcons.length];
-          return (
-            <div
-              key={item.label}
-              className={cn(
-                "group flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-sage-red-100/70 bg-white/70 px-2 py-3 text-center shadow-sm shadow-sage-red-100/20 backdrop-blur transition-all duration-200",
-                "sm:rounded-2xl sm:px-3 sm:py-3.5 md:flex-row md:items-center md:gap-3 md:px-4 md:text-left",
-                "hover:-translate-y-0.5 hover:border-sage-primary/20 hover:shadow-md hover:shadow-sage-red-100/40"
-              )}
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sage-primary/8 text-sage-primary transition-colors duration-200 group-hover:bg-sage-primary/12 sm:h-9 sm:w-9 sm:rounded-xl">
-                <Icon />
-              </span>
-              <div className="min-w-0 max-w-full">
-                <p className="bn-headline text-base font-bold leading-tight text-sage-secondary sm:text-xl md:text-2xl">
+    <div className="mt-10 grid grid-cols-3 overflow-hidden rounded-2xl border border-sage-primary/10 bg-white/80 shadow-[0_10px_30px_-18px_rgba(122,20,28,0.35)] backdrop-blur">
+      {heroStats.map((item, index) => {
+        const Icon = StatIcons[index % StatIcons.length];
+        return (
+          <div
+            key={item.label}
+            className={cn(
+              "relative flex min-w-0 flex-col items-center gap-2 px-2 py-4 text-center",
+              "sm:px-4 sm:py-5 md:flex-row md:items-center md:gap-3.5 md:px-5 md:text-left",
+              index > 0 && "before:absolute before:inset-y-4 before:left-0 before:w-px before:bg-sage-primary/10"
+            )}
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sage-primary to-sage-primary-hover text-white shadow-sm shadow-sage-primary/30 sm:h-11 sm:w-11">
+              <Icon />
+            </span>
+            <div className="min-w-0 max-w-full">
+              <p className="bn-headline text-lg font-bold leading-none text-sage-secondary sm:text-2xl">
+                <span className="notranslate" translate="no">
                   {hasCountUpValue(item) ? (
-                    <span className="notranslate" translate="no">
+                    <>
                       <CountUp
                         from={0}
                         to={item.countTo}
@@ -61,22 +61,20 @@ export function HeroStats() {
                         duration={1.4}
                         className="tabular-nums"
                       />
-                      {item.suffix}
-                    </span>
+                      <span className="text-sage-primary">{item.suffix}</span>
+                    </>
                   ) : (
-                    <span className="notranslate text-sm sm:text-base md:text-xl" translate="no">
-                      {item.value}
-                    </span>
+                    item.value
                   )}
-                </p>
-                <p className="bn-pill mt-0.5 text-[10px] font-medium leading-tight text-sage-gray-500 sm:text-xs md:text-sm">
-                  {item.label}
-                </p>
-              </div>
+                </span>
+              </p>
+              <p className="bn-pill mt-1.5 text-[11px] font-medium leading-tight text-sage-gray-500 sm:text-sm">
+                {item.label}
+              </p>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

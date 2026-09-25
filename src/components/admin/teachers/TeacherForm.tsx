@@ -12,9 +12,10 @@ interface TeacherFormProps {
   teacher?: AdminTeacher;
   onSuccess: () => void;
   onCancel: () => void;
+  subjectOptions?: string[];
 }
 
-export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) {
+export function TeacherForm({ teacher, onSuccess, onCancel, subjectOptions }: TeacherFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -125,6 +126,7 @@ export function TeacherForm({ teacher, onSuccess, onCancel }: TeacherFormProps) 
         setFormData={setFormData}
         previewUrl={previewUrl}
         onImageFileChange={handleImageFileChange}
+        subjectOptions={subjectOptions}
       />
       <div className="flex items-center justify-between pt-6 mt-6 border-t border-sage-border">
         {isEdit ? (

@@ -1,27 +1,21 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileQuestion,
-  Loader2,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Search,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { ColDef, ICellRendererParams } from "ag-grid-community";
+import { BookOpenCheck, Loader2, MapPin, Plus, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 import type { AdminExamProgram } from "@/components/admin/exam-hub/ExamHubManager";
 import { ExamProgramForm } from "@/components/admin/exam-hub/ExamProgramForm";
 import { ExamProgramViewModal } from "@/components/admin/exam-hub/ExamProgramViewModal";
+import { useExamHubTiles } from "@/components/admin/exam-hub/use-exam-hub-tiles";
+import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
+import type { GridTile } from "@/components/admin/grid/GridTiles";
+import { ActionIcons, Muted, Pill, dateCol, moneyCol, numberCol, setCol, textCol, type PillTone } from "@/components/admin/grid/cells";
+import { ButtonTitle, ThumbTitle, yesNoOptions } from "@/components/admin/grids/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -30,59 +24,52 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { adminClassLevelOptions } from "@/constants/admin-display";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+const SOURCE = "exam-programs";
 
 type ProgramVariant = "online" | "offline";
 
-type Filters = {
-  query: string;
-  status: "all" | AdminExamProgram["status"];
-  accessType: "all" | "public" | "private";
-  offlineType: "all" | "weekly" | "monthly";
+type Row = AdminExamProgram & { id: string; createdAt: string };
+
+type ProgramsContext = GridContext & {
+  view: (row: Row) => void;
+  edit: (row: Row) => void;
+  remove: (row: Row) => void;
 };
 
-const defaultFilters: Filters = {
-  query: "",
-  status: "all",
-  accessType: "all",
-  offlineType: "all",
+const STATUS_OPTIONS = [
+  { value: "published", label: "Published" },
+  { value: "draft", label: "Draft" },
+  { value: "hidden", label: "Hidden" },
+  { value: "archived", label: "Archived" },
+];
+
+const STATUS_TONES: Record<string, PillTone> = {
+  published: "success",
+  draft: "neutral",
+  hidden: "warning",
+  archived: "neutral",
 };
+
+const OFFLINE_TYPE_LABELS: Record<string, string> = { weekly: "Weekly", monthly: "Monthly" };
+
+function ProgramActions({ data, context }: ICellRendererParams<Row, unknown, ProgramsContext>) {
+  if (!data) return null;
+  return <ActionIcons onView={() => context.view(data)} onEdit={() => context.edit(data)} onDelete={() => context.remove(data)} />;
+}
 
 type Props = {
+  tiles: GridTile[];
   onProgramUpsert: (program: AdminExamProgram) => void;
   onProgramDelete: (programId: string) => void;
 };
 
-export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
-  const [variant, setVariant] = useState<ProgramVariant>("online");
-  const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[0]);
-  const [programs, setPrograms] = useState<AdminExamProgram[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const deferredQuery = useDeferredValue(filters.query.trim());
+export function ExamProgramsPanel({ tiles: initialTiles, onProgramUpsert, onProgramDelete }: Props) {
+  const router = useRouter();
+  const grid = useRef<SaDataGridHandle>(null);
+  const { tiles, reload: reloadTiles } = useExamHubTiles("programs", "", initialTiles);
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [createMode, setCreateMode] = useState<ProgramVariant>("online");
@@ -93,63 +80,11 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<AdminExamProgram | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const rangeEnd = Math.min(page * pageSize, total);
-
-  const loadPrograms = useCallback(
-    async (signal?: AbortSignal) => {
-      const params = new URLSearchParams({
-        deliveryMode: variant,
-        sort: "order:asc",
-        page: String(page),
-        limit: String(pageSize),
-      });
-      if (deferredQuery) params.set("q", deferredQuery);
-      if (filters.status !== "all") params.set("status", filters.status);
-      if (variant === "online" && filters.accessType !== "all") {
-        params.set("accessType", filters.accessType);
-      }
-      if (variant === "offline" && filters.offlineType !== "all") {
-        params.set("offlineType", filters.offlineType);
-      }
-
-      try {
-        const res = await fetch(`/api/admin/exam-hub/programs?${params.toString()}`, { signal });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          if (!signal?.aborted) {
-            toast.error(typeof data?.message === "string" ? data.message : "Could not load the exam programs");
-          }
-          return;
-        }
-        const nextTotalPages = data.data?.totalPages || 0;
-        if (page > Math.max(1, nextTotalPages)) {
-          setPage(Math.max(1, nextTotalPages));
-          return;
-        }
-        setPrograms(data.data?.items || []);
-        setTotal(data.data?.total || 0);
-        setTotalPages(nextTotalPages);
-      } finally {
-        if (!signal?.aborted) setLoading(false);
-      }
-    },
-    [
-      deferredQuery,
-      filters.accessType,
-      filters.offlineType,
-      filters.status,
-      page,
-      pageSize,
-      variant,
-    ]
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void loadPrograms(controller.signal);
-    return () => controller.abort();
-  }, [loadPrograms]);
+  function reload() {
+    grid.current?.refresh();
+    void reloadTiles();
+    router.refresh();
+  }
 
   function openCreate(mode: ProgramVariant) {
     setEditing(null);
@@ -168,16 +103,6 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
     setEditing(null);
   }
 
-  async function handleRefresh() {
-    setRefreshing(true);
-    setLoading(true);
-    try {
-      await loadPrograms();
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
   async function confirmDelete() {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -191,196 +116,143 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
       onProgramDelete(deleteTarget._id);
       toast.success("Exam program deleted successfully");
       setDeleteTarget(null);
-      if (programs.length === 1 && page > 1) setPage((current) => current - 1);
-      else await loadPrograms();
+      reload();
     } finally {
       setDeleting(false);
     }
   }
 
-  const isOnline = variant === "online";
-
-  function updateFilters(update: Partial<Filters>) {
-    setLoading(true);
-    setPage(1);
-    setFilters((current) => ({ ...current, ...update }));
-  }
+  const columnDefs = useMemo<ColDef<Row>[]>(
+    () => [
+      {
+        field: "title",
+        headerName: "Program",
+        minWidth: 260,
+        flex: 1.5,
+        ...textCol(),
+        cellRenderer: ({ data, context }: ICellRendererParams<Row, unknown, ProgramsContext>) =>
+          data ? (
+            <ButtonTitle onClick={() => context.view(data)}>
+              <ThumbTitle
+                image={data.image}
+                icon={data.deliveryMode === "online" ? BookOpenCheck : MapPin}
+                title={data.title}
+                sub={`/${data.slug}`}
+              />
+            </ButtonTitle>
+          ) : null,
+      },
+      { field: "slug", headerName: "Slug", width: 180, hide: true, ...textCol() },
+      {
+        field: "deliveryMode",
+        headerName: "Mode",
+        width: 120,
+        ...setCol([
+          { value: "online", label: "Online" },
+          { value: "offline", label: "Offline" },
+        ]),
+        cellRenderer: ({ value }: { value?: string }) =>
+          value === "offline" ? <Pill tone="warning">Offline</Pill> : <Pill tone="info">Online</Pill>,
+      },
+      {
+        field: "offlineType",
+        headerName: "Offline type",
+        width: 130,
+        ...setCol(Object.entries(OFFLINE_TYPE_LABELS).map(([value, label]) => ({ value, label }))),
+        valueFormatter: ({ value }) => (value ? (OFFLINE_TYPE_LABELS[value as string] ?? String(value)) : "—"),
+      },
+      {
+        field: "accessType",
+        headerName: "Access",
+        width: 150,
+        ...setCol([
+          { value: "public", label: "Public" },
+          { value: "private", label: "Private" },
+        ]),
+        cellRenderer: ({ data }: { data?: Row }) =>
+          data ? (
+            data.deliveryMode === "online" ? (
+              <span style={{ display: "inline-flex", gap: 4 }}>
+                <Pill tone="neutral">{data.accessType === "private" ? "Private" : "Public"}</Pill>
+                {data.isPaid ? <Pill tone="danger">Paid</Pill> : null}
+              </span>
+            ) : (
+              <Muted>—</Muted>
+            )
+          ) : null,
+      },
+      { field: "isPaid", headerName: "Paid", width: 110, hide: true, ...setCol(yesNoOptions("Paid", "Free")), valueFormatter: ({ value }) => (value ? "Paid" : "Free") },
+      { field: "feeAmount", headerName: "Fee", width: 120, hide: true, ...moneyCol() },
+      {
+        field: "status",
+        headerName: "Status",
+        width: 125,
+        ...setCol(STATUS_OPTIONS),
+        cellRenderer: ({ value }: { value?: string }) =>
+          value ? <Pill tone={STATUS_TONES[value] ?? "neutral"}>{STATUS_OPTIONS.find((item) => item.value === value)?.label ?? value}</Pill> : null,
+      },
+      { field: "questionCount", headerName: "Questions", width: 125, ...numberCol(), headerTooltip: "Active questions (online programs)" },
+      { field: "enrollmentCount", headerName: "Enrollments", width: 135, ...numberCol() },
+      { field: "startDate", headerName: "Starts", width: 125, ...dateCol() },
+      { field: "endDate", headerName: "Ends", width: 125, ...dateCol() },
+      {
+        field: "examTime",
+        headerName: "Exam time",
+        width: 160,
+        ...textCol(),
+        cellRenderer: ({ value }: { value?: string }) => (value ? value : <Muted>—</Muted>),
+      },
+      {
+        field: "venue",
+        headerName: "Venue",
+        width: 180,
+        ...textCol(),
+        cellRenderer: ({ value }: { value?: string }) => (value ? value : <Muted>—</Muted>),
+      },
+      {
+        field: "classLevels",
+        headerName: "Classes",
+        width: 150,
+        hide: true,
+        ...setCol(adminClassLevelOptions, { sortable: false }),
+        valueFormatter: ({ value }) => (Array.isArray(value) && value.length ? value.map((level) => `Class ${level}`).join(", ") : "All classes"),
+        context: { exportValue: (row: Row) => (row.classLevels ?? []).join(" ") },
+      },
+      { field: "durationMinutes", headerName: "Duration (min)", width: 140, hide: true, ...numberCol() },
+      { field: "totalMarks", headerName: "Total marks", width: 130, hide: true, ...numberCol() },
+      { field: "featured", headerName: "Featured", width: 120, hide: true, ...setCol(yesNoOptions("Featured", "Not featured")), valueFormatter: ({ value }) => (value ? "Yes" : "No") },
+      { field: "order", headerName: "Order", width: 100, hide: true, ...numberCol() },
+      { field: "createdAt", headerName: "Created", width: 125, hide: true, ...dateCol() },
+      { colId: "actions", headerName: "", width: 130, cellRenderer: ProgramActions },
+    ],
+    []
+  );
 
   return (
     <>
-      <div className="space-y-6">
-        <Card className="overflow-hidden border-sage-border/80 bg-white py-0 shadow-sm ring-sage-border/60">
-          <Tabs
-            value={variant}
-            onValueChange={(value) => {
-              setLoading(true);
-              setPage(1);
-              setVariant(value as ProgramVariant);
-            }}
-          >
-            <div className="flex flex-col gap-4 border-b border-sage-border/80 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-sage-secondary">Exam programs</h3>
-                <p className="mt-1 text-sm text-sage-gray-500">
-                  Manage online MCQ exams and offline center exams in one place.
-                </p>
-              </div>
-              <TabsList className="h-11 w-full rounded-2xl bg-sage-cream/80 p-1 sm:w-auto">
-                <TabsTrigger value="online" className="rounded-xl px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                  Online
-                  {variant === "online" ? (
-                    <Badge variant="secondary" className="ml-2 bg-sage-red-50 text-sage-primary">{total}</Badge>
-                  ) : null}
-                </TabsTrigger>
-                <TabsTrigger value="offline" className="rounded-xl px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                  Offline
-                  {variant === "offline" ? (
-                    <Badge variant="secondary" className="ml-2 bg-amber-50 text-amber-800">{total}</Badge>
-                  ) : null}
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <CardContent className="space-y-5 px-4 pb-5 sm:px-6 sm:pb-6">
-              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="relative sm:col-span-2 lg:col-span-1">
-                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-sage-gray-400" />
-                    <Input
-                      value={filters.query}
-                      onChange={(event) => updateFilters({ query: event.target.value })}
-                      placeholder="Search title or slug..."
-                      className="h-10 rounded-xl border-sage-border pl-9"
-                    />
-                  </div>
-                  <Select
-                    value={filters.status}
-                    onValueChange={(value) => updateFilters({ status: value as Filters["status"] })}
-                  >
-                    <SelectTrigger className="h-10 rounded-xl border-sage-border">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All statuses</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="hidden">Hidden</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {isOnline ? (
-                    <Select
-                      value={filters.accessType}
-                      onValueChange={(value) => updateFilters({ accessType: value as Filters["accessType"] })}
-                    >
-                      <SelectTrigger className="h-10 rounded-xl border-sage-border">
-                        <SelectValue placeholder="Access" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All access</SelectItem>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Select
-                      value={filters.offlineType}
-                      onValueChange={(value) => updateFilters({ offlineType: value as Filters["offlineType"] })}
-                    >
-                      <SelectTrigger className="h-10 rounded-xl border-sage-border">
-                        <SelectValue placeholder="Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All types</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl"
-                    onClick={() => updateFilters(defaultFilters)}
-                  >
-                    <RotateCcw className="size-4" />
-                    Reset
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl"
-                    disabled={refreshing}
-                    onClick={handleRefresh}
-                  >
-                    {refreshing ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-                    Refresh
-                  </Button>
-                  <Button
-                    size="sm"
-                    className={cn(
-                      "rounded-xl font-semibold",
-                      isOnline ? "bg-sage-primary hover:bg-sage-secondary" : "bg-amber-700 hover:bg-amber-800"
-                    )}
-                    onClick={() => openCreate(variant)}
-                  >
-                    <Plus className="size-4" />
-                    New {isOnline ? "online" : "offline"}
-                  </Button>
-                </div>
-              </div>
-
-              <TabsContent value="online" className="mt-0">
-                <ProgramList
-                  variant="online"
-                  programs={programs}
-                  empty={!loading && total === 0}
-                  loading={loading}
-                  onView={setViewTarget}
-                  onEdit={openEdit}
-                  onDelete={setDeleteTarget}
-                />
-              </TabsContent>
-              <TabsContent value="offline" className="mt-0">
-                <ProgramList
-                  variant="offline"
-                  programs={programs}
-                  empty={!loading && total === 0}
-                  loading={loading}
-                  onView={setViewTarget}
-                  onEdit={openEdit}
-                  onDelete={setDeleteTarget}
-                />
-              </TabsContent>
-
-              <PaginationBar
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                total={total}
-                page={page}
-                totalPages={Math.max(1, totalPages)}
-                pageSize={pageSize}
-                onPageSizeChange={(size) => {
-                  setLoading(true);
-                  setPage(1);
-                  setPageSize(size);
-                }}
-                onPrev={() => {
-                  setLoading(true);
-                  setPage((current) => Math.max(1, current - 1));
-                }}
-                onNext={() => {
-                  setLoading(true);
-                  setPage((current) => Math.min(totalPages, current + 1));
-                }}
-              />
-            </CardContent>
-          </Tabs>
-        </Card>
-      </div>
+      <SaDataGrid<Row>
+        ref={grid}
+        source={SOURCE}
+        gridId={SOURCE}
+        columnDefs={columnDefs}
+        getRowId={(row) => row.id}
+        tiles={tiles}
+        context={{ view: setViewTarget, edit: openEdit, remove: setDeleteTarget }}
+        searchPlaceholder="Search title, slug, venue or exam time…"
+        emptyTitle="No programs found"
+        emptyDescription="Try changing filters or create a new exam program."
+        exportName="sage-exam-programs"
+        toolbarActions={
+          <>
+            <button type="button" className="sa-grid-btn" onClick={() => openCreate("offline")}>
+              <Plus size={15} /> <span className="sa-grid-btn-label">New offline</span>
+            </button>
+            <button type="button" className="sa-grid-btn primary" onClick={() => openCreate("online")}>
+              <Plus size={15} /> <span className="sa-grid-btn-label">New online</span>
+            </button>
+          </>
+        }
+      />
 
       <Dialog open={sheetOpen} onOpenChange={(open) => !open && !savingProgram && closeSheet()}>
         <DialogContent
@@ -429,7 +301,7 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
               onSavingChange={setSavingProgram}
               onSaved={(program) => {
                 onProgramUpsert(program);
-                void loadPrograms();
+                reload();
                 closeSheet();
                 toast.success(editing ? "Exam program updated successfully" : "Exam program created successfully");
               }}
@@ -438,13 +310,7 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
           </div>
 
           <DialogFooter className="-mx-0 -mb-0 shrink-0 gap-2 rounded-none border-t border-sage-border/70 bg-white px-4 py-4 sm:flex-row sm:justify-end sm:px-6 sm:py-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              disabled={savingProgram}
-              onClick={closeSheet}
-            >
+            <Button type="button" variant="outline" className="rounded-xl" disabled={savingProgram} onClick={closeSheet}>
               Cancel
             </Button>
             <Button
@@ -501,262 +367,5 @@ export function ExamProgramsPanel({ onProgramUpsert, onProgramDelete }: Props) {
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-function ProgramList({
-  variant,
-  programs,
-  empty,
-  loading,
-  onView,
-  onEdit,
-  onDelete,
-}: {
-  variant: ProgramVariant;
-  programs: AdminExamProgram[];
-  empty: boolean;
-  loading: boolean;
-  onView: (p: AdminExamProgram) => void;
-  onEdit: (p: AdminExamProgram) => void;
-  onDelete: (p: AdminExamProgram) => void;
-}) {
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 rounded-2xl border border-sage-border bg-sage-cream/20 px-6 py-16 text-sm text-sage-gray-500">
-        <Loader2 className="size-4 animate-spin" />
-        Loading exam programs...
-      </div>
-    );
-  }
-
-  if (empty) {
-    return (
-      <div className="rounded-2xl border border-dashed border-sage-border bg-sage-cream/20 px-6 py-16 text-center">
-        <p className="font-semibold text-sage-secondary">No programs found</p>
-        <p className="mt-2 text-sm text-sage-gray-500">Try changing filters or create a new exam program.</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="hidden overflow-hidden rounded-2xl border border-sage-border/80 md:block">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-sage-cream/30 hover:bg-sage-cream/30">
-              <TableHead>Program</TableHead>
-              {variant === "online" ? (
-                <>
-                  <TableHead>Access</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Questions / enrollments</TableHead>
-                </>
-              ) : (
-                <>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Exam time</TableHead>
-                  <TableHead>Venue</TableHead>
-                  <TableHead>Status</TableHead>
-                </>
-              )}
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-              {programs.map((program, index) => (
-                <TableRow
-                  key={program._id}
-                  className="border-sage-border/60 hover:bg-sage-cream/20"
-                  style={{ animationDelay: `${index * 30}ms` }}
-                >
-                  <TableCell className="py-4">
-                    <p className="font-semibold text-sage-secondary">{program.title}</p>
-                    <p className="text-xs text-sage-gray-500">/{program.slug}</p>
-                  </TableCell>
-                  {variant === "online" ? (
-                    <>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {program.accessType ? <Badge variant="secondary">{program.accessType}</Badge> : null}
-                          {program.isPaid ? <Badge className="bg-sage-red-50 text-sage-primary">paid</Badge> : null}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={program.status} />
-                      </TableCell>
-                      <TableCell className="tabular-nums">
-                        <span className="inline-flex items-center gap-1 text-sm">
-                          <FileQuestion className="size-3.5 text-sage-primary" />
-                          {program.questionCount || 0}
-                          <span className="text-sage-gray-400">/</span>
-                          <Users className="size-3.5 text-sage-primary" />
-                          {program.enrollmentCount || 0}
-                        </span>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell>
-                        <Badge variant="secondary" className="capitalize">
-                          {program.offlineType || "offline"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-[180px] truncate text-sm">{program.examTime || "—"}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm">{program.venue || "—"}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={program.status} />
-                      </TableCell>
-                    </>
-                  )}
-                  <TableCell className="text-right">
-                    <RowActions program={program} onView={onView} onEdit={onEdit} onDelete={onDelete} />
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="grid gap-3 md:hidden">
-        {programs.map((program, index) => (
-          <motion.div
-            key={program._id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.04 }}
-            className="rounded-2xl border border-sage-border bg-white p-4 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-sage-secondary">{program.title}</p>
-                <p className="text-xs text-sage-gray-500">/{program.slug}</p>
-              </div>
-              <StatusBadge status={program.status} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-xs text-sage-gray-600">
-              {variant === "online" ? (
-                <>
-                  {program.accessType ? <Badge variant="outline">{program.accessType}</Badge> : null}
-                  <Badge variant="outline">{program.questionCount || 0} questions</Badge>
-                  <Badge variant="outline">{program.enrollmentCount || 0} enrollments</Badge>
-                </>
-              ) : (
-                <>
-                  <Badge variant="outline" className="capitalize">
-                    {program.offlineType || "offline"}
-                  </Badge>
-                  {program.examTime ? <Badge variant="outline">{program.examTime}</Badge> : null}
-                </>
-              )}
-            </div>
-            <div className="mt-4">
-              <RowActions program={program} onView={onView} onEdit={onEdit} onDelete={onDelete} compact />
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function RowActions({
-  program,
-  onView,
-  onEdit,
-  onDelete,
-  compact = false,
-}: {
-  program: AdminExamProgram;
-  onView: (p: AdminExamProgram) => void;
-  onEdit: (p: AdminExamProgram) => void;
-  onDelete: (p: AdminExamProgram) => void;
-  compact?: boolean;
-}) {
-  return (
-    <div className={cn("flex gap-2", compact ? "flex-wrap" : "justify-end")}>
-      <Button variant="outline" size="sm" className="rounded-lg" onClick={() => onView(program)}>
-        View
-      </Button>
-      <Button variant="outline" size="sm" className="rounded-lg" onClick={() => onEdit(program)}>
-        Edit
-      </Button>
-      <Button variant="destructive" size="sm" className="rounded-lg" onClick={() => onDelete(program)}>
-        Delete
-      </Button>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: AdminExamProgram["status"] }) {
-  const styles = {
-    published: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-    draft: "bg-sage-cream text-sage-gray-700 ring-sage-border",
-    hidden: "bg-amber-50 text-amber-800 ring-amber-100",
-    archived: "bg-slate-100 text-slate-600 ring-slate-200",
-  }[status];
-
-  return (
-    <Badge variant="outline" className={cn("capitalize ring-1", styles)}>
-      {status}
-    </Badge>
-  );
-}
-
-function PaginationBar({
-  rangeStart,
-  rangeEnd,
-  total,
-  page,
-  totalPages,
-  pageSize,
-  onPageSizeChange,
-  onPrev,
-  onNext,
-}: {
-  rangeStart: number;
-  rangeEnd: number;
-  total: number;
-  page: number;
-  totalPages: number;
-  pageSize: number;
-  onPageSizeChange: (size: number) => void;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3 border-t border-sage-border/80 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-sage-gray-600">
-        Showing {rangeStart}–{rangeEnd} of {total}
-      </p>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-sage-gray-600">Rows</span>
-          <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
-            <SelectTrigger className="h-9 w-[5.5rem] rounded-lg">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PAGE_SIZE_OPTIONS.map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" className="rounded-lg" disabled={page <= 1} onClick={onPrev}>
-            <ChevronLeft className="size-4" />
-          </Button>
-          <span className="min-w-[5.5rem] text-center text-sm font-semibold text-sage-secondary">
-            {page} / {totalPages}
-          </span>
-          <Button type="button" variant="outline" size="sm" className="rounded-lg" disabled={page >= totalPages} onClick={onNext}>
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
   );
 }

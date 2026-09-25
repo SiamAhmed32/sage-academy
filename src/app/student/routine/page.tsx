@@ -1,48 +1,34 @@
-import { StudentPageHeader } from "@/components/student/StudentPageHeader";
-import { StudentRoutineDayTabs } from "@/components/student/StudentRoutineDayTabs";
-import { StudentRoutineTimeline } from "@/components/student/StudentRoutineTimeline";
-import { buildStudentRoutine, getStudentContext, studentDays } from "@/lib/student-dashboard";
+import { PortalRoutine, type PortalSlot } from "@/components/student/portal/PortalRoutine";
+import { MiniStat, MiniStats, PageHeading } from "@/components/admin/sa/ui";
+import type { WeekDay } from "@/lib/academy/constants";
+import { dhakaNowMinutes, dhakaParts } from "@/lib/academy/codes";
+import { BN_DAYS } from "@/lib/academy/bn";
+import { getPortalStudent } from "@/lib/academy/portal";
 
-type RoutinePageProps = {
-  searchParams: Promise<{ day?: string }>;
-};
-
-export default async function StudentRoutinePage({ searchParams }: RoutinePageProps) {
-  const ctx = await getStudentContext();
-  if ("problem" in ctx) return null;
-
-  const params = await searchParams;
-  const routine = buildStudentRoutine(ctx.student);
-  const todayEn = new Date().toLocaleDateString("en-US", { weekday: "long" });
-  const todayBn = studentDays.find((day) => day.en === todayEn)?.bn ?? studentDays[0].bn;
-  const selectedDayBn =
-    studentDays.find((day) => day.bn === params.day)?.bn ?? todayBn;
-  const dayClasses = routine.filter((item) => item.dayBn === selectedDayBn);
-  const batchLabel = [ctx.student.batch?.title, ctx.student.batch?.batchCode].filter(Boolean).join(" · ");
-  const routineNote = ctx.student.batch?.routineNote?.trim();
+export default async function StudentRoutinePage() {
+  const { detail } = await getPortalStudent();
+  if (!detail) return null;
+  const slots = detail.routine as PortalSlot[];
+  const today = dhakaParts().weekday as WeekDay | "fri";
+  const batches = [...new Set(slots.map((slot) => slot.batchCode))];
+  const busiest = Object.entries(
+    slots.reduce<Record<string, number>>((acc, slot) => ({ ...acc, [slot.day]: (acc[slot.day] ?? 0) + 1 }), {})
+  ).sort((a, b) => b[1] - a[1])[0];
 
   return (
-    <section className="space-y-6">
-      <StudentPageHeader
+    <div>
+      <PageHeading
+        eyebrow="Student workspace"
         title="ক্লাস রুটিন"
-        description={
-          batchLabel
-            ? `${batchLabel} — সাপ্তাহিক ক্লাসের সময়সূচি। দিন বেছে নিয়ে বিস্তারিত দেখুন।`
-            : "আপনার ব্যাচের সাপ্তাহিক ক্লাসের সময়সূচি। দিন বেছে নিয়ে বিস্তারিত দেখুন।"
-        }
+        description={`${detail.student.name} · ${detail.student.className} · ${batches.join(", ") || detail.student.homeBatchCode}`}
       />
-      {routineNote ? (
-        <div className="rounded-xl border border-sage-red-100 bg-sage-red-50/60 px-4 py-3 text-sm font-medium text-sage-gray-700">
-          {routineNote}
-        </div>
-      ) : null}
-      {!routine.length ? (
-        <div className="rounded-xl border border-dashed border-sage-border bg-white px-4 py-8 text-center text-sm text-sage-gray-600">
-          এখনো এই ব্যাচের রুটিন সেট করা হয়নি। অ্যাডমিন প্যানেলে ব্যাচ → রুটিন থেকে বিষয়, দিন ও সময় যোগ করলে এখানে দেখা যাবে।
-        </div>
-      ) : null}
-      <StudentRoutineDayTabs selectedDayBn={selectedDayBn} />
-      <StudentRoutineTimeline classes={dayClasses} />
-    </section>
+      <MiniStats>
+        <MiniStat label="সপ্তাহে ক্লাস" value={slots.length} note="শনি থেকে বৃহস্পতি" />
+        <MiniStat label="আজ" value={today === "fri" ? "ছুটি" : slots.filter((slot) => slot.day === today).length} note={BN_DAYS[today]} />
+        <MiniStat label="বিষয়" value={detail.subjects.filter((row) => row.status === "active").length} note="চলমান বিষয়" />
+        <MiniStat label="ব্যস্ত দিন" value={busiest ? BN_DAYS[busiest[0] as WeekDay] : "—"} note={busiest ? `${busiest[1]}টি ক্লাস` : "রুটিন নেই"} />
+      </MiniStats>
+      <PortalRoutine slots={slots} today={today} nowMinutes={dhakaNowMinutes()} exportName={`${detail.student.studentId}-routine`} />
+    </div>
   );
 }

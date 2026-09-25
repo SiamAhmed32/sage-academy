@@ -10,10 +10,13 @@ interface AdmissionNoteModalProps {
   id: string;
   initialNote: string;
   studentName: string;
+  /** Current status, sent with the note so saving a note never clears it. */
+  status?: string;
   onClose: () => void;
+  onSaved?: () => void;
 }
 
-export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: AdmissionNoteModalProps) {
+export function AdmissionNoteModal({ id, initialNote, studentName, status, onClose, onSaved }: AdmissionNoteModalProps) {
   const [note, setNote] = useState(initialNote);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -24,11 +27,13 @@ export function AdmissionNoteModal({ id, initialNote, studentName, onClose }: Ad
       const formData = new FormData();
       formData.append("id", id);
       formData.append("adminNote", note);
-      
+      if (status) formData.append("status", status);
+
       const res = await updateAdmissionRequestAction(formData);
       if (res.success) {
         toast.success("Note saved");
         router.refresh();
+        onSaved?.();
         onClose();
       } else {
         toast.error("Could not save the note");

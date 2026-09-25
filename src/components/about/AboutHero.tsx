@@ -51,14 +51,13 @@ export default function AboutHero() {
             viewport={{ once: true }}
             className="w-full lg:pl-2"
           >
-            {/* Matches photo ratio (1600×830) — no letterboxing, no inner borders */}
-            <div className="relative aspect-[160/83] w-full overflow-hidden rounded-[1.75rem] shadow-[0_28px_64px_-16px_rgba(109,15,18,0.22)]">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.75rem] bg-sage-red-50 shadow-[0_28px_64px_-16px_rgba(109,15,18,0.22)] ring-1 ring-sage-red-100">
               <Image
                 src={hero.image}
-                alt="About SAGE Academy"
+                alt="SAGE Academy-তে শিক্ষার্থী কাউন্সেলিং"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 100vw, 46vw"
                 className="object-cover object-center"
               />
             </div>

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import PromotionCard from "@/models/PromotionCard";
-import AcademicBatch from "@/models/AcademicBatch";
+import { resolvePromotionBatchLink } from "@/lib/academy/public-batch";
 import { requireRole, adminRoles } from "@/lib/rbac";
 import { uploadBatchImage } from "@/lib/upload-batch-image";
 import { buildPublicSlug } from "@/lib/public-slug";
@@ -39,14 +39,11 @@ export async function POST(req: NextRequest) {
     ].filter((f): f is string => typeof f === "string" && f.length > 0);
 
     const title = formData.get("title") as string;
-    const linkedBatch = formData.get("linkedBatch")?.toString() || "";
-    const batch = linkedBatch
-      ? await AcademicBatch.findById(linkedBatch).select("batchCode classLevel").lean()
-      : null;
+    const link = await resolvePromotionBatchLink(formData.get("linkedBatch")?.toString() || "");
     const slug = buildPublicSlug({
       title,
-      batchCode: batch?.batchCode,
-      classLevel: batch?.classLevel,
+      batchCode: link.batchCode,
+      classLevel: link.classLevel,
       fallback: `batch-${Date.now()}`,
     });
 
@@ -57,7 +54,8 @@ export async function POST(req: NextRequest) {
       badge: (formData.get("badge") as string) || "ভর্তি চলছে",
       features,
       overview: (formData.get("overview") as string)?.trim() || "",
-      linkedBatch: linkedBatch || null,
+      linkedBatch: link.linkedBatch,
+      academyBatch: link.academyBatch,
       websiteVisible: formData.get("websiteVisible") === "on",
       featured: formData.get("featured") === "on",
       order: Number(formData.get("order") || 0),

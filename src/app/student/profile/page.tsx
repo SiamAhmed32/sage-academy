@@ -1,102 +1,97 @@
-import { CalendarDays, MapPin, Phone, UserRound } from "lucide-react";
-import Image from "next/image";
+import { BookOpen } from "lucide-react";
 
-import { StudentPageHeader } from "@/components/student/StudentPageHeader";
-import { formatStudentEnrollment } from "@/lib/student-display";
-import { getStudentContext } from "@/lib/student-dashboard";
+import { PageHeading, Panel, StatusChip } from "@/components/admin/sa/ui";
+import { VERSION_LABELS, subjectTone } from "@/lib/academy/constants";
+import { formatDate, formatTaka, initials } from "@/lib/academy/codes";
+import { bnMonthLabel } from "@/lib/academy/bn";
+import { getPortalStudent } from "@/lib/academy/portal";
 
 export default async function StudentProfilePage() {
-  const ctx = await getStudentContext();
-  if ("problem" in ctx) return null;
+  const { detail } = await getPortalStudent();
+  if (!detail) return null;
+  const { student } = detail;
+  const active = detail.subjects.filter((row) => row.status === "active");
 
-  const student = ctx.student;
-  const displayName = student.nameBangla || student.nameEnglish;
-  const phone = student.whatsapp || student.phone || "নম্বর যুক্ত নেই";
-  const enrollment = formatStudentEnrollment(student.classLevel, student.batch);
-  const subjects = (student.selectedSubjects ?? [])
-    .map((subject: { subjectName?: string }) => subject.subjectName)
-    .filter(Boolean);
+  const info: [string, string][] = [
+    ["বাংলা নাম", student.nameBangla],
+    ["অভিভাবক", `${student.guardianName}${student.guardianRelation ? ` (${student.guardianRelation})` : ""}`],
+    ["অভিভাবকের ফোন", student.guardianPhone],
+    ["হোয়াটসঅ্যাপ", student.whatsapp],
+    ["শিক্ষার্থীর ফোন", student.phone],
+    ["স্কুল", student.schoolName],
+    ["বাবার নাম", student.fatherName],
+    ["মায়ের নাম", student.motherName],
+    ["জন্ম তারিখ", formatDate(student.dateOfBirth)],
+    ["ঠিকানা", student.address],
+  ];
 
   return (
-    <section className="space-y-6">
-      <StudentPageHeader
-        title="আমার প্রোফাইল"
-        description="আপনার ভর্তি তথ্য, যোগাযোগ ও ভর্তি করা বিষয়গুলো এক জায়গায় দেখুন।"
+    <div>
+      <PageHeading
+        eyebrow="Student workspace"
+        title="প্রোফাইল"
+        description="তথ্য পরিবর্তন করতে অফিসে যোগাযোগ করুন।"
       />
-
-      <article className="rounded-xl border border-sage-border bg-white p-6 shadow-sm">
-        <header className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          {student.image?.url ? (
-            <Image
-              src={student.image.url}
-              alt={displayName}
-              width={96}
-              height={96}
-              className="h-24 w-24 rounded-2xl object-cover ring-1 ring-sage-border"
-            />
-          ) : (
-            <span className="flex h-24 w-24 items-center justify-center rounded-2xl bg-sage-red-50 text-4xl font-black text-sage-primary">
-              {displayName.charAt(0)}
-            </span>
-          )}
-          <div>
-            <h3 className="text-3xl font-black text-sage-secondary">{displayName}</h3>
-            <p className="mt-1 text-sm font-semibold text-sage-gray-500">Student ID: {student.studentId}</p>
-            <p className="mt-2 text-sm text-sage-gray-600">শ্রেণি: {enrollment.classLabel}</p>
-            <p className="mt-1 text-sm text-sage-gray-600">ব্যাচ কোড: {enrollment.batchCode}</p>
+      <div className="profile-layout">
+        <section className="panel profile-hero">
+          <div className="profile-cover" />
+          <div className="profile-hero-body">
+            <span className="sa-avatar profile-avatar">{initials(student.name)}</span>
+            <h2>{student.name}</h2>
+            <p>
+              {student.className} · {VERSION_LABELS[student.version]}
+            </p>
+            {student.status === "active" ? <StatusChip tone="success">সক্রিয়</StatusChip> : <StatusChip tone="neutral">সক্রিয় নয়</StatusChip>}
+            <div className="profile-meta">
+              <span>
+                শিক্ষার্থী আইডি <b>{student.studentId}</b>
+              </span>
+              <span>
+                ব্যাচ <b>{student.homeBatchCode}</b>
+              </span>
+              <span>
+                ভর্তির তারিখ <b>{formatDate(student.admissionDate) || "—"}</b>
+              </span>
+              <span>
+                মাসিক বেতন <b>{formatTaka(detail.monthlyTuition)}</b>
+              </span>
+            </div>
           </div>
-        </header>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <p className="flex items-start gap-3 rounded-xl bg-sage-red-50/50 p-4 text-sm text-sage-gray-700">
-            <Phone className="mt-0.5 h-5 w-5 shrink-0 text-sage-primary" />
-            <span>
-              <strong className="block text-sage-secondary">যোগাযোগ</strong>
-              {phone}
-            </span>
-          </p>
-          <p className="flex items-start gap-3 rounded-xl bg-sage-red-50/50 p-4 text-sm text-sage-gray-700">
-            <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-sage-primary" />
-            <span>
-              <strong className="block text-sage-secondary">ভর্তির বছর</strong>
-              {student.admissionYear || "-"}
-            </span>
-          </p>
-          <p className="flex items-start gap-3 rounded-xl bg-sage-red-50/50 p-4 text-sm text-sage-gray-700">
-            <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-sage-primary" />
-            <span>
-              <strong className="block text-sage-secondary">অভিভাবক</strong>
-              {student.guardianName || student.fatherName || "তথ্য নেই"}
-              {student.guardianPhone ? ` · ${student.guardianPhone}` : ""}
-            </span>
-          </p>
-          <p className="flex items-start gap-3 rounded-xl bg-sage-red-50/50 p-4 text-sm text-sage-gray-700">
-            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-sage-primary" />
-            <span>
-              <strong className="block text-sage-secondary">ঠিকানা</strong>
-              {student.presentAddress || student.permanentAddress || "তথ্য নেই"}
-            </span>
-          </p>
-        </div>
-
-        <section className="mt-8">
-          <h4 className="text-lg font-bold text-sage-secondary">ভর্তি করা বিষয়</h4>
-          {subjects.length ? (
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {subjects.map((subject: string) => (
-                <li
-                  key={subject}
-                  className="rounded-full bg-sage-red-50 px-4 py-2 text-sm font-semibold text-sage-primary"
-                >
-                  {subject}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-sage-gray-500">এখনও কোনো বিষয় যুক্ত নেই।</p>
-          )}
         </section>
-      </article>
-    </section>
+
+        <div className="stack">
+          <Panel title="ব্যক্তিগত তথ্য">
+            <div className="info-grid">
+              {info
+                .filter(([, value]) => value)
+                .map(([label, value]) => (
+                  <div key={label}>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                  </div>
+                ))}
+            </div>
+          </Panel>
+          <Panel title="আমার বিষয়" description={`${active.length}টি চলমান বিষয়`}>
+            <div className="course-list">
+              {active.map((row) => (
+                <div key={row.enrollmentId} className="course-item" style={{ gridTemplateColumns: "40px minmax(0,1fr) auto" }}>
+                  <span className={`course-icon tone-${subjectTone(row.name)}`}>
+                    <BookOpen size={17} />
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <b>{row.name}</b>
+                    <small>
+                      {row.teacherName || "শিক্ষক"} · {row.batchCode} · {bnMonthLabel(row.startMonth)} থেকে
+                    </small>
+                  </span>
+                  <time>{formatTaka(row.monthly)}</time>
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </div>
+      </div>
+    </div>
   );
 }

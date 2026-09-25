@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Trash2, HelpCircle, Save } from "lucide-react";
 import { toast } from "react-toastify";
 
-import type { AdminQuizQuestion } from "./QuizManager";
+import type { AdminQuizQuestion } from "./types";
 import { saveQuizQuestionAction } from "@/app/admin/actions";
 import { getAdminClassLabel } from "@/constants/admin-display";
 import { formatAdminNumber } from "@/lib/admin-format";

@@ -12,6 +12,7 @@ type PromotionCardDoc = {
   features?: string[];
   overview?: string;
   linkedBatch?: LinkedBatchDoc | string | null;
+  academyBatch?: { _id?: { toString(): string } | string; code?: string } | string | null;
   websiteVisible?: boolean;
   featured?: boolean;
   order?: number;
@@ -77,7 +78,11 @@ export function serializePromotionCard(card: PromotionCardDoc): SerializedPromot
     badge: card.badge || "ভর্তি চলছে",
     features: Array.isArray(card.features) ? card.features.filter(Boolean) : [],
     overview: card.overview || "",
-    linkedBatch: serializeLinkedBatch(card.linkedBatch),
+    // A new academy batch is sent as "academy:<id>" so the form's single batch select can hold both kinds.
+    linkedBatch:
+      card.academyBatch && typeof card.academyBatch === "object" && card.academyBatch._id
+        ? { _id: `academy:${card.academyBatch._id.toString()}`, title: card.academyBatch.code || "Batch", batchCode: "New batch" }
+        : serializeLinkedBatch(card.linkedBatch),
     websiteVisible: card.websiteVisible !== false,
     featured: Boolean(card.featured),
     order: Number(card.order) || 0,

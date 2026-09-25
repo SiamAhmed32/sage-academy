@@ -1,0 +1,32 @@
+import { themeQuartz } from "ag-grid-community";
+
+// Goraya Doors' grid sizing (Inter 13px, 44px header, generous rows) in SAGE colours.
+export const sageGridTheme = themeQuartz.withParams({
+  fontFamily: ["var(--font-inter)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+  fontSize: 13,
+  dataFontSize: 13,
+  headerFontSize: 12,
+  headerFontWeight: 600,
+  rowHeight: 56,
+  headerHeight: 46,
+  cellHorizontalPadding: 14,
+  spacing: 6,
+  wrapperBorderRadius: 12,
+  accentColor: "#6d0f12",
+  backgroundColor: "#ffffff",
+  foregroundColor: "#17182b",
+  borderColor: "#e8e9ef",
+  chromeBackgroundColor: "#fbfbfd",
+  headerBackgroundColor: "#fbfbfd",
+  headerTextColor: "#55586a",
+  rowHoverColor: "#fdf6f6",
+  selectedRowBackgroundColor: "rgba(109, 15, 18, 0.08)",
+  oddRowBackgroundColor: "#ffffff",
+  rowBorder: { color: "#f0f0f3" },
+  columnBorder: false,
+  headerColumnBorder: false,
+  wrapperBorder: { color: "#e8e9ef" },
+  inputFocusBorder: { color: "#6d0f12" },
+  checkboxCheckedBackgroundColor: "#6d0f12",
+  iconSize: 15,
+});

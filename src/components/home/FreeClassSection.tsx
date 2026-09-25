@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -18,6 +17,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { DepthCarousel } from "@/components/home/DepthCarousel";
 import { toast } from "react-toastify";
 
 import { Container } from "@/components/shared/Container";
@@ -51,30 +51,50 @@ function FreeClassEyebrow({ className }: { className?: string }) {
   );
 }
 
+const freeClassSlides = [
+  {
+    src: "/v1NewImages/Fres class.webp",
+    alt: "SAGE Academy লাইব্রেরিতে শিক্ষক ও শিক্ষার্থীর গাইডলাইন সেশন",
+    position: "object-[48%_center]",
+  },
+  {
+    src: "/freeClassFinal/class-board.webp",
+    alt: "SAGE Academy ক্লাসে শিক্ষক হোয়াইটবোর্ডে পড়াচ্ছেন",
+    position: "object-[center_28%]",
+  },
+  {
+    src: "/freeClassFinal/class-room.webp",
+    alt: "SAGE Academy ক্লাসরুমে শিক্ষার্থীরা ক্লাস করছেন",
+    position: "object-[center_42%]",
+  },
+] as const;
+
 function FreeClassPhoto({ mobile = false }: { mobile?: boolean }) {
   const photoFrame = (
-    <div className={cn("relative overflow-hidden bg-sage-secondary", mobile ? "rounded-[1.2rem]" : "rounded-[1.35rem]")}>
-      <div
-        className={cn(
-          "relative w-full",
-          mobile ? "aspect-[16/11] min-h-[220px]" : "aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4] lg:min-h-[min(560px,64vh)]"
-        )}
-      >
-        <Image
-          src="/v1NewImages/Fres class.webp"
-          alt="SAGE Academy লাইব্রেরিতে শিক্ষক ও শিক্ষার্থীর গাইডলাইন সেশন"
-          fill
-          className="object-cover object-[48%_center] saturate-[1.03]"
-          sizes="(max-width: 1024px) 100vw, 48vw"
-          priority={false}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-sage-secondary/60 via-sage-secondary/10 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-      </div>
-
-      <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-4 py-2 text-xs font-black tracking-wider text-white shadow-lg backdrop-blur-xl sm:left-5 sm:top-5">
-        SAGE LIVE CLASS
-      </div>
+    <div
+      className={cn(
+        "relative overflow-hidden bg-sage-secondary",
+        mobile ? "aspect-[16/11] min-h-[220px] rounded-[1.2rem]" : "aspect-[5/4] min-h-[420px] rounded-[1.35rem] lg:min-h-[min(540px,62vh)]"
+      )}
+    >
+      <DepthCarousel
+        items={freeClassSlides.map((slide) => ({
+          image: slide.src,
+          alt: slide.alt,
+          imageClass: slide.position,
+        }))}
+        fill
+        radius={0}
+        spread={36}
+        depth={120}
+        tilt={14}
+        tiltDirection="right"
+        autoplay
+        autoplayDelay={4500}
+        showControls={false}
+        badge="SAGE LIVE CLASS"
+        className="absolute inset-0 min-h-0"
+      />
     </div>
   );
 

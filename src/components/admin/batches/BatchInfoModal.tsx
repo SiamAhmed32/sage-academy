@@ -13,9 +13,11 @@ interface BatchInfoModalProps {
   batch?: AdminBatch & { _id: string };
   open: boolean;
   onClose: () => void;
+  /** Called after a successful save (e.g. to reload a data grid). */
+  onSaved?: () => void;
 }
 
-export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
+export function BatchInfoModal({ batch, open, onClose, onSaved }: BatchInfoModalProps) {
   const isEdit = !!batch;
   const [classLevel, setClassLevel] = useState(batch?.classLevel ?? 6);
   const [genderGroup, setGenderGroup] = useState<string>(batch?.genderGroup ?? "male");
@@ -40,6 +42,7 @@ export function BatchInfoModal({ batch, open, onClose }: BatchInfoModalProps) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.message || "The batch could not be saved.");
       toast.success(isEdit ? "Batch updated." : "New batch created.");
+      onSaved?.();
       onClose();
       if (!isEdit && data?.data?._id) {
         const urlParams = new URLSearchParams(window.location.search);

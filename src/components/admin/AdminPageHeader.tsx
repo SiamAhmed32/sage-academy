@@ -4,19 +4,16 @@ type AdminPageHeaderProps = {
   action?: React.ReactNode;
 };
 
+// Shared by the older admin pages; uses the same heading as the new workspace.
 export function AdminPageHeader({ title, description, action }: AdminPageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="page-heading">
       <div>
-        <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-gray-400">
-          Admin Workspace
-        </p>
-        <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-          {description}
-        </p>
+        <span className="eyebrow">Admin workspace</span>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </div>
-      {action}
-    </div>
+      {action ? <div className="heading-actions">{action}</div> : null}
+    </section>
   );
 }

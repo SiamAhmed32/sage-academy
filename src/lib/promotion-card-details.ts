@@ -2,6 +2,8 @@ import { buildPublicSlug } from "@/lib/public-slug";
 import { connectDB } from "@/lib/mongodb";
 import AcademicBatch from "@/models/AcademicBatch";
 import PromotionCard from "@/models/PromotionCard";
+import AcademyBatch from "@/models/academy/AcademyBatch";
+import { attachAcademyBatches } from "@/lib/academy/public-batch";
 import "@/models/Teacher";
 
 const linkedBatchPopulate = {
@@ -22,7 +24,17 @@ function getRequestedClassLevel(slug: string) {
   return match?.[1] ? Number(match[1]) : null;
 }
 
+async function withAcademyBatch<T extends object>(card: T | null) {
+  if (!card) return null;
+  const [shaped] = await attachAcademyBatches([card as T & { academyBatch?: unknown }]);
+  return shaped as T;
+}
+
 export async function findPromotionCardBySlug(slug: string) {
+  return withAcademyBatch(await findPromotionCardBySlugRaw(slug));
+}
+
+async function findPromotionCardBySlugRaw(slug: string) {
   await connectDB();
 
   const normalizedSlug = slug.toLowerCase().trim();
@@ -46,6 +58,18 @@ export async function findPromotionCardBySlug(slug: string) {
     })
       .select("_id")
       .lean();
+
+    const academyIds = await AcademyBatch.find({ classLevel, status: "active" }).select("_id").lean();
+    if (academyIds.length > 0) {
+      const byAcademyBatch = await PromotionCard.findOne({
+        ...visibleCardQuery,
+        academyBatch: { $in: academyIds.map((batch) => batch._id) },
+      })
+        .sort({ order: 1, createdAt: -1 })
+        .populate(linkedBatchPopulate)
+        .lean();
+      if (byAcademyBatch) return byAcademyBatch;
+    }
 
     if (batchIds.length > 0) {
       const byLinkedBatch = await PromotionCard.findOne({
@@ -96,13 +120,14 @@ export async function findPromotionCardBySlug(slug: string) {
 export async function findRelatedPromotionCards(excludeId: unknown, limit = 6) {
   await connectDB();
 
-  return PromotionCard.find({
+  const cards = await PromotionCard.find({
     _id: { $ne: excludeId },
     ...visibleCardQuery,
   })
     .sort({ order: 1, createdAt: 1 })
     .limit(limit)
-    .select("title slug image badge linkedBatch")
+    .select("title slug image badge linkedBatch academyBatch")
     .populate({ path: "linkedBatch", select: "classLevel" })
     .lean();
+  return attachAcademyBatches(cards);
 }

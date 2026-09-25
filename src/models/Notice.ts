@@ -14,7 +14,8 @@ const NoticeSchema = new Schema(
       default: "all",
     },
     classLevel: { type: Number, min: 1, max: 12, default: null },
-    batch: { type: Schema.Types.ObjectId, ref: "AcademicBatch", default: null },
+    // Batch notices target the new academy batches (academy_batches).
+    batch: { type: Schema.Types.ObjectId, ref: "AcademyBatch", default: null },
     student: { type: Schema.Types.ObjectId, ref: "Student", default: null },
     topic: { type: String, default: "", trim: true, maxlength: 160 },
     examDate: { type: Date, default: null },
