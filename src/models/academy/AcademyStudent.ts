@@ -35,7 +35,8 @@ const AcademyStudentSchema = new Schema(
 );
 
 AcademyStudentSchema.index({ studentId: 1 }, { unique: true });
-AcademyStudentSchema.index({ admissionYear: 1, serial: 1 }, { unique: true });
+// Serials restart per class each year (2605001, 2606001…), so only studentId is unique.
+AcademyStudentSchema.index({ admissionYear: 1, serial: 1 });
 AcademyStudentSchema.index({ status: 1, classId: 1 });
 AcademyStudentSchema.index({ homeBatchId: 1 });
 AcademyStudentSchema.index({ guardianPhone: 1 });

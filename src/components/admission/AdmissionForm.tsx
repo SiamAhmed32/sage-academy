@@ -75,13 +75,13 @@ export function AdmissionForm() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     
-    if (!form.studentName.trim() || !form.phone.trim() || !form.className.trim() || !form.preferredBatch.trim()) {
-      setFeedback("Please fill required fields (Name, Phone, শ্রেণি, ব্যাচ)");
+    if (!form.studentName.trim() || !form.phone.trim() || !form.className.trim()) {
+      setFeedback("প্রয়োজনীয় তথ্য দিন (নাম, ফোন, শ্রেণি)।");
       setStatus("error");
       return;
     }
     if (!form.interestedSubjects.trim()) {
-      setFeedback("ব্যাচের অন্তত একটি বিষয় নির্বাচন করুন।");
+      setFeedback("অন্তত একটি বিষয় নির্বাচন করুন।");
       setStatus("error");
       return;
     }

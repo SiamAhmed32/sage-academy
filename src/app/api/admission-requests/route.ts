@@ -7,9 +7,6 @@ import { connectDB } from "@/lib/mongodb";
 import { requireRole, staffRoles } from "@/lib/rbac";
 import AdmissionRequest from "@/models/AdmissionRequest";
 import { createAdmissionRequestSchema } from "@/schemas/admission-request";
-import AcademicBatch from "@/models/AcademicBatch";
-import Student from "@/models/Student";
-import { buildStudentId, getNextStudentSerial } from "@/lib/student-id";
 
 function readFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -109,63 +106,10 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
 
   const validatedData = createAdmissionRequestSchema.parse(body);
-  const batch = validatedData.preferredBatch
-    ? await AcademicBatch.findById(validatedData.preferredBatch).lean<{
-        _id: string;
-        title: string;
-        classLevel: number;
-        subjects?: Array<{ subjectName?: string; monthlyFee?: number }>;
-      }>()
-    : null;
-
-  if (batch) {
-    validatedData.preferredBatch = batch.title;
-    const subjectNames = validatedData.interestedSubjects
-      .split(",")
-      .map((name) => name.trim())
-      .filter(Boolean);
-    const gender = ["male", "female", "other"].includes(validatedData.studentGender)
-      ? validatedData.studentGender
-      : "other";
-    const version = ["bangla", "english", "other"].includes(validatedData.academicVersion)
-      ? validatedData.academicVersion
-      : "bangla";
-    const admissionYear = new Date().getFullYear();
-    const serialNumber = await getNextStudentSerial(admissionYear, batch.classLevel);
-
-    await Student.create({
-      studentId: buildStudentId(admissionYear, batch.classLevel, serialNumber),
-      admissionYear,
-      classLevel: batch.classLevel,
-      serialNumber,
-      nameEnglish: validatedData.studentName,
-      nameBangla: validatedData.nameBangla,
-      phone: validatedData.phone,
-      whatsapp: validatedData.studentWhatsapp,
-      fatherName: validatedData.fatherName,
-      motherName: validatedData.motherName,
-      guardianName: validatedData.guardianName,
-      guardianPhone: validatedData.phone,
-      gender,
-      version,
-      batch: batch._id,
-      schoolName: validatedData.schoolName,
-      section: validatedData.section,
-      roll: validatedData.classRoll,
-      presentAddress: validatedData.presentAddress,
-      permanentAddress: validatedData.permanentAddress,
-      admissionDate: validatedData.admissionDate || new Date(),
-      dateOfBirth: validatedData.studentDateOfBirth,
-      selectedSubjects: subjectNames.map((subjectName) => ({
-        subjectName,
-        baseFee: 0,
-        discountType: "none",
-        discountValue: 0,
-        monthlyFee: 0,
-      })),
-      isActive: true,
-    });
-  }
+  // A website submission is only a lead: the parent picks the class (sent as
+  // its level, e.g. "6") and subjects. The batch is chosen by the admin at
+  // Admin → New admission, so nothing here creates a student.
+  validatedData.preferredBatch = "";
 
   const request = await AdmissionRequest.create(validatedData);
 

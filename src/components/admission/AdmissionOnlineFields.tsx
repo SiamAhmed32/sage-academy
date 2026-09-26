@@ -1,6 +1,6 @@
 "use client";
 
-import { AdmissionBatchChoice } from "./AdmissionBatchChoice";
+import { AdmissionClassChoice } from "./AdmissionClassChoice";
 
 /* =========================================================================
    PRIMITIVES — plain HTML, no Shadcn, fully customisable via className
@@ -233,10 +233,10 @@ export function AdmissionOnlineFields({
           />
         </Field>
 
-        <AdmissionBatchChoice
-          batchId={form.preferredBatch}
+        <AdmissionClassChoice
+          classLevel={form.className}
           subjects={form.interestedSubjects}
-          onBatchChange={(batchId) => updateField("preferredBatch", batchId)}
+          onClassChange={(value) => updateField("className", value)}
           onSubjectsChange={(value) => updateField("interestedSubjects", value)}
         />
 
@@ -244,17 +244,6 @@ export function AdmissionOnlineFields({
 
       {/* ── ২. একাডেমিক তথ্য ─────────────────────────────────────── */}
       <Section title="একাডেমিক তথ্য">
-
-        <Field>
-          <FormLabel htmlFor="className" required>শ্রেণী</FormLabel>
-          <FormInput
-            id="className"
-            placeholder="উদা: নবম অথবা SSC"
-            value={form.className}
-            onChange={(e) => updateField("className", e.target.value)}
-            required
-          />
-        </Field>
 
         <Field>
           <FormLabel htmlFor="academicVersion">ভার্সন</FormLabel>

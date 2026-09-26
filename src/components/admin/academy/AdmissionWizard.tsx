@@ -638,7 +638,7 @@ export function AdmissionWizard({
                   </div>
                   <div>
                     <span>Student ID</span>
-                    <span>Given on save (S{String(new Date().getFullYear() % 100)}-####)</span>
+                    <span>Given on save ({String(new Date().getFullYear() % 100)}{String(batch.classLevel).padStart(2, "0")}###)</span>
                   </div>
                 </div>
 
