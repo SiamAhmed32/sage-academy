@@ -125,7 +125,8 @@ export function NavbarActions({
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        <DropdownMenu>
+        {/* modal={false}: opening the menu must not lock page scroll (that removed the scrollbar and made the page and header jump). */}
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <button
               type="button"

@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle, Phone, Wallet } from "lucide-react";
 
+import { DownloadPayslipButton } from "@/components/admin/academy/DownloadPayslipButton";
 import { DownloadRoutineButton } from "@/components/admin/academy/DownloadRoutineButton";
 import { AddSubjectButton, EditStudentButton, StudentStatusButton } from "@/components/admin/academy/StudentWidgets";
 import { StudentActivityGrid, StudentDuesGrid, StudentReceiptsGrid, StudentSubjectsGrid } from "@/components/admin/academy/grids/StudentProfileGrids";
 import { WeekTimetable } from "@/components/admin/sa/WeekTimetable";
 import { Avatar, MiniStat, MiniStats, PageHeading, StatusChip } from "@/components/admin/sa/ui";
-import { VERSION_LABELS, batchGenderForStudent } from "@/lib/academy/constants";
+import { DUE_KIND_LABELS, VERSION_LABELS, batchGenderForStudent } from "@/lib/academy/constants";
 import { currentMonthKey, formatDate, formatTaka, monthLabel } from "@/lib/academy/codes";
 import { getStudentDetail, listBatchOptions, slotsToTimetable } from "@/lib/academy/queries";
 
@@ -238,6 +239,31 @@ export default async function StudentProfilePage({
                 <h2>Bills</h2>
                 <p>Tuition is billed on the 1st of every month. Partial payments carry over.</p>
               </div>
+              <DownloadPayslipButton
+                fileName={`${student.studentId}-payslip`}
+                info={[
+                  { label: "Name", value: student.name },
+                  { label: "Student ID", value: student.studentId },
+                  { label: "Class", value: student.className },
+                  { label: "Version", value: VERSION_LABELS[student.version] },
+                  { label: "Home batch", value: student.homeBatchCode },
+                  { label: "Guardian phone", value: student.guardianPhone },
+                ]}
+                bills={detail.dues
+                  .filter((due) => (due.status === "unpaid" || due.status === "partial") && due.month <= month)
+                  .sort((a, b) => a.month.localeCompare(b.month))
+                  .map((due) => ({
+                    id: due.id,
+                    month: due.month,
+                    label: due.label || DUE_KIND_LABELS[due.kind],
+                    details: [
+                      ...due.lines.map((line) => `${line.subjectName} ${formatTaka(line.amount)}`),
+                      ...(due.adjustment ? [`Adjustment ${due.adjustment > 0 ? "+" : "−"}${formatTaka(Math.abs(due.adjustment))}`] : []),
+                    ].join(" · "),
+                    amount: due.amount,
+                    paid: due.paid,
+                  }))}
+              />
             </div>
             <StudentDuesGrid
               studentId={student.id}
