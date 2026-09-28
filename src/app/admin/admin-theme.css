@@ -4894,56 +4894,291 @@ a.sa-grid-title:hover b {
   }
 }
 
-/* ── Archive button + banner (classes, subjects, batches, students) ── */
+/* ── Archive: header button, banner, confirm dialog, guide ── */
+.sa .page-heading > div:first-child {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.sa .page-heading .heading-actions {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
 .sa .sa-archive-btn {
   gap: 8px;
 }
 
-.sa .sa-archive-btn .sa-archive-count {
+.sa .sa-archive-count {
   display: inline-grid;
   place-items: center;
   min-width: 22px;
   height: 20px;
-  padding: 0 6px;
+  padding: 0 7px;
   border-radius: 999px;
-  background: #f1f2f6;
-  color: var(--muted, #6b7080);
+  background: var(--brand-tint);
+  color: var(--brand);
   font-size: 11.5px;
   font-weight: 700;
   line-height: 1;
 }
 
-.sa .sa-archive-btn:hover .sa-archive-count {
-  background: #e7e8ef;
-  color: var(--ink);
+.sa .sa-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sa .sa-guide-btn:hover {
+  color: var(--brand);
 }
 
 .sa .sa-archive-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 16px;
-  padding: 14px 16px;
-  border: 1px dashed #d7d8e0;
-  border-radius: 12px;
-  background: repeating-linear-gradient(135deg, #fafafc 0 12px, #f5f6f9 12px 24px);
-  color: var(--muted, #6b7080);
+  padding: 14px 18px;
+  border: 1px solid #f1dcdc;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--brand-faint), #fff 70%);
 }
 
-.sa .sa-archive-banner > svg {
+.sa .sa-archive-banner-icon {
+  display: grid;
   flex: none;
-  margin-top: 2px;
-  color: var(--ink);
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--brand-tint);
+  color: var(--brand);
 }
 
 .sa .sa-archive-banner strong {
   display: block;
-  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 14.5px;
+}
+
+.sa .sa-archive-banner span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sa-confirm,
+.sa-guide {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 28px 28px 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(12, 14, 27, 0.28);
+  animation: sa-pop 160ms ease-out;
+}
+
+.sa-guide {
+  width: min(720px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+
+@keyframes sa-pop {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.sa-confirm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.sa-confirm-close:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+
+.sa-confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--brand-tint);
+  color: var(--brand);
+}
+
+.sa-confirm.restore .sa-confirm-icon {
+  background: #e7f6ef;
+  color: var(--green);
+}
+
+.sa-confirm.delete .sa-confirm-icon {
+  background: #fdeced;
+  color: var(--red);
+}
+
+.sa-confirm h2,
+.sa-guide h2 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sa-confirm-body p {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.sa-confirm-body .sa-confirm-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+  border: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sa-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.sa .btn-danger-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sa .btn-danger-solid:hover:not(:disabled) {
+  background: #bd2f3d;
+}
+
+.sa .btn-danger-solid:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.sa-guide .eyebrow {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.sa-guide-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.sa-guide-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--soft);
+}
+
+.sa-guide-steps strong {
   color: var(--ink);
   font-size: 14px;
 }
 
-.sa .sa-archive-banner span {
+.sa-guide-steps p {
+  margin: 4px 0 0;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.sa-guide-num {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--brand-tint);
+  color: var(--brand);
+}
+
+.sa-guide-num.restore { background: #e7f6ef; color: var(--green); }
+.sa-guide-num.delete { background: #fdeced; color: var(--red); }
+
+.sa-guide-order {
+  margin: 0 0 14px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  background: var(--brand-faint);
+  border: 1px solid #f1dcdc;
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+.sa-guide-table {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+.sa-guide-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr;
+  gap: 14px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sa-guide-row:first-child { border-top: 0; }
+
+.sa-guide-row.head {
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sa-guide-row strong { color: var(--ink); }
+
+@media (max-width: 640px) {
+  .sa-guide-steps { grid-template-columns: 1fr; }
+  .sa-guide-row { grid-template-columns: 1fr; gap: 4px; }
+  .sa-guide-row.head { display: none; }
 }

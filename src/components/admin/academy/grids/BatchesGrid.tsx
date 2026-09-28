@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
-import { Archive, CalendarClock, CalendarDays, ListChecks, Plus, RotateCcw } from "lucide-react";
+import { CalendarClock, CalendarDays, ListChecks, Plus } from "lucide-react";
 
 import { deleteBatchAction, getBatchForEditAction, setBatchStatusAction } from "@/app/admin/academy/_actions/setup";
-import { ArchiveBanner, ArchiveButton, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
+import { ArchiveBanner, ArchiveButton, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
 import { BatchDrawer, type BatchFormData } from "@/components/admin/academy/BatchDrawer";
 import type { BatchBuilderExisting } from "@/components/admin/academy/BatchBuilder";
-import { useAction } from "@/components/admin/academy/use-action";
 import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
 import { ActionIcons, IconAction, Pill, TitleCell, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
@@ -37,35 +36,21 @@ type Row = {
 type BatchesContext = GridContext & { open: (row: Row, mode: "view" | "edit") => void };
 
 function BatchActions({ data, context }: ICellRendererParams<Row, unknown, BatchesContext>) {
-  const { pending, run } = useAction();
   if (!data) return null;
-  if (data.status === "archived") {
-    return (
-      <ActionIcons onView={() => context.open(data, "view")}>
-        <ArchivedRowActions
-          name={`batch ${data.code}`}
-          restore={() => setBatchStatusAction(data.id, "active")}
-          remove={() => deleteBatchAction(data.id)}
-          onDone={() => context.refresh()}
-        />
-      </ActionIcons>
-    );
-  }
-  const archive = data.status === "active";
-  // The server refuses to archive a batch that still has students; say so up front.
-  const blocked = archive && data.students > 0;
+  const archived = data.status === "archived";
   return (
-    <ActionIcons onView={() => context.open(data, "view")} onEdit={() => context.open(data, "edit")}>
-      <IconAction icon={CalendarClock} label={data.routineCount ? "Edit routine" : "Set routine"} href={`/admin/academy/batches/${data.id}/routine`} />
-      <IconAction
-        icon={archive ? Archive : RotateCcw}
-        label={blocked ? "Transfer or drop its students before archiving" : archive ? "Archive batch" : "Restore batch"}
-        tone={archive ? "danger" : "success"}
-        disabled={pending || blocked}
-        onClick={() => {
-          if (archive && !window.confirm(`Archive ${data.code}? It will be hidden from admission. Its code is never reused.`)) return;
-          run(() => setBatchStatusAction(data.id, archive ? "archived" : "active"), { onSuccess: () => context.refresh() });
-        }}
+    <ActionIcons onView={() => context.open(data, "view")} onEdit={archived ? undefined : () => context.open(data, "edit")}>
+      {archived ? null : (
+        <IconAction icon={CalendarClock} label={data.routineCount ? "Edit routine" : "Set routine"} href={`/admin/academy/batches/${data.id}/routine`} />
+      )}
+      <ArchiveRowButtons
+        what={`batch ${data.code}`}
+        archived={archived}
+        archive={() => setBatchStatusAction(data.id, "archived")}
+        restore={() => setBatchStatusAction(data.id, "active")}
+        remove={() => deleteBatchAction(data.id)}
+        archiveNote="It is hidden from admission. Its code is never reused."
+        onDone={() => context.refresh()}
       />
     </ActionIcons>
   );
@@ -75,7 +60,7 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
   const classes = form.classes;
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const archivedCount = Number(tiles.find((tile) => tile.key === "archived")?.value ?? 0);
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
   const [drawer, setDrawer] = useState<{ existing?: BatchBuilderExisting; className?: string; classLevel?: number; view?: boolean } | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -221,7 +206,7 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
           </>
         }
       />
-      {inArchive ? <ArchiveBanner what="batches" note="A batch can be deleted only when no student record uses it. Its code is never reused." /> : null}
+      {inArchive ? <ArchiveBanner what="batches" /> : null}
       <SaDataGrid<Row>
         ref={grid}
         source="academy-batches"
@@ -229,7 +214,7 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
-        tiles={inArchive ? undefined : tiles}
+        tiles={inArchive ? undefined : cardTiles}
         initialPreset={inArchive ? "archived" : ""}
         context={{ open: (row: Row, mode: "view" | "edit") => (loadingId ? undefined : void openBatch(row, mode)) }}
         onRowClick={(row) => (loadingId ? undefined : void openBatch(row, "view"))}

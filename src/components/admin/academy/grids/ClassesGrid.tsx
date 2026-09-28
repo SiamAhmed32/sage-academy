@@ -4,14 +4,14 @@ import { SaSelect } from "@/components/admin/sa/SaSelect";
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
-import { Archive, BookOpen, Layers, Plus } from "lucide-react";
+import { BookOpen, Layers, Plus } from "lucide-react";
 
 import { deleteClassAction, saveClassAction, setClassArchivedAction } from "@/app/admin/academy/_actions/setup";
-import { ArchiveBanner, ArchiveButton, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
+import { ArchiveBanner, ArchiveButton, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
 import { ErrorNotice, useAction } from "@/components/admin/academy/use-action";
 import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
-import { ActionIcons, IconAction, Pill, TitleCell, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
+import { ActionIcons, Pill, TitleCell, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
 import { Modal } from "@/components/admin/sa/Modal";
 import { PageHeading } from "@/components/admin/sa/ui";
 
@@ -29,31 +29,18 @@ type Row = {
 type ClassesContext = GridContext & { edit: (row: Row) => void };
 
 function ClassActions({ data, context }: ICellRendererParams<Row, unknown, ClassesContext>) {
-  const { pending, run } = useAction();
   if (!data) return null;
-  if (data.isArchived) {
-    return (
-      <ActionIcons>
-        <ArchivedRowActions
-          name={data.name}
-          restore={() => setClassArchivedAction(data.id, false)}
-          remove={() => deleteClassAction(data.id)}
-          onDone={() => context.refresh()}
-        />
-      </ActionIcons>
-    );
-  }
   return (
-    <ActionIcons onEdit={() => context.edit(data)}>
-      <IconAction
-        icon={Archive}
-        label="Archive class"
-        tone="danger"
-        disabled={pending}
-        onClick={() => {
-          if (!window.confirm(`Archive ${data.name}? Its subjects, batches and students must be archived first.`)) return;
-          run(() => setClassArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
-        }}
+    <ActionIcons onEdit={data.isArchived ? undefined : () => context.edit(data)}>
+      <ArchiveRowButtons
+        what={data.name}
+        archived={data.isArchived}
+        archive={() => setClassArchivedAction(data.id, true)}
+        restore={() => setClassArchivedAction(data.id, false)}
+        remove={() => deleteClassAction(data.id)}
+        archiveNote="Its subjects and batches are archived with it."
+        deleteNote="Its subjects and batches are deleted with it."
+        onDone={() => context.refresh()}
       />
     </ActionIcons>
   );
@@ -62,7 +49,7 @@ function ClassActions({ data, context }: ICellRendererParams<Row, unknown, Class
 export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLevels: number[] }) {
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const archivedCount = Number(tiles.find((tile) => tile.key === "archived")?.value ?? 0);
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const [level, setLevel] = useState("");
   const [name, setName] = useState("");
@@ -151,7 +138,7 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
           </>
         }
       />
-      {inArchive ? <ArchiveBanner what="classes" note="A class can be deleted only after its subjects, batches and students are deleted." /> : null}
+      {inArchive ? <ArchiveBanner what="classes" /> : null}
       <SaDataGrid<Row>
         ref={grid}
         source="academy-classes"
@@ -159,7 +146,7 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
-        tiles={inArchive ? undefined : tiles}
+        tiles={inArchive ? undefined : cardTiles}
         initialPreset={inArchive ? "archived" : ""}
         context={{ edit: open }}
         searchPlaceholder="Search classes…"

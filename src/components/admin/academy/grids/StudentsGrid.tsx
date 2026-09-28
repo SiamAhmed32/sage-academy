@@ -2,12 +2,11 @@
 
 import { useMemo } from "react";
 import type { ColDef } from "ag-grid-community";
-import { Archive, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
 import type { ICellRendererParams } from "ag-grid-community";
 
 import { deleteStudentAction, setStudentArchivedAction } from "@/app/admin/academy/_actions/students";
-import { ArchiveBanner, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
-import { useAction } from "@/components/admin/academy/use-action";
+import { ArchiveBanner, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
 import { SaDataGrid, type GridContext } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
 import { ActionIcons, IconAction, Muted, Pill, TitleCell, dateCol, moneyCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
@@ -34,36 +33,26 @@ type Row = {
 };
 
 function StudentActions({ data, context }: ICellRendererParams<Row, unknown, GridContext>) {
-  const { pending, run } = useAction();
   if (!data) return null;
-  if (data.isArchived) {
-    return (
-      <ActionIcons viewHref={`/admin/academy/students/${data.id}`}>
-        <ArchivedRowActions
-          name={`${data.name} (${data.studentId})`}
-          restore={() => setStudentArchivedAction(data.id, false)}
-          remove={() => deleteStudentAction(data.id)}
-          onDone={() => context.refresh()}
-        />
-      </ActionIcons>
-    );
-  }
-  const canArchive = data.status === "inactive" && data.due <= 0;
   return (
     <ActionIcons viewHref={`/admin/academy/students/${data.id}`}>
-      <IconAction icon={Wallet} label="Collect payment" href={`/admin/academy/payments?student=${data.id}`} tone="success" />
-      {data.status === "inactive" ? (
-        <IconAction
-          icon={Archive}
-          label={canArchive ? "Archive student" : "Collect or waive their dues before archiving"}
-          tone="danger"
-          disabled={pending || !canArchive}
-          onClick={() => {
-            if (!window.confirm(`Archive ${data.name}? They leave the student list; you can restore them from the archive.`)) return;
-            run(() => setStudentArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
-          }}
-        />
-      ) : null}
+      {data.isArchived ? null : (
+        <IconAction icon={Wallet} label="Collect payment" href={`/admin/academy/payments?student=${data.id}`} tone="success" />
+      )}
+      <ArchiveRowButtons
+        what={data.name}
+        archived={data.isArchived}
+        archive={() => setStudentArchivedAction(data.id, true)}
+        restore={() => setStudentArchivedAction(data.id, false)}
+        remove={() => deleteStudentAction(data.id)}
+        archiveNote={
+          data.due > 0
+            ? `They are marked as Left and billing stops. They still owe ${formatTaka(data.due)} — that bill stays in Finance.`
+            : "They are marked as Left and billing stops. Old bills and receipts stay."
+        }
+        deleteNote="Their receipts stay in Finance."
+        onDone={() => context.refresh()}
+      />
     </ActionIcons>
   );
 }
@@ -168,14 +157,14 @@ export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTil
 
   return (
     <>
-    {inArchive ? <ArchiveBanner what="students" note="Only students who have left and owe nothing can be archived. Their receipts stay on record." /> : null}
+    {inArchive ? <ArchiveBanner what="students" /> : null}
     <SaDataGrid<Row>
       source="academy-students"
       gridId="academy-students"
       columnDefs={columnDefs}
       getRowId={(row) => row.id}
       key={inArchive ? "archived" : "list"}
-      tiles={inArchive ? undefined : tiles}
+      tiles={inArchive ? undefined : splitArchiveTile(tiles).tiles}
       initialPreset={inArchive ? "archived" : ""}
       initialSearch={initialSearch}
       searchPlaceholder="Search name, student ID, guardian or phone…"

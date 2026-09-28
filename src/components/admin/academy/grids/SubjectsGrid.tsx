@@ -4,14 +4,14 @@ import { SaSelect } from "@/components/admin/sa/SaSelect";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import Link from "next/link";
-import { Archive, BookOpen, CalendarClock, Info, ListChecks, Plus } from "lucide-react";
+import { BookOpen, CalendarClock, Info, ListChecks, Plus } from "lucide-react";
 
 import { cancelUpcomingFeeAction, deleteSubjectAction, saveSubjectAction, setSubjectArchivedAction } from "@/app/admin/academy/_actions/setup";
-import { ArchiveBanner, ArchiveButton, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
+import { ArchiveBanner, ArchiveButton, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
 import { ErrorNotice, useAction } from "@/components/admin/academy/use-action";
 import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
-import { ActionIcons, IconAction, Muted, Pill, TitleCell, moneyCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
+import { ActionIcons, Muted, Pill, TitleCell, moneyCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
 import { Modal } from "@/components/admin/sa/Modal";
 import { PageHeading } from "@/components/admin/sa/ui";
 import { addMonths, currentMonthKey, formatTaka, monthLabel } from "@/lib/academy/codes";
@@ -38,31 +38,17 @@ type Form = { id?: string; classId: string; name: string; code: string; bangla: 
 type SubjectsContext = GridContext & { edit: (row: Row) => void };
 
 function SubjectActions({ data, context }: ICellRendererParams<Row, unknown, SubjectsContext>) {
-  const { pending, run } = useAction();
   if (!data) return null;
-  if (data.isArchived) {
-    return (
-      <ActionIcons>
-        <ArchivedRowActions
-          name={data.name}
-          restore={() => setSubjectArchivedAction(data.id, false)}
-          remove={() => deleteSubjectAction(data.id)}
-          onDone={() => context.refresh()}
-        />
-      </ActionIcons>
-    );
-  }
   return (
-    <ActionIcons onEdit={() => context.edit(data)}>
-      <IconAction
-        icon={Archive}
-        label="Archive subject"
-        tone="danger"
-        disabled={pending}
-        onClick={() => {
-          if (!window.confirm(`Archive ${data.name}? It must not be in an active batch or taken by any student.`)) return;
-          run(() => setSubjectArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
-        }}
+    <ActionIcons onEdit={data.isArchived ? undefined : () => context.edit(data)}>
+      <ArchiveRowButtons
+        what={data.name}
+        archived={data.isArchived}
+        archive={() => setSubjectArchivedAction(data.id, true)}
+        restore={() => setSubjectArchivedAction(data.id, false)}
+        remove={() => deleteSubjectAction(data.id)}
+        archiveNote="New admissions will no longer see this subject."
+        onDone={() => context.refresh()}
       />
     </ActionIcons>
   );
@@ -82,7 +68,7 @@ export function SubjectsGrid({
 }) {
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const archivedCount = Number(tiles.find((tile) => tile.key === "archived")?.value ?? 0);
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
   const [classFilter, setClassFilter] = useState(initialClass);
   const [form, setForm] = useState<Form | null>(null);
   const [editingRow, setEditingRow] = useState<Row | null>(null);
@@ -205,7 +191,7 @@ export function SubjectsGrid({
           </>
         }
       />
-      {inArchive ? <ArchiveBanner what="subjects" note="A subject can be deleted only when no batch or student record uses it." /> : null}
+      {inArchive ? <ArchiveBanner what="subjects" /> : null}
       <SaDataGrid<Row>
         ref={grid}
         source="academy-subjects"
@@ -213,7 +199,7 @@ export function SubjectsGrid({
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
-        tiles={inArchive ? undefined : tiles}
+        tiles={inArchive ? undefined : cardTiles}
         initialPreset={inArchive ? "archived" : ""}
         params={params}
         context={{ edit: openEdit }}

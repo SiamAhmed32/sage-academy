@@ -6,6 +6,8 @@ export const softDeleteFields = {
   deletedBy: { type: new Schema({ id: String, name: String }, { _id: false }), default: null },
   /** The unique value (class level, subject name) a deleted record gave up, kept for history. */
   deletedKey: { type: String, default: "" },
+  /** Archived automatically together with its class, so restoring the class brings it back. */
+  archivedWithClass: { type: Boolean, default: false },
 };
 
 /**

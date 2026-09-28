@@ -19,7 +19,6 @@ import { studentClashes, type ClashSlot } from "@/lib/academy/routine";
 import { AcademyError, logActivity, requireObjectId, runAction, withTransaction } from "@/lib/academy/server";
 import { normalizeBangladeshPhone, isValidBdMobileNormalized } from "@/lib/bd-phone";
 import AcademyBatch from "@/models/academy/AcademyBatch";
-import AcademyClass from "@/models/academy/AcademyClass";
 import AcademyDue, { dueStatusFor } from "@/models/academy/AcademyDue";
 import AcademyEnrollment from "@/models/academy/AcademyEnrollment";
 import AcademyStudent from "@/models/academy/AcademyStudent";
@@ -733,24 +732,36 @@ export async function studentEnrollmentsAction(studentId: string) {
 export async function setStudentArchivedAction(id: string, archived: boolean) {
   return runAction("admin", async (actor) => {
     requireObjectId(id, "student");
+    const month = currentMonthKey();
     const student = await AcademyStudent.findById(id).lean();
     if (!student) throw new AcademyError("That student no longer exists.");
-    if (archived) {
-      if (student.status !== "inactive") throw new AcademyError("Mark the student as left first. Only students who have left can be archived.");
-      const owing = await AcademyDue.countDocuments({ studentId: id, status: { $in: ["unpaid", "partial"] } });
-      if (owing) throw new AcademyError(`This student still has ${owing} unpaid bill${owing === 1 ? "" : "s"}. Collect or waive them first.`);
-    } else {
-      const [cls, batch] = await Promise.all([
-        AcademyClass.findById(student.classId).select("isArchived name").lean(),
-        AcademyBatch.findById(student.homeBatchId).select("_id").lean(),
-      ]);
-      if (!cls || !batch) throw new AcademyError("This student's class or batch was deleted, so they cannot be restored.");
-      if (cls.isArchived) throw new AcademyError(`${cls.name} is archived. Restore the class first.`);
+    if (!archived) {
+      const batch = await AcademyBatch.findById(student.homeBatchId).select("_id").lean();
+      if (!batch) throw new AcademyError("This student's batch was deleted, so they cannot be restored.");
     }
-    await AcademyStudent.updateOne({ _id: id }, { $set: { isArchived: archived } });
-    await logActivity({ action: archived ? "student.archived" : "student.restored", studentId: id, message: archived ? "Archived the student." : "Restored the student from the archive." }, actor);
+    await withTransaction(async (session) => {
+      if (archived) {
+        // Archiving means they have left: seats are freed and no new bills are made. Old bills and receipts stay.
+        await AcademyStudent.updateOne({ _id: id }, { $set: { isArchived: true, status: "inactive" } }, { session });
+        await AcademyEnrollment.updateMany(
+          { studentId: id, status: "active" },
+          { $set: { status: "dropped", endMonth: month }, $push: { history: { action: "dropped", note: "Student archived", by: actor, at: new Date() } } },
+          { session }
+        );
+      } else {
+        await AcademyStudent.updateOne({ _id: id }, { $set: { isArchived: false } }, { session });
+      }
+      await logActivity(
+        { action: archived ? "student.archived" : "student.restored", studentId: id, message: archived ? "Archived the student (marked as left)." : "Restored the student from the archive." },
+        actor,
+        session
+      );
+    });
     refresh();
-    return { ok: true, message: archived ? `${student.name} archived.` : `${student.name} restored.` };
+    return {
+      ok: true,
+      message: archived ? `${student.name} archived.` : `${student.name} restored. They are listed as Left until you add their subjects again.`,
+    };
   });
 }
 
