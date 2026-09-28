@@ -47,7 +47,8 @@ async function leadCounts() {
 
 export default async function AdminDashboardPage() {
   await connectDB();
-  await ensureMonthlyDues();
+  // Billing scans every active student. It must not block the dashboard; the dues page still runs it fresh.
+  void ensureMonthlyDues().catch(() => undefined);
   const [user, data, slots, leads] = await Promise.all([getCurrentAuthUser(), getDashboardData(), allActiveSlots(), leadCounts()]);
 
   const now = dhakaParts();

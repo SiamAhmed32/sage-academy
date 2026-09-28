@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { Types } from "mongoose";
 
 import {
@@ -225,9 +226,17 @@ async function hydrateBatches(batches: RawBatch[]): Promise<BatchOption[]> {
   }));
 }
 
-export async function listBatchOptions(filter: { status?: "active" | "archived" | "all" } = {}) {
+/** Active batches, shared for the rest of this request (dashboard calls this twice). */
+export const listActiveBatchOptions = cache(async () => {
   await connectDB();
-  const query = filter.status === "all" ? {} : { status: filter.status ?? "active" };
+  const batches = await AcademyBatch.find({ status: "active" }).sort({ year: -1, classLevel: 1, code: 1 }).lean<RawBatch[]>();
+  return hydrateBatches(batches);
+});
+
+export async function listBatchOptions(filter: { status?: "active" | "archived" | "all" } = {}) {
+  if (!filter.status || filter.status === "active") return listActiveBatchOptions();
+  await connectDB();
+  const query = filter.status === "all" ? {} : { status: filter.status };
   const batches = await AcademyBatch.find(query).sort({ year: -1, classLevel: 1, code: 1 }).lean<RawBatch[]>();
   return hydrateBatches(batches);
 }
@@ -283,7 +292,7 @@ export async function getBatchDetail(id: string) {
 
 /** Slots of all active batches (for clash checks and the timetable page). */
 export async function allActiveSlots() {
-  const batches = await listBatchOptions();
+  const batches = await listActiveBatchOptions();
   return batches.flatMap((batch) =>
     batch.routine.map((slot) => {
       const subject = batch.subjects.find((item) => item.subjectId === slot.subjectId);
@@ -590,7 +599,7 @@ export type ReceiptView = NonNullable<Awaited<ReturnType<typeof getReceipt>>>;
 export async function getDashboardData() {
   await connectDB();
   const month = currentMonthKey();
-  const [activeStudents, newThisMonth, monthDues, openDues, recentPayments, batches] = await Promise.all([
+  const [activeStudents, newThisMonth, monthDues, openDues, recentPayments, batches, collectedThisMonth] = await Promise.all([
     AcademyStudent.countDocuments({ status: "active" }),
     AcademyStudent.countDocuments({ createdAt: { $gte: new Date(`${month}-01T00:00:00+06:00`) } }),
     AcademyDue.aggregate<{ billed: number; paid: number }>([
@@ -603,12 +612,11 @@ export async function getDashboardData() {
       { $sort: { owed: -1 } },
     ]),
     AcademyPayment.find({ status: "valid" }).sort({ paidAt: -1 }).limit(6).lean(),
-    listBatchOptions(),
-  ]);
-
-  const collectedThisMonth = await AcademyPayment.aggregate<{ total: number }>([
-    { $match: { status: "valid", paidAt: { $gte: new Date(`${month}-01T00:00:00+06:00`) } } },
-    { $group: { _id: null, total: { $sum: "$amount" } } },
+    listActiveBatchOptions(),
+    AcademyPayment.aggregate<{ total: number }>([
+      { $match: { status: "valid", paidAt: { $gte: new Date(`${month}-01T00:00:00+06:00`) } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]),
   ]);
 
   const owingIds = openDues.slice(0, 6).map((row) => row._id);

@@ -4137,6 +4137,92 @@ a.class-card:hover {
   gap: 8px;
 }
 
+.sa-page-skeleton {
+  display: grid;
+  gap: 14px;
+}
+
+.sa-skel {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #efeae8 25%, #f7f4f3 37%, #efeae8 63%);
+  background-size: 400% 100%;
+  animation: sa-shimmer 1.15s ease infinite;
+}
+
+.sa-skel-kicker {
+  width: 120px;
+  height: 12px;
+}
+
+.sa-skel-title {
+  width: min(280px, 60%);
+  height: 28px;
+}
+
+.sa-skel-line {
+  width: min(460px, 80%);
+  height: 14px;
+}
+
+.sa-skel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.sa-skel-stats .sa-skel {
+  height: 84px;
+  border-radius: 14px;
+}
+
+.sa-skel-table {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sa-skel-table .sa-skel {
+  height: 40px;
+}
+
+.sa .sa-grid-skeleton {
+  position: absolute;
+  z-index: 2;
+  inset: 44px 12px 52px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 8px 4px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.sa .sa-grid-skeleton span {
+  display: block;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #efeae8 25%, #f7f4f3 37%, #efeae8 63%);
+  background-size: 400% 100%;
+  animation: sa-shimmer 1.15s ease infinite;
+}
+
+@keyframes sa-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .sa-skel-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .sa .sa-grid-body {
   position: relative;
   display: flex;

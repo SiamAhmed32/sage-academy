@@ -125,12 +125,19 @@ export async function ensureTuitionDues(
   return docs.length;
 }
 
+/** This server process already billed this month, so later dashboard visits skip the full scan. */
+let ensuredMonth: string | null = null;
+
 /** Create this month's tuition dues for every active student (idempotent). */
-export async function ensureMonthlyDues(month = currentMonthKey()) {
+export async function ensureMonthlyDues(month = currentMonthKey(), options?: { fresh?: boolean }) {
+  if (!options?.fresh && ensuredMonth === month) return { month, created: 0 };
   const students = await AcademyStudent.find({ status: "active" })
     .select("version")
     .lean<{ _id: Types.ObjectId; version: Version }[]>();
-  if (students.length === 0) return { month, created: 0 };
+  if (students.length === 0) {
+    ensuredMonth = month;
+    return { month, created: 0 };
+  }
 
   const [enrollments, existing] = await Promise.all([
     AcademyEnrollment.find({
@@ -165,6 +172,7 @@ export async function ensureMonthlyDues(month = currentMonthKey()) {
       if (error?.code !== 11000) throw error;
     });
   }
+  ensuredMonth = month;
   return { month, created: docs.length };
 }
 

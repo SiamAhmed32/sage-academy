@@ -448,6 +448,13 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
       ) : null}
 
       <div className="sa-grid-body" ref={bodyRef}>
+        {loading && total === null ? (
+          <div className="sa-grid-skeleton" aria-hidden="true">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span key={index} />
+            ))}
+          </div>
+        ) : null}
         <div className="sa-grid-main">
           {mounted ? (
             <AgGridReact<Row>

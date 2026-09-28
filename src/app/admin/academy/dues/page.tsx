@@ -12,7 +12,7 @@ export default async function DuesPage() {
   const current = currentMonthKey();
   await connectDB();
   // Bills for this month are created automatically; this makes sure they exist even if the scheduled job has not run yet.
-  await ensureMonthlyDues(current);
+  await ensureMonthlyDues(current, { fresh: true });
   const tiles = await dueTiles();
   const months = Array.from({ length: 13 }, (_, index) => addMonths(current, 1 - index));
 
