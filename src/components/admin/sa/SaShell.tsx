@@ -23,6 +23,7 @@ import { studentPortalNavGroups } from "@/constants/student-nav";
 import { adminRoleLabels } from "@/constants/admin-display";
 import type { AuthUser } from "@/lib/auth";
 import { initials } from "@/lib/academy/codes";
+import { prefetchAdminGrid } from "@/components/admin/grid/grid-cache";
 
 const COLLAPSE_KEY = "sage-admin-sidebar-collapsed";
 
@@ -141,6 +142,24 @@ export function SaShell({
     writeCollapsed(!collapsed);
   }
 
+  const [liveCounts, setLiveCounts] = useState(counts);
+
+  useEffect(() => {
+    if (variant !== "admin") return;
+    let cancelled = false;
+    fetch("/api/admin/nav-counts")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data && typeof data.admissionRequests === "number") {
+          setLiveCounts({ admissionRequests: data.admissionRequests });
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [variant]);
+
   const current = activeSaNavItem(pathname, groups);
   const shellClass = ["sa", fontClassName, collapsed ? "sa-collapsed" : "", drawerOpen ? "sa-drawer-open" : ""]
     .filter(Boolean)
@@ -202,11 +221,13 @@ export function SaShell({
                   group.items.map((item) => {
                     const Icon = item.icon;
                     const active = current?.href === item.href;
-                    const count = item.countKey ? counts[item.countKey] : 0;
+                    const count = item.countKey ? liveCounts?.[item.countKey] ?? 0 : 0;
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
+                        prefetch
+                        onMouseEnter={() => prefetchAdminGrid(item.href)}
                         className={`sa-nav-item${active ? " active" : ""}`}
                         data-tooltip={item.label}
                         aria-label={item.label}

@@ -46,10 +46,12 @@ function ClassActions({ data, context }: ICellRendererParams<Row, unknown, Class
   );
 }
 
-export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLevels: number[] }) {
+export function ClassesGrid({ tiles, usedLevels = [] }: { tiles?: GridTile[]; usedLevels?: number[] }) {
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
+  const [loadedTiles, setLoadedTiles] = useState<GridTile[]>(tiles ?? []);
+  const [levels, setLevels] = useState<number[]>(usedLevels);
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(loadedTiles);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const [level, setLevel] = useState("");
   const [name, setName] = useState("");
@@ -59,7 +61,7 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
     setError("");
     setEditing(row);
     if (row === "new") {
-      const used = new Set(usedLevels);
+      const used = new Set(levels);
       const next = Array.from({ length: 12 }, (_, index) => index + 1).find((value) => !used.has(value)) ?? 1;
       setLevel(String(next));
       setName(`Class ${next}`);
@@ -147,6 +149,10 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
         tiles={inArchive ? undefined : cardTiles}
+        onTiles={setLoadedTiles}
+        onMeta={(meta) => {
+          if (Array.isArray(meta.usedLevels)) setLevels(meta.usedLevels as number[]);
+        }}
         initialPreset={inArchive ? "archived" : ""}
         context={{ edit: open }}
         searchPlaceholder="Search classes…"

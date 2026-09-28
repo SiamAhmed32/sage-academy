@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { Types } from "mongoose";
 
@@ -596,7 +597,7 @@ export type ReceiptView = NonNullable<Awaited<ReturnType<typeof getReceipt>>>;
 
 // ───────────── Dashboard ─────────────
 
-export async function getDashboardData() {
+async function loadDashboardData() {
   await connectDB();
   const month = currentMonthKey();
   const [activeStudents, newThisMonth, monthDues, openDues, recentPayments, batches, collectedThisMonth] = await Promise.all([
@@ -651,3 +652,5 @@ export async function getDashboardData() {
     batches,
   };
 }
+
+export const getDashboardData = unstable_cache(loadDashboardData, ["admin-dashboard"], { revalidate: 20 });

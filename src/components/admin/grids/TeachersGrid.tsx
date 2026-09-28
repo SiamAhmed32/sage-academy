@@ -147,14 +147,17 @@ function OrderCell({
 }
 
 export function TeachersGrid({
-  tiles,
-  subjects,
-  subjectOptions,
+  tiles = [],
+  subjects: initialSubjects = [],
+  subjectOptions: initialSubjectOptions = [],
 }: {
-  tiles: GridTile[];
-  subjects: string[];
-  subjectOptions: string[];
+  tiles?: GridTile[];
+  subjects?: string[];
+  subjectOptions?: string[];
 }) {
+  const [subjects, setSubjects] = useState(initialSubjects);
+  const [subjectOptions, setSubjectOptions] = useState(initialSubjectOptions);
+  const [loadedTiles, setLoadedTiles] = useState(tiles);
   const router = useRouter();
   const gridRef = useRef<SaDataGridHandle>(null);
   const [drawer, setDrawer] = useState<Drawer | null>(null);
@@ -382,7 +385,12 @@ export function TeachersGrid({
         gridId={SOURCE}
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
-        tiles={tiles}
+        tiles={loadedTiles}
+        onTiles={setLoadedTiles}
+        onMeta={(meta) => {
+          if (Array.isArray(meta.subjects)) setSubjects(meta.subjects.filter((subject): subject is string => typeof subject === "string"));
+          if (Array.isArray(meta.subjectOptions)) setSubjectOptions(meta.subjectOptions.filter((subject): subject is string => typeof subject === "string"));
+        }}
         rowHeight={52}
         onRowClick={(row) => setDrawer({ mode: "view", row })}
         searchPlaceholder="Search name, subject or designation…"

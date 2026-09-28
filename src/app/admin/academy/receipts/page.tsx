@@ -3,11 +3,7 @@ import { Wallet } from "lucide-react";
 
 import { ReceiptsGrid } from "@/components/admin/academy/grids/ReceiptsGrid";
 import { PageHeading } from "@/components/admin/sa/ui";
-import { receiptTiles } from "@/lib/grid/tiles";
-
-export default async function ReceiptsPage() {
-  const tiles = await receiptTiles();
-
+export default function ReceiptsPage() {
   return (
     <div>
       <PageHeading
@@ -20,7 +16,7 @@ export default async function ReceiptsPage() {
           </Link>
         }
       />
-      <ReceiptsGrid tiles={tiles} />
+      <ReceiptsGrid />
     </div>
   );
 }

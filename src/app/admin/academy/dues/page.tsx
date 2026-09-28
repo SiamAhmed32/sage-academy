@@ -4,16 +4,9 @@ import { Wallet } from "lucide-react";
 import { DuesGrid } from "@/components/admin/academy/grids/DuesGrid";
 import { PageHeading } from "@/components/admin/sa/ui";
 import { addMonths, currentMonthKey } from "@/lib/academy/codes";
-import { ensureMonthlyDues } from "@/lib/academy/dues";
-import { dueTiles } from "@/lib/grid/tiles";
-import { connectDB } from "@/lib/mongodb";
 
-export default async function DuesPage() {
+export default function DuesPage() {
   const current = currentMonthKey();
-  await connectDB();
-  // Bills for this month are created automatically; this makes sure they exist even if the scheduled job has not run yet.
-  await ensureMonthlyDues(current, { fresh: true });
-  const tiles = await dueTiles();
   const months = Array.from({ length: 13 }, (_, index) => addMonths(current, 1 - index));
 
   return (
@@ -28,7 +21,7 @@ export default async function DuesPage() {
           </Link>
         }
       />
-      <DuesGrid tiles={tiles} months={months} />
+      <DuesGrid months={months} />
     </div>
   );
 }

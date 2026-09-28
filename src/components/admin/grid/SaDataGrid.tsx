@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 
+import { clearGridCache, gridCacheKey, loadGridPage, readGridCache } from "./grid-cache";
 import { sageGridTheme } from "./grid-theme";
 import { GridTiles, type GridTile } from "./GridTiles";
 import { SetFilter, type SetFilterOption } from "./SetFilter";
@@ -68,6 +69,10 @@ type Props<Row> = {
   height?: number;
   /** Change this value to reload the rows (e.g. after a server action refreshed the page). */
   refreshKey?: string | number;
+  /** Fired when the first response includes summary cards. */
+  onTiles?: (tiles: GridTile[]) => void;
+  /** Fired when the first response includes extra data for the page (class levels, and so on). */
+  onMeta?: (meta: Record<string, unknown>) => void;
 };
 
 type PanelId = "filters" | "columns" | null;
@@ -129,7 +134,15 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
     beforeToolbar,
     height,
     refreshKey,
+    onTiles,
+    onMeta,
   } = props;
+  const onTilesRef = useRef(onTiles);
+  const onMetaRef = useRef(onMeta);
+  const tilesRef = useRef(tiles);
+  onTilesRef.current = onTiles;
+  onMetaRef.current = onMeta;
+  tilesRef.current = tiles;
 
   const router = useRouter();
   const apiRef = useRef<GridApi | null>(null);
@@ -137,6 +150,22 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [search, setSearch] = useState(initialSearch);
   const [preset, setPreset] = useState(initialPreset);
+  const [liveTiles, setLiveTiles] = useState<GridTile[] | undefined>(tiles);
+  // The page strips the archive count out of the cards. Follow that list once it arrives.
+  // Compare by value: the page builds a new array on every render.
+  useEffect(() => {
+    if (!tiles?.length) return;
+    setLiveTiles((current) => {
+      if (
+        current &&
+        current.length === tiles.length &&
+        current.every((tile, index) => tile.key === tiles[index]?.key && tile.value === tiles[index]?.value && tile.preset === tiles[index]?.preset)
+      ) {
+        return current;
+      }
+      return tiles;
+    });
+  }, [tiles]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState<number | null>(null);
   const [error, setError] = useState("");
@@ -172,63 +201,65 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
     return () => window.removeEventListener("resize", fit);
   }, [error, mounted, height]);
 
-  const fetchPage = useCallback(
-    async (body: Record<string, unknown>, signal?: AbortSignal) => {
-      const response = await fetch(`/api/admin/grid/${source}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal,
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || "Could not load this table.");
-      return data as { rows: Row[]; total: number };
-    },
-    [source]
-  );
-
   const datasource = useMemo<IDatasource>(() => {
+    function applyPage(page: { rows: unknown[]; total: number; tiles?: GridTile[]; meta?: Record<string, unknown> }) {
+      setError("");
+      setTotal(page.total);
+      if (page.tiles) {
+        setLiveTiles(page.tiles);
+        onTilesRef.current?.(page.tiles);
+      }
+      if (page.meta) onMetaRef.current?.(page.meta);
+      if (page.total === 0) apiRef.current?.showNoRowsOverlay();
+      else apiRef.current?.hideOverlay();
+    }
+
     return {
       getRows: async (request: IGetRowsParams) => {
         controllerRef.current?.abort();
         const controller = new AbortController();
         controllerRef.current = controller;
+        const payload = {
+          startRow: request.startRow,
+          endRow: request.endRow,
+          sortModel: request.sortModel ?? [],
+          filterModel: request.filterModel ?? {},
+          search: query.current.search,
+          preset: query.current.preset,
+          params: query.current.params,
+          withTiles: request.startRow === 0 && !tilesRef.current?.length,
+        };
+        const cached = readGridCache(gridCacheKey(source, payload));
+        if (cached) {
+          applyPage(cached);
+          request.successCallback(cached.rows as Row[], cached.total);
+          return;
+        }
         setLoading(true);
         setError("");
         try {
-          const result = await fetchPage(
-            {
-              startRow: request.startRow,
-              endRow: request.endRow,
-              sortModel: request.sortModel,
-              filterModel: request.filterModel,
-              search: query.current.search,
-              preset: query.current.preset,
-              params: query.current.params,
-            },
-            controller.signal
-          );
-          setTotal(result.total);
-          request.successCallback(result.rows, result.total);
-          if (result.total === 0) apiRef.current?.showNoRowsOverlay();
-          else apiRef.current?.hideOverlay();
+          const result = await loadGridPage(source, payload, controller.signal);
+          if (controller.signal.aborted) return;
+          applyPage(result);
+          request.successCallback(result.rows as Row[], result.total);
         } catch (cause) {
           if ((cause as Error).name === "AbortError") return;
           setError((cause as Error).message);
           request.failCallback();
         } finally {
-          setLoading(false);
+          if (!controller.signal.aborted) setLoading(false);
         }
       },
     };
-  }, [fetchPage]);
+  }, [source]);
 
   const refresh = useCallback((purge = true) => {
+    clearGridCache(source);
     const api = apiRef.current;
     if (!api) return;
     if (purge) api.purgeInfiniteCache();
     else api.refreshInfiniteCache();
-  }, []);
+  }, [source]);
 
   useImperativeHandle(ref, () => ({ refresh, get api() { return apiRef.current; } }), [refresh]);
 
@@ -318,7 +349,7 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
     try {
       const all: Row[] = [];
       for (let start = 0; start < 5000; start += 500) {
-        const result = await fetchPage({
+        const result = await loadGridPage(source, {
           startRow: start,
           endRow: start + 500,
           sortModel: api.getColumnState().filter((c) => c.sort).map((c) => ({ colId: c.colId, sort: c.sort })),
@@ -327,7 +358,7 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
           preset: query.current.preset,
           params: query.current.params,
         });
-        all.push(...result.rows);
+        all.push(...(result.rows as Row[]));
         if (all.length >= result.total || result.rows.length === 0) break;
       }
       const cols = (api.getAllDisplayedColumns() ?? []).filter((col) => col.getColId() !== "actions");
@@ -372,7 +403,7 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
 
   return (
     <section className="sa-grid-shell">
-      {tiles && tiles.length ? <GridTiles tiles={tiles} active={preset} onSelect={choosePreset} /> : null}
+      {liveTiles && liveTiles.length ? <GridTiles tiles={liveTiles} active={preset} onSelect={choosePreset} /> : null}
       {beforeToolbar}
 
       <div className="sa-grid-toolbar">

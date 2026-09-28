@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { connectDB } from "@/lib/mongodb";
 import { ADMISSION_OPEN } from "@/lib/grid/sources/content";
 import { staffRoles } from "@/lib/rbac";
@@ -13,7 +15,7 @@ import User from "@/models/User";
 
 const dhakaToday = () => new Date(`${new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date())}T00:00:00+06:00`);
 
-export async function teacherTiles(): Promise<GridTile[]> {
+async function loadTeacherTiles(): Promise<GridTile[]> {
   await connectDB();
   const [all, featured, noPhoto, subjects] = await Promise.all([
     Teacher.countDocuments({}),
@@ -29,6 +31,8 @@ export async function teacherTiles(): Promise<GridTile[]> {
     { key: "subjects", label: "Subjects", value: subjects.filter(Boolean).length, icon: "book", tone: "purple" },
   ];
 }
+
+export const teacherTiles = unstable_cache(loadTeacherTiles, ["admin-teacher-tiles"], { revalidate: 20 });
 
 export async function userTiles(): Promise<GridTile[]> {
   await connectDB();

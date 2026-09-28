@@ -55,20 +55,24 @@ function SubjectActions({ data, context }: ICellRendererParams<Row, unknown, Sub
 }
 
 export function SubjectsGrid({
-  tiles,
-  classes,
+  tiles = [],
+  classes: initialClasses = [],
   initialClass,
-  counts,
+  counts: initialCounts = {},
 }: {
-  tiles: GridTile[];
-  classes: ClassOption[];
+  tiles?: GridTile[];
+  classes?: ClassOption[];
   initialClass: string;
   /** Active subjects per class id, for the tab badges. */
-  counts: Record<string, number>;
+  counts?: Record<string, number>;
 }) {
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
+  const [loadedTiles, setLoadedTiles] = useState<GridTile[]>(tiles);
+  const [classes, setClasses] = useState(initialClasses);
+  const [counts, setCounts] = useState(initialCounts);
+  const [ready, setReady] = useState(initialClasses.length > 0);
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(loadedTiles);
   const [classFilter, setClassFilter] = useState(initialClass);
   const [form, setForm] = useState<Form | null>(null);
   const [editingRow, setEditingRow] = useState<Row | null>(null);
@@ -199,14 +203,20 @@ export function SubjectsGrid({
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
-        tiles={inArchive ? undefined : cardTiles}
         initialPreset={inArchive ? "archived" : ""}
         params={params}
         context={{ edit: openEdit }}
         searchPlaceholder="Search subject, code or class…"
-        emptyTitle={classes.length === 0 ? "Add a class first" : "No subjects found"}
+        tiles={inArchive ? undefined : cardTiles}
+        onTiles={setLoadedTiles}
+        onMeta={(meta) => {
+          if (Array.isArray(meta.classes)) setClasses(meta.classes as ClassOption[]);
+          if (meta.counts && typeof meta.counts === "object") setCounts(meta.counts as Record<string, number>);
+          setReady(true);
+        }}
+        emptyTitle={ready && classes.length === 0 ? "Add a class first" : "No subjects found"}
         emptyDescription={
-          classes.length === 0
+          ready && classes.length === 0
             ? "Subjects belong to a class. Create your classes, then come back here."
             : "Add each subject with two monthly fees — Bangla version and English version."
         }

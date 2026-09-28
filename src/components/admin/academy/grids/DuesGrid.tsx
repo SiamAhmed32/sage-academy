@@ -29,7 +29,7 @@ type Row = {
   status: string;
 };
 
-export function DuesGrid({ tiles, months }: { tiles: GridTile[]; months: string[] }) {
+export function DuesGrid({ tiles, months }: { tiles?: GridTile[]; months: string[] }) {
   const grid = useRef<SaDataGridHandle>(null);
   const { pending, run } = useAction();
   const month = currentMonthKey();

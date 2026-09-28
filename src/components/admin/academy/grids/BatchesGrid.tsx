@@ -56,24 +56,37 @@ function BatchActions({ data, context }: ICellRendererParams<Row, unknown, Batch
   );
 }
 
-export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTile[]; form: BatchFormData; openCreate?: boolean }) {
-  const classes = form.classes;
+export function BatchesGrid({
+  tiles = [],
+  form: initialForm = null,
+  openCreate = false,
+}: {
+  tiles?: GridTile[];
+  form?: BatchFormData | null;
+  openCreate?: boolean;
+}) {
   const grid = useRef<SaDataGridHandle>(null);
   const inArchive = useArchiveView();
-  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(tiles);
+  const [loadedTiles, setLoadedTiles] = useState<GridTile[]>(tiles);
+  const [form, setForm] = useState<BatchFormData | null>(initialForm);
+  const classes = form?.classes ?? [];
+  const { tiles: cardTiles, archived: archivedCount } = splitArchiveTile(loadedTiles);
   const [drawer, setDrawer] = useState<{ existing?: BatchBuilderExisting; className?: string; classLevel?: number; view?: boolean } | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const openedCreate = useRef(false);
 
-  // /batches?create=1 (links from other pages): open after hydration, then drop the flag so a reload doesn't reopen it.
+  // /batches?create=1 (links from other pages): open once the form data has arrived, then drop the flag so a reload doesn't reopen it.
   useEffect(() => {
-    if (!openCreate) return;
+    if (!openCreate || !form || openedCreate.current) return;
+    openedCreate.current = true;
     setDrawer({});
     const url = new URL(window.location.href);
     url.searchParams.delete("create");
     window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
-  }, [openCreate]);
+  }, [form, openCreate]);
 
   async function openBatch(row: Row, mode: "view" | "edit") {
+    if (!form) return;
     setLoadingId(row.id);
     const result = await getBatchForEditAction(row.id);
     setLoadingId(null);
@@ -85,15 +98,17 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
     setDrawer({ existing, className, classLevel, view: mode === "view" });
   }
 
-  const drawerData: BatchFormData = drawer?.existing
-    ? {
-        ...form,
-        years: [drawer.existing.year],
-        classes: form.classes.some((item) => item.id === drawer.existing!.classId)
-          ? form.classes
-          : [...form.classes, { id: drawer.existing.classId, name: drawer.className ?? "Class", level: drawer.classLevel ?? 0 }],
-      }
-    : form;
+  const drawerData: BatchFormData | null = !form
+    ? null
+    : drawer?.existing
+      ? {
+          ...form,
+          years: [drawer.existing.year],
+          classes: form.classes.some((item) => item.id === drawer.existing!.classId)
+            ? form.classes
+            : [...form.classes, { id: drawer.existing.classId, name: drawer.className ?? "Class", level: drawer.classLevel ?? 0 }],
+        }
+      : form;
 
   const columnDefs = useMemo<ColDef<Row>[]>(
     () => [
@@ -215,6 +230,10 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
         getRowId={(row) => row.id}
         key={inArchive ? "archived" : "list"}
         tiles={inArchive ? undefined : cardTiles}
+        onTiles={setLoadedTiles}
+        onMeta={(meta) => {
+          if (meta.form && typeof meta.form === "object") setForm(meta.form as BatchFormData);
+        }}
         initialPreset={inArchive ? "archived" : ""}
         context={{ open: (row: Row, mode: "view" | "edit") => (loadingId ? undefined : void openBatch(row, mode)) }}
         onRowClick={(row) => (loadingId ? undefined : void openBatch(row, "view"))}
@@ -223,16 +242,18 @@ export function BatchesGrid({ tiles, form, openCreate = false }: { tiles: GridTi
         emptyDescription="Clear the filters, or create a batch for a class, gender and version."
         exportName="sage-batches"
       />
-      <BatchDrawer
-        open={drawer !== null}
-        onClose={() => setDrawer(null)}
-        onSaved={() => grid.current?.refresh()}
-        onEdit={() => setDrawer((current) => (current ? { ...current, view: false } : current))}
-        data={drawerData}
-        existing={drawer?.existing}
-        view={drawer?.view}
-        className={drawer?.className}
-      />
+      {drawerData ? (
+        <BatchDrawer
+          open={drawer !== null}
+          onClose={() => setDrawer(null)}
+          onSaved={() => grid.current?.refresh()}
+          onEdit={() => setDrawer((current) => (current ? { ...current, view: false } : current))}
+          data={drawerData}
+          existing={drawer?.existing}
+          view={drawer?.view}
+          className={drawer?.className}
+        />
+      ) : null}
     </>
   );
 }

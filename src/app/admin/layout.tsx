@@ -1,16 +1,14 @@
 import type { ReactNode } from "react";
 import { Inter, Libre_Baskerville } from "next/font/google";
-import { unstable_cache } from "next/cache";
+import { redirect } from "next/navigation";
 
 import "./admin-theme.css";
 
 import { SaShell } from "@/components/admin/sa/SaShell";
-import { connectDB } from "@/lib/mongodb";
-import { requireAdminPageUser } from "@/lib/rbac";
-import AdmissionRequest from "@/models/AdmissionRequest";
+import { getNavbarAuthUser } from "@/lib/auth-session";
+import { staffRoles } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,7 +17,6 @@ const inter = Inter({
   display: "swap",
 });
 
-// Formal serif for printed money receipts.
 const receiptSerif = Libre_Baskerville({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -27,30 +24,13 @@ const receiptSerif = Libre_Baskerville({
   display: "swap",
 });
 
-const admissionBadgeCount = unstable_cache(
-  async () => {
-    await connectDB();
-    return AdmissionRequest.countDocuments({ status: "new", isArchived: { $ne: true } });
-  },
-  ["admin-admission-badge"],
-  { revalidate: 30 }
-);
-
-async function navCounts() {
-  try {
-    const admissionRequests = await admissionBadgeCount();
-    return { admissionRequests };
-  } catch {
-    return { admissionRequests: 0 };
-  }
-}
-
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const user = await requireAdminPageUser();
-  const counts = await navCounts();
+  const user = await getNavbarAuthUser();
+  if (!user) redirect("/login");
+  if (!staffRoles.includes(user.role)) redirect("/");
 
   return (
-    <SaShell user={user} counts={counts} fontClassName={`${inter.variable} ${receiptSerif.variable}`}>
+    <SaShell user={user} fontClassName={`${inter.variable} ${receiptSerif.variable}`}>
       {children}
     </SaShell>
   );

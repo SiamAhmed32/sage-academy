@@ -1,15 +1,12 @@
 import Link from "next/link";
 import { BadgeDollarSign, Receipt } from "lucide-react";
 
-import { paymentContextAction } from "@/app/admin/academy/_actions/finance";
 import { CollectPayment } from "@/components/admin/academy/CollectPayment";
 import { PageHeading } from "@/components/admin/sa/ui";
 
 export default async function CollectPaymentPage({ searchParams }: { searchParams: Promise<{ student?: string }> }) {
   const params = await searchParams;
   const studentId = params.student ?? "";
-  // A link from a profile, dues list or receipt opens with that student's bills ready.
-  const initial = studentId ? await paymentContextAction(studentId) : null;
 
   return (
     <div>
@@ -28,16 +25,7 @@ export default async function CollectPaymentPage({ searchParams }: { searchParam
           </>
         }
       />
-      {initial && !initial.ok ? (
-        <div className="notice danger" style={{ marginBottom: 16 }}>
-          <span>{initial.message}</span>
-        </div>
-      ) : null}
-      <CollectPayment
-        key={studentId || "none"}
-        initialStudentId={initial?.ok ? studentId : ""}
-        initialContext={initial?.ok ? initial.data ?? null : null}
-      />
+      <CollectPayment key={studentId || "none"} initialStudentId={studentId} initialContext={null} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Info, Receipt, UserRound, X } from "lucide-react";
@@ -66,8 +66,13 @@ export function CollectPayment({
     [month, setError]
   );
 
-  // Fetched from event handlers only; a `?student=` link arrives with its bills already loaded.
   const load = useCallback(async (id: string) => apply(await paymentContextAction(id)), [apply]);
+
+  // A profile, dues or receipt link opens this page with `?student=`. Bills load after the page paints.
+  useEffect(() => {
+    if (!initialStudentId || initialContext) return;
+    void load(initialStudentId);
+  }, [initialContext, initialStudentId, load]);
 
   const openDues = useMemo(() => context?.openDues ?? [], [context]);
   const selectedDues = openDues.filter((due) => selected.has(due.id));

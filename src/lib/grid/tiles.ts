@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { currentMonthKey, formatTaka } from "@/lib/academy/codes";
 import { connectDB } from "@/lib/mongodb";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
@@ -24,7 +26,7 @@ async function owedByStudent() {
   ]);
 }
 
-export async function studentTiles(): Promise<GridTile[]> {
+async function loadStudentTiles(): Promise<GridTile[]> {
   await connectDB();
   const month = currentMonthKey();
   const [all, active, inactive, fresh, owed, archived] = await Promise.all([
@@ -53,7 +55,7 @@ export async function studentTiles(): Promise<GridTile[]> {
   ];
 }
 
-export async function batchTiles(): Promise<GridTile[]> {
+async function loadBatchTiles(): Promise<GridTile[]> {
   await connectDB();
   const [active, archived, noRoutine, batches, seats] = await Promise.all([
     AcademyBatch.countDocuments({ status: "active" }),
@@ -79,7 +81,7 @@ export async function batchTiles(): Promise<GridTile[]> {
   ];
 }
 
-export async function subjectTiles(): Promise<GridTile[]> {
+async function loadSubjectTiles(): Promise<GridTile[]> {
   await connectDB();
   const month = currentMonthKey();
   const [active, archived, scheduled, classes] = await Promise.all([
@@ -96,7 +98,7 @@ export async function subjectTiles(): Promise<GridTile[]> {
   ];
 }
 
-export async function classTiles(): Promise<GridTile[]> {
+async function loadClassTiles(): Promise<GridTile[]> {
   await connectDB();
   const [active, archived, subjects, batches, students] = await Promise.all([
     AcademyClass.countDocuments({ isArchived: false }),
@@ -114,7 +116,7 @@ export async function classTiles(): Promise<GridTile[]> {
   ];
 }
 
-export async function dueTiles(): Promise<GridTile[]> {
+async function loadDueTiles(): Promise<GridTile[]> {
   await connectDB();
   const month = currentMonthKey();
   const sum = (match: Record<string, unknown>) =>
@@ -146,7 +148,7 @@ export async function dueTiles(): Promise<GridTile[]> {
   ];
 }
 
-export async function receiptTiles(): Promise<GridTile[]> {
+async function loadReceiptTiles(): Promise<GridTile[]> {
   await connectDB();
   const month = currentMonthKey();
   const total = (match: Record<string, unknown>) =>
@@ -167,3 +169,12 @@ export async function receiptTiles(): Promise<GridTile[]> {
     { key: "void", label: "Void receipts", value: voided.n, icon: "alert", tone: "red", preset: "void" },
   ];
 }
+
+const tileCache = { revalidate: 20 };
+
+export const studentTiles = unstable_cache(loadStudentTiles, ["admin-student-tiles"], tileCache);
+export const batchTiles = unstable_cache(loadBatchTiles, ["admin-batch-tiles"], tileCache);
+export const subjectTiles = unstable_cache(loadSubjectTiles, ["admin-subject-tiles"], tileCache);
+export const classTiles = unstable_cache(loadClassTiles, ["admin-class-tiles"], tileCache);
+export const dueTiles = unstable_cache(loadDueTiles, ["admin-due-tiles"], tileCache);
+export const receiptTiles = unstable_cache(loadReceiptTiles, ["admin-receipt-tiles"], tileCache);

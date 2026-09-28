@@ -1,16 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { ColDef } from "ag-grid-community";
-import { Wallet } from "lucide-react";
+import { UserPlus, Wallet } from "lucide-react";
 import type { ICellRendererParams } from "ag-grid-community";
 
 import { deleteStudentAction, setStudentArchivedAction } from "@/app/admin/academy/_actions/students";
-import { ArchiveBanner, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
+import { ArchiveBanner, ArchiveButton, ArchiveRowButtons, splitArchiveTile, useArchiveView } from "@/components/admin/academy/archive";
 import { SaDataGrid, type GridContext } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
 import { ActionIcons, IconAction, Muted, Pill, TitleCell, dateCol, moneyCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
+import { PageHeading } from "@/components/admin/sa/ui";
 import { formatTaka } from "@/lib/academy/codes";
+import type { ClassOption } from "@/lib/academy/queries";
 import { VERSION_SHORT } from "@/lib/academy/constants";
 
 type Row = {
@@ -57,8 +60,10 @@ function StudentActions({ data, context }: ICellRendererParams<Row, unknown, Gri
   );
 }
 
-export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTile[]; classes: { level: number; name: string }[]; initialSearch?: string }) {
+export function StudentsGrid({ tiles = [], classes: initialClasses = [], initialSearch }: { tiles?: GridTile[]; classes?: ClassOption[]; initialSearch?: string }) {
   const inArchive = useArchiveView();
+  const [loadedTiles, setLoadedTiles] = useState<GridTile[]>(tiles);
+  const [classes, setClasses] = useState(initialClasses);
   const columnDefs = useMemo<ColDef<Row>[]>(
     () => [
       {
@@ -157,14 +162,30 @@ export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTil
 
   return (
     <>
-    {inArchive ? <ArchiveBanner what="students" /> : null}
+      <PageHeading
+        title="Students"
+        description="Everyone admitted through the new admission flow, with their batch, subjects and what they owe."
+        actions={
+          <>
+            <ArchiveButton count={splitArchiveTile(loadedTiles).archived} />
+            <Link href="/admin/academy/admission" className="btn-primary">
+              <UserPlus size={17} /> Register student
+            </Link>
+          </>
+        }
+      />
+      {inArchive ? <ArchiveBanner what="students" /> : null}
     <SaDataGrid<Row>
       source="academy-students"
       gridId="academy-students"
       columnDefs={columnDefs}
       getRowId={(row) => row.id}
       key={inArchive ? "archived" : "list"}
-      tiles={inArchive ? undefined : splitArchiveTile(tiles).tiles}
+      tiles={inArchive ? undefined : splitArchiveTile(loadedTiles).tiles}
+      onTiles={setLoadedTiles}
+      onMeta={(meta) => {
+        if (Array.isArray(meta.classes)) setClasses(meta.classes as ClassOption[]);
+      }}
       initialPreset={inArchive ? "archived" : ""}
       initialSearch={initialSearch}
       searchPlaceholder="Search name, student ID, guardian or phone…"

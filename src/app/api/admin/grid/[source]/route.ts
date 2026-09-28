@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { gridBootstrap } from "@/lib/grid/bootstrap";
 import { getGridSource } from "@/lib/grid/registry";
 import type { GridRequest } from "@/lib/grid/query";
 import { AppError } from "@/lib/errors";
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ so
     const source = await getGridSource(name);
     if (!source) return NextResponse.json({ message: "Unknown table" }, { status: 404 });
     const user = await requireRole(source.access === "admin" ? adminRoles : staffRoles);
-    const body = (await request.json().catch(() => ({}))) as Partial<GridRequest>;
+    const body = (await request.json().catch(() => ({}))) as Partial<GridRequest> & { withTiles?: boolean };
     const gridRequest: GridRequest = {
       startRow: Number(body.startRow) || 0,
       endRow: Number(body.endRow) || 25,
@@ -30,8 +31,12 @@ export async function POST(request: NextRequest, context: { params: Promise<{ so
       params: body.params && typeof body.params === "object" ? body.params : {},
     };
     await connectDB();
-    const result = await source.run(gridRequest, user);
-    return NextResponse.json(result);
+    const withTiles = body.withTiles === true && gridRequest.startRow === 0;
+    const [result, boot] = await Promise.all([
+      source.run(gridRequest, user),
+      withTiles ? gridBootstrap(name) : Promise.resolve(null),
+    ]);
+    return NextResponse.json(boot ? { ...result, ...boot } : result);
   } catch (error) {
     if (error instanceof AppError) {
       return NextResponse.json({ message: error.message }, { status: error.statusCode });

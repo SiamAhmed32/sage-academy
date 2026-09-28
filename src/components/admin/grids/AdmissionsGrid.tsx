@@ -64,7 +64,7 @@ function AdmissionActions({ data, context }: ICellRendererParams<Row, unknown, A
   );
 }
 
-export function AdmissionsGrid({ tiles, canDelete, initialSearch }: { tiles: GridTile[]; canDelete: boolean; initialSearch?: string }) {
+export function AdmissionsGrid({ tiles, canDelete, initialSearch }: { tiles?: GridTile[]; canDelete: boolean; initialSearch?: string }) {
   const router = useRouter();
   const grid = useRef<SaDataGridHandle>(null);
   const [detail, setDetail] = useState<Row | null>(null);

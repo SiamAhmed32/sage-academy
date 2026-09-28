@@ -26,7 +26,7 @@ type Row = {
   kinds: DueKind[];
 };
 
-export function ReceiptsGrid({ tiles }: { tiles: GridTile[] }) {
+export function ReceiptsGrid({ tiles }: { tiles?: GridTile[] }) {
   const columnDefs = useMemo<ColDef<Row>[]>(
     () => [
       {

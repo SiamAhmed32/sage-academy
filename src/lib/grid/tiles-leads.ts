@@ -1,12 +1,13 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import type { Model } from "mongoose";
 
 import type { GridTile } from "@/components/admin/grid/GridTiles";
 import {
-  admissionPresetMatch,
   assessmentPresetMatch,
   contactPresetMatch,
+  dhakaToday,
   freeClassPresetMatch,
   quizClassKey,
   quizPresetMatch,
@@ -27,18 +28,31 @@ function counter(model: unknown, match: (preset?: string) => Record<string, unkn
 
 const todayNote = (count: number) => `${count} today`;
 
-export async function admissionTiles(): Promise<GridTile[]> {
+async function loadAdmissionTiles(): Promise<GridTile[]> {
   await connectDB();
-  const count = counter(AdmissionRequest, admissionPresetMatch);
-  const today = admissionPresetMatch("today").createdAt;
-  const [all, fresh, freshToday, followUp, closed, archived] = await Promise.all([
-    count(""),
-    count("new"),
-    count("new", { createdAt: today }),
-    count("follow-up"),
-    count("closed"),
-    count("archived"),
+  const today = dhakaToday();
+  const rows = await AdmissionRequest.aggregate<{ _id: { archived: boolean; status: string }; n: number; todayNew: number }>([
+    {
+      $group: {
+        _id: { archived: { $ifNull: ["$isArchived", false] }, status: "$status" },
+        n: { $sum: 1 },
+        todayNew: {
+          $sum: { $cond: [{ $and: [{ $eq: ["$status", "new"] }, { $gte: ["$createdAt", today] }] }, 1, 0] },
+        },
+      },
+    },
   ]);
+  const active = rows.filter((row) => !row._id.archived);
+  const count = (status?: string) =>
+    active.filter((row) => (status ? row._id.status === status : true)).reduce((sum, row) => sum + row.n, 0);
+  const all = count();
+  const fresh = count("new");
+  const freshToday = active.reduce((sum, row) => sum + row.todayNew, 0);
+  const followUp = active
+    .filter((row) => row._id.status === "contacted" || row._id.status === "qualified")
+    .reduce((sum, row) => sum + row.n, 0);
+  const closed = count("closed");
+  const archived = rows.filter((row) => row._id.archived).reduce((sum, row) => sum + row.n, 0);
   return [
     { key: "all", label: "Active applications", value: all, icon: "inbox", tone: "blue", preset: "" },
     { key: "new", label: "New", value: fresh, icon: "dot", tone: "brand", preset: "new", note: todayNote(freshToday) },
@@ -47,6 +61,8 @@ export async function admissionTiles(): Promise<GridTile[]> {
     { key: "archived", label: "Archived", value: archived, icon: "archive", tone: "zinc", preset: "archived" },
   ];
 }
+
+export const admissionTiles = unstable_cache(loadAdmissionTiles, ["admin-admission-tiles"], { revalidate: 20 });
 
 export async function contactTiles(): Promise<GridTile[]> {
   await connectDB();

@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  experimental: {
+    // Repeat visits to the same admin page reuse the last result instead of waiting on the server again.
+    staleTimes: { dynamic: 30 },
+  },
   async redirects() {
     return [
       {
