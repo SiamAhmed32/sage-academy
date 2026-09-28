@@ -4,9 +4,10 @@ import { SaSelect } from "@/components/admin/sa/SaSelect";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import Link from "next/link";
-import { Archive, BookOpen, CalendarClock, Info, ListChecks, Plus, RotateCcw } from "lucide-react";
+import { Archive, BookOpen, CalendarClock, Info, ListChecks, Plus } from "lucide-react";
 
-import { cancelUpcomingFeeAction, saveSubjectAction, setSubjectArchivedAction } from "@/app/admin/academy/_actions/setup";
+import { cancelUpcomingFeeAction, deleteSubjectAction, saveSubjectAction, setSubjectArchivedAction } from "@/app/admin/academy/_actions/setup";
+import { ArchiveBanner, ArchiveButton, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
 import { ErrorNotice, useAction } from "@/components/admin/academy/use-action";
 import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
@@ -39,14 +40,29 @@ type SubjectsContext = GridContext & { edit: (row: Row) => void };
 function SubjectActions({ data, context }: ICellRendererParams<Row, unknown, SubjectsContext>) {
   const { pending, run } = useAction();
   if (!data) return null;
+  if (data.isArchived) {
+    return (
+      <ActionIcons>
+        <ArchivedRowActions
+          name={data.name}
+          restore={() => setSubjectArchivedAction(data.id, false)}
+          remove={() => deleteSubjectAction(data.id)}
+          onDone={() => context.refresh()}
+        />
+      </ActionIcons>
+    );
+  }
   return (
     <ActionIcons onEdit={() => context.edit(data)}>
       <IconAction
-        icon={data.isArchived ? RotateCcw : Archive}
-        label={data.isArchived ? "Restore subject" : "Archive subject"}
-        tone={data.isArchived ? "success" : "danger"}
+        icon={Archive}
+        label="Archive subject"
+        tone="danger"
         disabled={pending}
-        onClick={() => run(() => setSubjectArchivedAction(data.id, !data.isArchived), { onSuccess: () => context.refresh() })}
+        onClick={() => {
+          if (!window.confirm(`Archive ${data.name}? It must not be in an active batch or taken by any student.`)) return;
+          run(() => setSubjectArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
+        }}
       />
     </ActionIcons>
   );
@@ -65,6 +81,8 @@ export function SubjectsGrid({
   counts: Record<string, number>;
 }) {
   const grid = useRef<SaDataGridHandle>(null);
+  const inArchive = useArchiveView();
+  const archivedCount = Number(tiles.find((tile) => tile.key === "archived")?.value ?? 0);
   const [classFilter, setClassFilter] = useState(initialClass);
   const [form, setForm] = useState<Form | null>(null);
   const [editingRow, setEditingRow] = useState<Row | null>(null);
@@ -164,7 +182,7 @@ export function SubjectsGrid({
         cellRenderer: ({ data }: { data?: Row }) =>
           data ? data.isArchived ? <Pill tone="neutral">Archived</Pill> : <Pill tone="success">Active</Pill> : null,
       },
-      { colId: "actions", headerName: "", width: 100, cellRenderer: SubjectActions },
+      { colId: "actions", headerName: "", width: 110, cellRenderer: SubjectActions },
     ],
     [classes]
   );
@@ -177,6 +195,7 @@ export function SubjectsGrid({
         description="Each subject belongs to a class and has two monthly fees: Bangla version and English version. Fees can only be changed here."
         actions={
           <>
+            <ArchiveButton count={archivedCount} />
             <Link href="/admin/academy/batches/new" className="btn-secondary">
               <ListChecks size={17} /> Next: create batch
             </Link>
@@ -186,13 +205,16 @@ export function SubjectsGrid({
           </>
         }
       />
+      {inArchive ? <ArchiveBanner what="subjects" note="A subject can be deleted only when no batch or student record uses it." /> : null}
       <SaDataGrid<Row>
         ref={grid}
         source="academy-subjects"
         gridId="academy-subjects"
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
-        tiles={tiles}
+        key={inArchive ? "archived" : "list"}
+        tiles={inArchive ? undefined : tiles}
+        initialPreset={inArchive ? "archived" : ""}
         params={params}
         context={{ edit: openEdit }}
         searchPlaceholder="Search subject, code or class…"

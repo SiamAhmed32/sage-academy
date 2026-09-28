@@ -39,8 +39,11 @@ export const studentsSource: GridSource = {
   access: "staff",
   run: async (request) => {
     const month = currentMonthKey();
+    const archiveMatch = request.preset === "archived" ? { isArchived: true } : { isArchived: { $ne: true } };
     const presetMatch: Record<string, unknown> =
-      request.preset === "active"
+      request.preset === "archived"
+        ? {}
+        : request.preset === "active"
         ? { status: "active" }
         : request.preset === "inactive"
           ? { status: "inactive" }
@@ -48,7 +51,7 @@ export const studentsSource: GridSource = {
             ? { createdAt: { $gte: monthStart(month) } }
             : {};
     const prepare: PipelineStage[] = [
-      { $match: presetMatch },
+      { $match: { ...archiveMatch, ...presetMatch } },
       { $lookup: { from: "academy_classes", localField: "classId", foreignField: "_id", as: "cls" } },
       { $lookup: { from: "academy_batches", localField: "homeBatchId", foreignField: "_id", as: "batch" } },
       {
@@ -115,6 +118,7 @@ export const studentsSource: GridSource = {
           subjects: doc.subjects,
           due: doc.due,
           status: doc.status,
+          isArchived: Boolean(doc.isArchived),
           admissionDate: iso(doc.admissionDate),
         })),
     });
@@ -400,6 +404,8 @@ export const duesSource: GridSource = {
     const prepare: PipelineStage[] = [
       { $match: presetMatch },
       { $lookup: { from: "academy_students", localField: "studentId", foreignField: "_id", as: "student" } },
+      // Bills of a deleted student leave the list with them (money records stay in the database).
+      { $match: { "student.0": { $exists: true }, "student.deletedAt": { $not: { $gt: new Date(0) } } } },
       { $lookup: { from: "academy_batches", localField: "student.homeBatchId", foreignField: "_id", as: "batch" } },
       {
         $addFields: {

@@ -27,12 +27,13 @@ async function owedByStudent() {
 export async function studentTiles(): Promise<GridTile[]> {
   await connectDB();
   const month = currentMonthKey();
-  const [all, active, inactive, fresh, owed] = await Promise.all([
-    AcademyStudent.countDocuments({}),
-    AcademyStudent.countDocuments({ status: "active" }),
-    AcademyStudent.countDocuments({ status: "inactive" }),
-    AcademyStudent.countDocuments({ createdAt: { $gte: monthStart(month) } }),
+  const [all, active, inactive, fresh, owed, archived] = await Promise.all([
+    AcademyStudent.countDocuments({ isArchived: { $ne: true } }),
+    AcademyStudent.countDocuments({ status: "active", isArchived: { $ne: true } }),
+    AcademyStudent.countDocuments({ status: "inactive", isArchived: { $ne: true } }),
+    AcademyStudent.countDocuments({ createdAt: { $gte: monthStart(month) }, isArchived: { $ne: true } }),
     owedByStudent(),
+    AcademyStudent.countDocuments({ isArchived: true }),
   ]);
   return [
     { key: "all", label: "All students", value: all, icon: "users", tone: "blue", preset: "" },
@@ -48,6 +49,7 @@ export async function studentTiles(): Promise<GridTile[]> {
       note: formatTaka(owed.reduce((sum, row) => sum + row.owed, 0)),
     },
     { key: "inactive", label: "Left", value: inactive, icon: "inactive", tone: "zinc", preset: "inactive" },
+    { key: "archived", label: "Archived", value: archived, icon: "archive", tone: "zinc", preset: "archived" },
   ];
 }
 

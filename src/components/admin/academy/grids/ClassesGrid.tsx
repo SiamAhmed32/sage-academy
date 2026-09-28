@@ -4,9 +4,10 @@ import { SaSelect } from "@/components/admin/sa/SaSelect";
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
-import { Archive, BookOpen, Layers, Plus, RotateCcw } from "lucide-react";
+import { Archive, BookOpen, Layers, Plus } from "lucide-react";
 
-import { saveClassAction, setClassArchivedAction } from "@/app/admin/academy/_actions/setup";
+import { deleteClassAction, saveClassAction, setClassArchivedAction } from "@/app/admin/academy/_actions/setup";
+import { ArchiveBanner, ArchiveButton, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
 import { ErrorNotice, useAction } from "@/components/admin/academy/use-action";
 import { SaDataGrid, type GridContext, type SaDataGridHandle } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
@@ -30,14 +31,29 @@ type ClassesContext = GridContext & { edit: (row: Row) => void };
 function ClassActions({ data, context }: ICellRendererParams<Row, unknown, ClassesContext>) {
   const { pending, run } = useAction();
   if (!data) return null;
+  if (data.isArchived) {
+    return (
+      <ActionIcons>
+        <ArchivedRowActions
+          name={data.name}
+          restore={() => setClassArchivedAction(data.id, false)}
+          remove={() => deleteClassAction(data.id)}
+          onDone={() => context.refresh()}
+        />
+      </ActionIcons>
+    );
+  }
   return (
     <ActionIcons onEdit={() => context.edit(data)}>
       <IconAction
-        icon={data.isArchived ? RotateCcw : Archive}
-        label={data.isArchived ? "Restore class" : "Archive class"}
-        tone={data.isArchived ? "success" : "danger"}
+        icon={Archive}
+        label="Archive class"
+        tone="danger"
         disabled={pending}
-        onClick={() => run(() => setClassArchivedAction(data.id, !data.isArchived), { onSuccess: () => context.refresh() })}
+        onClick={() => {
+          if (!window.confirm(`Archive ${data.name}? Its subjects, batches and students must be archived first.`)) return;
+          run(() => setClassArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
+        }}
       />
     </ActionIcons>
   );
@@ -45,6 +61,8 @@ function ClassActions({ data, context }: ICellRendererParams<Row, unknown, Class
 
 export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLevels: number[] }) {
   const grid = useRef<SaDataGridHandle>(null);
+  const inArchive = useArchiveView();
+  const archivedCount = Number(tiles.find((tile) => tile.key === "archived")?.value ?? 0);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const [level, setLevel] = useState("");
   const [name, setName] = useState("");
@@ -110,7 +128,7 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
         cellRenderer: ({ data }: { data?: Row }) =>
           data ? data.isArchived ? <Pill tone="neutral">Archived</Pill> : <Pill tone="success">Active</Pill> : null,
       },
-      { colId: "actions", headerName: "", width: 100, cellRenderer: ClassActions },
+      { colId: "actions", headerName: "", width: 110, cellRenderer: ClassActions },
     ],
     []
   );
@@ -123,6 +141,7 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
         description="The classes SAGE teaches. Every subject belongs to one class, and every batch is built from one class."
         actions={
           <>
+            <ArchiveButton count={archivedCount} />
             <Link href="/admin/academy/subjects" className="btn-secondary">
               <BookOpen size={17} /> Next: subjects
             </Link>
@@ -132,13 +151,16 @@ export function ClassesGrid({ tiles, usedLevels }: { tiles: GridTile[]; usedLeve
           </>
         }
       />
+      {inArchive ? <ArchiveBanner what="classes" note="A class can be deleted only after its subjects, batches and students are deleted." /> : null}
       <SaDataGrid<Row>
         ref={grid}
         source="academy-classes"
         gridId="academy-classes"
         columnDefs={columnDefs}
         getRowId={(row) => row.id}
-        tiles={tiles}
+        key={inArchive ? "archived" : "list"}
+        tiles={inArchive ? undefined : tiles}
+        initialPreset={inArchive ? "archived" : ""}
         context={{ edit: open }}
         searchPlaceholder="Search classes…"
         emptyTitle="No classes yet"

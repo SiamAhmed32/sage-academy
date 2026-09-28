@@ -1,5 +1,7 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
+import { softDelete, softDeleteFields } from "@/lib/academy/soft-delete";
+
 import { BATCH_GENDERS, VERSIONS, WEEK_DAYS } from "@/lib/academy/constants";
 
 const BatchSubjectSchema = new Schema(
@@ -20,6 +22,7 @@ const RoutineSlotSchema = new Schema({
 
 const AcademyBatchSchema = new Schema(
   {
+    ...softDeleteFields,
     code: { type: String, required: true, trim: true },
     year: { type: Number, required: true },
     classId: { type: Schema.Types.ObjectId, ref: "AcademyClass", required: true },
@@ -36,6 +39,7 @@ const AcademyBatchSchema = new Schema(
   { collection: "academy_batches", timestamps: true }
 );
 
+softDelete(AcademyBatchSchema);
 AcademyBatchSchema.index({ code: 1 }, { unique: true });
 AcademyBatchSchema.index({ classId: 1, gender: 1, version: 1, sequence: 1 });
 AcademyBatchSchema.index({ status: 1, year: 1 });

@@ -2,9 +2,13 @@
 
 import { useMemo } from "react";
 import type { ColDef } from "ag-grid-community";
-import { Wallet } from "lucide-react";
+import { Archive, Wallet } from "lucide-react";
+import type { ICellRendererParams } from "ag-grid-community";
 
-import { SaDataGrid } from "@/components/admin/grid/SaDataGrid";
+import { deleteStudentAction, setStudentArchivedAction } from "@/app/admin/academy/_actions/students";
+import { ArchiveBanner, ArchivedRowActions, useArchiveView } from "@/components/admin/academy/archive";
+import { useAction } from "@/components/admin/academy/use-action";
+import { SaDataGrid, type GridContext } from "@/components/admin/grid/SaDataGrid";
 import type { GridTile } from "@/components/admin/grid/GridTiles";
 import { ActionIcons, IconAction, Muted, Pill, TitleCell, dateCol, moneyCol, numberCol, setCol, textCol } from "@/components/admin/grid/cells";
 import { formatTaka } from "@/lib/academy/codes";
@@ -25,10 +29,47 @@ type Row = {
   subjects: number;
   due: number;
   status: "active" | "inactive";
+  isArchived: boolean;
   admissionDate: string;
 };
 
+function StudentActions({ data, context }: ICellRendererParams<Row, unknown, GridContext>) {
+  const { pending, run } = useAction();
+  if (!data) return null;
+  if (data.isArchived) {
+    return (
+      <ActionIcons viewHref={`/admin/academy/students/${data.id}`}>
+        <ArchivedRowActions
+          name={`${data.name} (${data.studentId})`}
+          restore={() => setStudentArchivedAction(data.id, false)}
+          remove={() => deleteStudentAction(data.id)}
+          onDone={() => context.refresh()}
+        />
+      </ActionIcons>
+    );
+  }
+  const canArchive = data.status === "inactive" && data.due <= 0;
+  return (
+    <ActionIcons viewHref={`/admin/academy/students/${data.id}`}>
+      <IconAction icon={Wallet} label="Collect payment" href={`/admin/academy/payments?student=${data.id}`} tone="success" />
+      {data.status === "inactive" ? (
+        <IconAction
+          icon={Archive}
+          label={canArchive ? "Archive student" : "Collect or waive their dues before archiving"}
+          tone="danger"
+          disabled={pending || !canArchive}
+          onClick={() => {
+            if (!window.confirm(`Archive ${data.name}? They leave the student list; you can restore them from the archive.`)) return;
+            run(() => setStudentArchivedAction(data.id, true), { onSuccess: () => context.refresh() });
+          }}
+        />
+      ) : null}
+    </ActionIcons>
+  );
+}
+
 export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTile[]; classes: { level: number; name: string }[]; initialSearch?: string }) {
+  const inArchive = useArchiveView();
   const columnDefs = useMemo<ColDef<Row>[]>(
     () => [
       {
@@ -118,25 +159,24 @@ export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTil
       {
         colId: "actions",
         headerName: "",
-        width: 104,
-        cellRenderer: ({ data }: { data?: Row }) =>
-          data ? (
-            <ActionIcons viewHref={`/admin/academy/students/${data.id}`}>
-              <IconAction icon={Wallet} label="Collect payment" href={`/admin/academy/payments?student=${data.id}`} tone="success" />
-            </ActionIcons>
-          ) : null,
+        width: 132,
+        cellRenderer: StudentActions,
       },
     ],
     [classes]
   );
 
   return (
+    <>
+    {inArchive ? <ArchiveBanner what="students" note="Only students who have left and owe nothing can be archived. Their receipts stay on record." /> : null}
     <SaDataGrid<Row>
       source="academy-students"
       gridId="academy-students"
       columnDefs={columnDefs}
       getRowId={(row) => row.id}
-      tiles={tiles}
+      key={inArchive ? "archived" : "list"}
+      tiles={inArchive ? undefined : tiles}
+      initialPreset={inArchive ? "archived" : ""}
       initialSearch={initialSearch}
       searchPlaceholder="Search name, student ID, guardian or phone…"
       rowHref={(row) => `/admin/academy/students/${row.id}`}
@@ -144,5 +184,6 @@ export function StudentsGrid({ tiles, classes, initialSearch }: { tiles: GridTil
       emptyDescription="Clear the search or filters, or register a new student."
       exportName="sage-students"
     />
+    </>
   );
 }

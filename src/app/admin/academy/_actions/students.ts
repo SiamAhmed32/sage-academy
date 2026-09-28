@@ -19,6 +19,7 @@ import { studentClashes, type ClashSlot } from "@/lib/academy/routine";
 import { AcademyError, logActivity, requireObjectId, runAction, withTransaction } from "@/lib/academy/server";
 import { normalizeBangladeshPhone, isValidBdMobileNormalized } from "@/lib/bd-phone";
 import AcademyBatch from "@/models/academy/AcademyBatch";
+import AcademyClass from "@/models/academy/AcademyClass";
 import AcademyDue, { dueStatusFor } from "@/models/academy/AcademyDue";
 import AcademyEnrollment from "@/models/academy/AcademyEnrollment";
 import AcademyStudent from "@/models/academy/AcademyStudent";
@@ -724,3 +725,44 @@ export async function studentEnrollmentsAction(studentId: string) {
 }
 
 
+
+// ───────────── Archive & delete (soft) ─────────────
+// Only a student who has left and owes nothing can be archived. A deleted
+// student stays in the database (their receipts remain) but leaves the app.
+
+export async function setStudentArchivedAction(id: string, archived: boolean) {
+  return runAction("admin", async (actor) => {
+    requireObjectId(id, "student");
+    const student = await AcademyStudent.findById(id).lean();
+    if (!student) throw new AcademyError("That student no longer exists.");
+    if (archived) {
+      if (student.status !== "inactive") throw new AcademyError("Mark the student as left first. Only students who have left can be archived.");
+      const owing = await AcademyDue.countDocuments({ studentId: id, status: { $in: ["unpaid", "partial"] } });
+      if (owing) throw new AcademyError(`This student still has ${owing} unpaid bill${owing === 1 ? "" : "s"}. Collect or waive them first.`);
+    } else {
+      const [cls, batch] = await Promise.all([
+        AcademyClass.findById(student.classId).select("isArchived name").lean(),
+        AcademyBatch.findById(student.homeBatchId).select("_id").lean(),
+      ]);
+      if (!cls || !batch) throw new AcademyError("This student's class or batch was deleted, so they cannot be restored.");
+      if (cls.isArchived) throw new AcademyError(`${cls.name} is archived. Restore the class first.`);
+    }
+    await AcademyStudent.updateOne({ _id: id }, { $set: { isArchived: archived } });
+    await logActivity({ action: archived ? "student.archived" : "student.restored", studentId: id, message: archived ? "Archived the student." : "Restored the student from the archive." }, actor);
+    refresh();
+    return { ok: true, message: archived ? `${student.name} archived.` : `${student.name} restored.` };
+  });
+}
+
+export async function deleteStudentAction(id: string) {
+  return runAction("admin", async (actor) => {
+    requireObjectId(id, "student");
+    const student = await AcademyStudent.findById(id).lean();
+    if (!student) throw new AcademyError("That student no longer exists.");
+    if (!student.isArchived) throw new AcademyError("Archive the student first. Only archived students can be deleted.");
+    await AcademyStudent.updateOne({ _id: id }, { $set: { deletedAt: new Date(), deletedBy: { id: actor.id, name: actor.name } } });
+    await logActivity({ action: "student.deleted", studentId: id, message: `Deleted ${student.name} (${student.studentId}).` }, actor);
+    refresh();
+    return { ok: true, message: `${student.name} deleted.` };
+  });
+}

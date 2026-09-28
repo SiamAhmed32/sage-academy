@@ -13,6 +13,7 @@ import { AcademyError, logActivity, requireObjectId, runAction, withTransaction 
 import AcademyBatch from "@/models/academy/AcademyBatch";
 import AcademyClass from "@/models/academy/AcademyClass";
 import AcademyEnrollment from "@/models/academy/AcademyEnrollment";
+import AcademyStudent from "@/models/academy/AcademyStudent";
 import AcademySubject from "@/models/academy/AcademySubject";
 import Teacher from "@/models/Teacher";
 
@@ -36,6 +37,7 @@ export async function saveClassAction(input: z.input<typeof classSchema>) {
     const name = data.name || `Class ${data.level}`;
     const clash = await AcademyClass.findOne({ level: data.level, ...(data.id ? { _id: { $ne: data.id } } : {}) }).lean();
     if (clash) throw new AcademyError(`Class ${data.level} already exists.`);
+    await releaseDeletedClassLevel(data.level);
 
     if (data.id) {
       requireObjectId(data.id, "class");
@@ -61,8 +63,17 @@ export async function setClassArchivedAction(id: string, archived: boolean) {
   return runAction("admin", async (actor) => {
     requireObjectId(id, "class");
     if (archived) {
-      const activeBatch = await AcademyBatch.exists({ classId: id, status: "active" });
-      if (activeBatch) throw new AcademyError("Archive this class's active batches first.");
+      const [batches, subjects, students] = await Promise.all([
+        AcademyBatch.countDocuments({ classId: id, status: "active" }),
+        AcademySubject.countDocuments({ classId: id, isArchived: { $ne: true } }),
+        AcademyStudent.countDocuments({ classId: id, isArchived: { $ne: true } }),
+      ]);
+      const left = [
+        plural(batches, "active batch", "active batches"),
+        plural(subjects, "active subject", "active subjects"),
+        plural(students, "student not yet archived", "students not yet archived"),
+      ].filter(Boolean);
+      if (left.length) throw new AcademyError(`This class still has ${left.join(", ")}. Archive those first.`);
     }
     const updated = await AcademyClass.findByIdAndUpdate(id, { isArchived: archived }, { new: true }).lean();
     if (!updated) throw new AcademyError("That class no longer exists.");
@@ -96,6 +107,7 @@ export async function saveSubjectAction(input: z.input<typeof subjectSchema>) {
       ...(data.id ? { _id: { $ne: data.id } } : {}),
     }).lean();
     if (duplicate) throw new AcademyError(`${cls.name} already has a subject called ${duplicate.name}.`);
+    await releaseDeletedSubjectName(data.classId, data.name);
 
     const month = currentMonthKey();
 
@@ -178,6 +190,10 @@ export async function setSubjectArchivedAction(id: string, archived: boolean) {
     if (archived) {
       const inBatch = await AcademyBatch.exists({ status: "active", "subjects.subjectId": id });
       if (inBatch) throw new AcademyError("This subject is still in an active batch. Remove it from those batches first.");
+      const taking = await AcademyEnrollment.countDocuments({ subjectId: id, status: "active" });
+      if (taking) throw new AcademyError(`${plural(taking, "student is", "students are")} still taking this subject. Drop or transfer them first.`);
+    } else {
+      await requireLiveClass((await AcademySubject.findById(id).select("classId").lean())?.classId);
     }
     const subject = await AcademySubject.findByIdAndUpdate(id, { isArchived: archived }, { new: true }).lean();
     if (!subject) throw new AcademyError("That subject no longer exists.");
@@ -373,6 +389,8 @@ export async function setBatchStatusAction(id: string, status: "active" | "archi
     if (status === "archived") {
       const inUse = await AcademyEnrollment.exists({ batchId: id, status: "active" });
       if (inUse) throw new AcademyError("Students are still enrolled in this batch. Transfer or drop them first.");
+    } else {
+      await requireLiveClass((await AcademyBatch.findById(id).select("classId").lean())?.classId);
     }
     const batch = await AcademyBatch.findByIdAndUpdate(id, { status }, { new: true }).lean();
     if (!batch) throw new AcademyError("That batch no longer exists.");
@@ -382,3 +400,108 @@ export async function setBatchStatusAction(id: string, status: "active" | "archi
   });
 }
 
+
+// ───────────── Archive helpers & delete (soft) ─────────────
+// A delete hides the record everywhere but keeps it in the database. Only
+// archived records can be deleted, and a parent never goes before its children.
+
+function plural(count: number, one: string, many: string) {
+  return count ? `${count} ${count === 1 ? one : many}` : "";
+}
+
+/** Restoring a subject or batch needs its class to be active. */
+async function requireLiveClass(classId: unknown) {
+  if (!classId) return;
+  const cls = await AcademyClass.findById(classId).select("isArchived name").lean();
+  if (!cls) throw new AcademyError("Its class was deleted, so this cannot be restored.");
+  if (cls.isArchived) throw new AcademyError(`${cls.name} is archived. Restore the class first.`);
+}
+
+/** How many of these students still exist (not deleted). */
+async function liveStudents(ids: unknown[]) {
+  return ids.length ? AcademyStudent.countDocuments({ _id: { $in: ids } }) : 0;
+}
+
+/** A deleted class keeps its record; move its level aside so the level can be reused. */
+async function releaseDeletedClassLevel(level: number) {
+  const held = await AcademyClass.findOne({ level, deletedAt: { $ne: null } }).setOptions({ withDeleted: true }).lean();
+  if (!held) return;
+  const top = await AcademyClass.findOne({ level: { $gte: 1000 } }).setOptions({ withDeleted: true }).sort({ level: -1 }).select("level").lean();
+  await AcademyClass.updateOne(
+    { _id: held._id, deletedAt: { $ne: null } },
+    { $set: { level: Math.max(1000, (top?.level ?? 999) + 1), deletedKey: String(level) } }
+  );
+}
+
+/** Same for a deleted subject's name inside its class. */
+async function releaseDeletedSubjectName(classId: string, name: string) {
+  const pattern = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+  const held = await AcademySubject.findOne({ classId, name: pattern, deletedAt: { $ne: null } }).setOptions({ withDeleted: true }).lean();
+  if (!held) return;
+  await AcademySubject.updateOne(
+    { _id: held._id, deletedAt: { $ne: null } },
+    { $set: { name: `${held.name} (deleted ${String(held._id).slice(-6)})`, deletedKey: held.name } }
+  );
+}
+
+function deletedStamp(actor: { id: string; name: string }) {
+  return { $set: { deletedAt: new Date(), deletedBy: { id: actor.id, name: actor.name } } };
+}
+
+export async function deleteClassAction(id: string) {
+  return runAction("admin", async (actor) => {
+    requireObjectId(id, "class");
+    const cls = await AcademyClass.findById(id).lean();
+    if (!cls) throw new AcademyError("That class no longer exists.");
+    if (!cls.isArchived) throw new AcademyError("Archive the class first. Only archived classes can be deleted.");
+    const [subjects, batches, students] = await Promise.all([
+      AcademySubject.countDocuments({ classId: id }),
+      AcademyBatch.countDocuments({ classId: id }),
+      AcademyStudent.countDocuments({ classId: id }),
+    ]);
+    const left = [
+      plural(subjects, "subject", "subjects"),
+      plural(batches, "batch", "batches"),
+      plural(students, "student", "students"),
+    ].filter(Boolean);
+    if (left.length) throw new AcademyError(`${cls.name} still has ${left.join(", ")} (archived ones count too). Delete those first.`);
+    await AcademyClass.updateOne({ _id: id }, deletedStamp(actor));
+    await logActivity({ action: "class.deleted", message: `Deleted ${cls.name}.` }, actor);
+    refresh();
+    return { ok: true, message: `${cls.name} deleted.` };
+  });
+}
+
+export async function deleteSubjectAction(id: string) {
+  return runAction("admin", async (actor) => {
+    requireObjectId(id, "subject");
+    const subject = await AcademySubject.findById(id).lean();
+    if (!subject) throw new AcademyError("That subject no longer exists.");
+    if (!subject.isArchived) throw new AcademyError("Archive the subject first. Only archived subjects can be deleted.");
+    const batches = await AcademyBatch.countDocuments({ "subjects.subjectId": id });
+    if (batches) throw new AcademyError(`This subject is still part of ${plural(batches, "batch", "batches")} (archived ones count too). Delete those batches or remove the subject from them first.`);
+    const students = await liveStudents(await AcademyEnrollment.distinct("studentId", { subjectId: id }));
+    if (students) throw new AcademyError(`${plural(students, "student has", "students have")} this subject in their record. Delete those students first, or keep the subject archived.`);
+    await AcademySubject.updateOne({ _id: id }, deletedStamp(actor));
+    await logActivity({ action: "subject.deleted", subjectId: id, message: `Deleted ${subject.name}.` }, actor);
+    refresh();
+    return { ok: true, message: `${subject.name} deleted.` };
+  });
+}
+
+export async function deleteBatchAction(id: string) {
+  return runAction("admin", async (actor) => {
+    requireObjectId(id, "batch");
+    const batch = await AcademyBatch.findById(id).lean();
+    if (!batch) throw new AcademyError("That batch no longer exists.");
+    if (batch.status !== "archived") throw new AcademyError("Archive the batch first. Only archived batches can be deleted.");
+    const home = await AcademyStudent.countDocuments({ homeBatchId: id });
+    const studied = await liveStudents(await AcademyEnrollment.distinct("studentId", { batchId: id }));
+    const students = Math.max(home, studied);
+    if (students) throw new AcademyError(`${plural(students, "student has", "students have")} this batch in their record. Delete those students first, or keep the batch archived.`);
+    await AcademyBatch.updateOne({ _id: id }, deletedStamp(actor));
+    await logActivity({ action: "batch.deleted", batchId: id, message: `Deleted batch ${batch.code}.` }, actor);
+    refresh();
+    return { ok: true, message: `Batch ${batch.code} deleted.` };
+  });
+}

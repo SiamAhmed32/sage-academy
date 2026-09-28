@@ -1,11 +1,16 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
+import { softDelete, softDeleteFields } from "@/lib/academy/soft-delete";
+
 import { STUDENT_GENDERS, VERSIONS } from "@/lib/academy/constants";
 
 const ActorSchema = new Schema({ id: String, name: String }, { _id: false });
 
 const AcademyStudentSchema = new Schema(
   {
+    /** Archived students are hidden from normal lists (restore brings them back). */
+    isArchived: { type: Boolean, default: false },
+    ...softDeleteFields,
     studentId: { type: String, required: true, trim: true },
     admissionYear: { type: Number, required: true },
     serial: { type: Number, required: true },
@@ -34,6 +39,7 @@ const AcademyStudentSchema = new Schema(
   { collection: "academy_students", timestamps: true }
 );
 
+softDelete(AcademyStudentSchema);
 AcademyStudentSchema.index({ studentId: 1 }, { unique: true });
 // Serials restart per class each year (2605001, 2606001…), so only studentId is unique.
 AcademyStudentSchema.index({ admissionYear: 1, serial: 1 });

@@ -1,5 +1,7 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
+import { softDelete, softDeleteFields } from "@/lib/academy/soft-delete";
+
 const ActorSchema = new Schema({ id: String, name: String }, { _id: false });
 
 // Fees live only here. Each entry applies from `effectiveFrom` ("YYYY-MM") onward,
@@ -17,6 +19,7 @@ const FeeEntrySchema = new Schema(
 
 const AcademySubjectSchema = new Schema(
   {
+    ...softDeleteFields,
     classId: { type: Schema.Types.ObjectId, ref: "AcademyClass", required: true },
     name: { type: String, required: true, trim: true },
     code: { type: String, default: "", trim: true, uppercase: true },
@@ -26,6 +29,7 @@ const AcademySubjectSchema = new Schema(
   { collection: "academy_subjects", timestamps: true }
 );
 
+softDelete(AcademySubjectSchema);
 AcademySubjectSchema.index({ classId: 1, name: 1 }, { unique: true });
 
 export type AcademySubjectDoc = InferSchemaType<typeof AcademySubjectSchema>;
