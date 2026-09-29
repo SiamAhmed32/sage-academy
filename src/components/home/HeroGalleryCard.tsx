@@ -50,8 +50,9 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
   const activeLoaded = loadedImages[slide.image];
 
   return (
-    <div className="mx-auto w-full max-w-none overflow-hidden bg-white lg:max-w-none lg:rounded-[2.35rem] lg:shadow-xl lg:shadow-sage-red-100/40">
-      <div className="relative h-[clamp(420px,68svh,580px)] w-full overflow-hidden bg-sage-red-50 sm:h-[clamp(440px,70svh,600px)] lg:aspect-[4/5] lg:h-auto lg:max-h-none">
+    <div className="mx-auto w-full max-w-none overflow-hidden rounded-[1.6rem] bg-white shadow-lg shadow-sage-red-100/60 ring-1 ring-sage-red-100/70 lg:max-w-none lg:rounded-[2.35rem] lg:shadow-xl lg:shadow-sage-red-100/40 lg:ring-0">
+      {/* Phones get a landscape frame so the whole photo shows; desktop keeps the tall card. */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-sage-red-50 sm:aspect-[16/10] lg:aspect-[4/5]">
         {!activeLoaded ? (
           <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-sage-red-50 via-white to-sage-red-50" />
         ) : null}
@@ -85,6 +86,22 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
             </div>
           );
         })}
+
+        {/* Mobile caption + slide dots */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 bg-gradient-to-t from-black/55 via-black/15 to-transparent px-4 pb-3.5 pt-12 lg:hidden">
+          <p className="min-w-0 truncate text-sm font-semibold text-white drop-shadow">{slide.title}</p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {heroGallerySlides.map((item, index) => (
+              <span
+                key={item.image}
+                className={cn(
+                  "h-1.5 rounded-full bg-white/60 transition-all duration-300",
+                  index === activeIndex ? "w-5 bg-white" : "w-1.5"
+                )}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

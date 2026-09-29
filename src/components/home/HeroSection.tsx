@@ -106,8 +106,8 @@ export function HeroSection() {
       {/* Top border */}
       <div className="absolute inset-x-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-sage-red-100 to-transparent lg:block" />
 
-      {/* Mobile: full-width hero image first (edge to edge) */}
-      <div className="relative z-10 lg:hidden">
+      {/* Mobile: framed landscape photo card first */}
+      <div className="relative z-10 px-4 pt-4 sm:px-6 sm:pt-6 lg:hidden">
         <HeroVisual activeIndex={activeSlide} />
       </div>
 
