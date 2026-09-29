@@ -10,6 +10,7 @@ import { Container } from "@/components/shared/Container";
 import { cn } from "@/lib/utils";
 import styles from "@/components/auth/AuthPanel.module.css";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPasswordModal";
+import { notifyAuthChanged } from "@/components/shared/navbar/use-navbar-user";
 
 type Mode = "login" | "signup";
 
@@ -91,6 +92,7 @@ export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps)
 
       setLoginNeedsPhone(false);
       toast.success(data.message);
+      notifyAuthChanged();
 
       // Delay redirect slightly for toast visibility
       setTimeout(() => {

@@ -105,7 +105,7 @@ function BatchCard({ item }: { item: RelatedBatch }) {
   return (
     <Link href={relatedBatchHref(item)} className="group block overflow-hidden rounded-2xl border border-sage-red-100 bg-white transition hover:border-sage-primary">
       <div className="relative h-52 w-full overflow-hidden">
-        <Image src={item.image || "/BatchImages/CAP26a.jpeg"} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-110" />
+        <Image src={item.image || "/BatchImages/CAP26a.jpeg"} alt={item.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-110" />
       </div>
       <div className="p-5">
         <span className="rounded-full bg-sage-red-50 px-3 py-1 text-[10px] font-bold text-sage-primary uppercase tracking-wider">

@@ -3,11 +3,10 @@ import { BrandLogo } from "@/components/shared/navbar/BrandLogo";
 import { MobileNavbar } from "@/components/shared/navbar/MobileNavbar";
 import { NavbarActions } from "@/components/shared/navbar/NavbarActions";
 import { NavLinks } from "@/components/shared/navbar/NavLinks";
-import { getNavbarAuthUser } from "@/lib/auth-session";
 
-export async function Navbar() {
-  const user = await getNavbarAuthUser();
-
+// The signed-in user is loaded in the browser (see use-navbar-user) so every
+// public page can be served from the cache.
+export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-sage-red-100 bg-sage-white/95 backdrop-blur-md">
       <Container>
@@ -19,11 +18,11 @@ export async function Navbar() {
           </div>
 
           <div className="hidden lg:block">
-            <NavbarActions user={user} />
+            <NavbarActions />
           </div>
 
           <div className="lg:hidden">
-            <MobileNavbar user={user} />
+            <MobileNavbar />
           </div>
         </nav>
       </Container>

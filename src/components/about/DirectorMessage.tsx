@@ -24,6 +24,7 @@ export default function DirectorMessage() {
               src={directorMessage.image}
               alt={directorMessage.name}
               fill
+              sizes="(max-width: 1024px) 100vw, 40vw"
               className="object-cover"
             />
           </motion.div>

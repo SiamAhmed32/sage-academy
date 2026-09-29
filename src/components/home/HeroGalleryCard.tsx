@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { heroGallerySlides, type HeroGallerySlide } from "@/constants/hero";
 import { cn } from "@/lib/utils";
@@ -43,15 +43,6 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
     return [...indexes].sort((a, b) => a - b);
   }, [activeIndex]);
 
-  useEffect(() => {
-    visibleIndexes.forEach((index) => {
-      const src = heroGallerySlides[index]?.image;
-      if (!src) return;
-      const img = new window.Image();
-      img.src = encodeURI(src);
-    });
-  }, [visibleIndexes]);
-
   function markLoaded(src: string) {
     setLoadedImages((current) => (current[src] ? current : { ...current, [src]: true }));
   }
@@ -84,9 +75,10 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
                 src={item.image}
                 alt={isActive ? item.title : ""}
                 fill
-                priority={isPriority}
+                // Only the first slide is needed for the first paint; the neighbours load quietly.
+                priority={index === 0}
                 loading={isPriority ? "eager" : "lazy"}
-                sizes="100vw"
+                sizes="(min-width: 1024px) 46vw, 100vw"
                 className={getHeroImageClass(item.imageClass, item.eyebrow)}
                 onLoad={() => markLoaded(item.image)}
               />

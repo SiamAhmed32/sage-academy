@@ -42,6 +42,7 @@ export function InstructorTab({ batch }: { batch: any }) {
                 src={instructor.image || "/teacher/team1.jpg"} 
                 alt={instructor.name} 
                 fill 
+                sizes="144px"
                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
               />
             </div>

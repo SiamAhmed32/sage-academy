@@ -9,6 +9,7 @@ import { navbarActions } from "@/constants/navbar";
 import { trackEngagementEvent } from "@/lib/engagement-tracker";
 import type { AuthUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { notifyAuthChanged, useNavbarUser } from "./use-navbar-user";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,8 +60,10 @@ function getInitials(name: string) {
 export function NavbarActions({
   stacked = false,
   onNavigate,
-  user,
+  user: userProp,
 }: NavbarActionsProps) {
+  const sessionUser = useNavbarUser();
+  const user = userProp !== undefined ? userProp : sessionUser;
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const showDashboardLink = canOpenDashboard(user);
@@ -73,6 +76,7 @@ export function NavbarActions({
         credentials: "include",
       });
       onNavigate?.();
+      notifyAuthChanged();
       router.push("/");
       router.refresh();
     } finally {

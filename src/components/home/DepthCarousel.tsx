@@ -401,7 +401,6 @@ export function DepthCarousel({
             quality={75}
             className={cn("pointer-events-none select-none object-cover", item.imageClass)}
             sizes="(max-width: 1024px) 92vw, 42vw"
-            priority={index === 0}
           />
           {badge ? (
             <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-[11px] font-black tracking-wider text-white backdrop-blur-xl">

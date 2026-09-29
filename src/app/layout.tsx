@@ -4,6 +4,7 @@ import { Geist_Mono, Hind_Siliguri, Noto_Sans_Bengali } from "next/font/google";
 import { Navbar } from "@/components/shared/navbar/Navbar";
 import { Footer } from "@/components/shared/footer/Footer";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { SplashScreen } from "@/components/shared/SplashScreen";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -83,6 +84,7 @@ export default function RootLayout({
       className={`${notoSansBengali.variable} ${hindSiliguri.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SplashScreen />
         <script
           type="application/ld+json"
           // Tells Google which image is the academy's logo for search results.

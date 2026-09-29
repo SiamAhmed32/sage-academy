@@ -1,7 +1,7 @@
 import { Container } from "@/components/shared/Container";
 
 function Block({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-sage-red-50/80 ${className ?? ""}`} />;
+  return <div className={`sage-skel rounded-2xl ${className ?? ""}`} />;
 }
 
 export function BatchDetailsSkeleton() {

@@ -67,11 +67,6 @@ export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
-    heroGallerySlides.slice(0, 3).forEach((item) => {
-      const img = new window.Image();
-      img.src = encodeURI(item.image);
-    });
-
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroGallerySlides.length);
     }, 5000);

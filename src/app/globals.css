@@ -291,3 +291,125 @@
     overflow-x: hidden;
   }
 }
+
+/* ── Loading skeletons (public site) ── */
+.sage-skel {
+  border-radius: 0.6rem;
+  background: linear-gradient(100deg, #f8eded 20%, #fdf6f6 40%, #f8eded 60%);
+  background-size: 220% 100%;
+  animation: sage-skel-wave 1.4s ease-in-out infinite;
+}
+
+@keyframes sage-skel-wave {
+  from { background-position: 110% 0; }
+  to { background-position: -110% 0; }
+}
+
+/* ── First-visit brand splash ── */
+.sage-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf8;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.sage-splash.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sage-splash-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(40rem 26rem at 50% 42%, rgba(109, 15, 18, 0.09), transparent 70%),
+    radial-gradient(24rem 16rem at 62% 60%, rgba(240, 180, 41, 0.12), transparent 70%);
+  animation: sage-splash-breathe 2.4s ease-in-out infinite alternate;
+}
+
+.sage-splash-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transition: transform 0.45s ease;
+}
+
+.sage-splash.is-leaving .sage-splash-inner {
+  transform: scale(1.04);
+}
+
+.sage-splash-logo {
+  position: relative;
+  width: min(220px, 56vw);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  animation: sage-splash-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s forwards;
+}
+
+.sage-splash-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sage-splash-sheen {
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(-160%) skewX(-18deg);
+  animation: sage-splash-sheen 1.6s ease-in-out 0.55s infinite;
+}
+
+.sage-splash-tag {
+  margin: 0;
+  color: #9b6a12;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: sage-splash-fade 0.6s ease 0.35s forwards;
+}
+
+.sage-splash-bar {
+  position: relative;
+  width: 132px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(109, 15, 18, 0.1);
+  opacity: 0;
+  animation: sage-splash-fade 0.4s ease 0.45s forwards;
+}
+
+.sage-splash-bar span {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6d0f12, #c8161d 60%, #f0b429);
+  animation: sage-splash-run 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes sage-splash-in { to { opacity: 1; transform: none; } }
+@keyframes sage-splash-fade { to { opacity: 1; } }
+@keyframes sage-splash-sheen { to { transform: translateX(360%) skewX(-18deg); } }
+@keyframes sage-splash-run { from { transform: translateX(-110%); } to { transform: translateX(240%); } }
+@keyframes sage-splash-breathe { from { opacity: 0.7; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sage-skel,
+  .sage-splash-glow,
+  .sage-splash-sheen,
+  .sage-splash-bar span { animation: none; }
+  .sage-splash-logo,
+  .sage-splash-tag,
+  .sage-splash-bar { animation: none; opacity: 1; transform: none; }
+}
