@@ -8,5 +8,8 @@
       "path": "/api/cron/monthly-bills",
       "schedule": "0 18 * * *"
     }
+  ],
+  "regions": [
+    "bom1"
   ]
 }

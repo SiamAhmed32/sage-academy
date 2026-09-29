@@ -4199,15 +4199,6 @@ a.class-card:hover {
   pointer-events: none;
 }
 
-.sa .sa-grid-skeleton span {
-  display: block;
-  height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #efeae8 25%, #f7f4f3 37%, #efeae8 63%);
-  background-size: 400% 100%;
-  animation: sa-shimmer 1.15s ease infinite;
-}
-
 @keyframes sa-shimmer {
   0% {
     background-position: 100% 0;
@@ -5424,4 +5415,121 @@ a.sa-grid-title:hover b {
   .sa .adm-glance { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sa .adm-contact { grid-column: 1 / -1; justify-content: flex-start; }
   .sa .adm-rows > div { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ── Loading skeletons (shaped like real cards and rows) ── */
+.sa-skel,
+.sa .sa-grid-skeleton .sa-skel {
+  display: block;
+  height: 12px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #eef0f4 0%, #f7f8fa 45%, #eef0f4 90%);
+  background-size: 250% 100%;
+  animation: skl-wave 1.3s ease-in-out infinite;
+}
+
+@keyframes skl-wave {
+  from { background-position: 125% 0; }
+  to { background-position: -125% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-skel { animation: none; }
+}
+
+.skl-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.sa-page-skeleton { gap: 14px; }
+.sa-skel-kicker { width: 120px; height: 12px; }
+.sa-skel-title { width: min(300px, 60%); height: 30px; border-radius: 9px; }
+.sa-skel-line { width: min(480px, 80%); height: 14px; margin-bottom: 8px; }
+
+.skl-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.skl-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 18px;
+  border: 1px solid var(--line, #e8e9ef);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.skl-card > div { flex: 1; display: grid; gap: 10px; }
+.sa-skel.skl-icon { flex: none; width: 40px; height: 40px; border-radius: 12px; }
+.sa-skel.skl-label { width: 55%; height: 10px; }
+.sa-skel.skl-value { width: 32%; height: 20px; }
+
+.skl-table {
+  border: 1px solid var(--line, #e8e9ef);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.skl-toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line-soft, #f0f0f3);
+}
+
+.sa-skel.skl-search { flex: 1; height: 44px; border-radius: 11px; }
+.sa-skel.skl-btn { width: 100px; height: 44px; border-radius: 11px; }
+
+.skl-head {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  gap: 24px;
+  padding: 18px 18px;
+  border-bottom: 1px solid var(--line-soft, #f0f0f3);
+  background: #fbfbfd;
+}
+
+.skl-head .sa-skel { width: 60%; height: 10px; }
+
+.skl-row {
+  display: grid;
+  grid-template-columns: 2fr repeat(auto-fit, minmax(60px, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: center;
+  gap: 24px;
+  min-height: 64px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line-soft, #f0f0f3);
+}
+
+.skl-first { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.skl-first > div { flex: 1; display: grid; gap: 7px; }
+.sa-skel.skl-avatar { flex: none; width: 38px; height: 38px; border-radius: 11px; }
+.sa-skel.skl-name { height: 12px; }
+.sa-skel.skl-sub { width: 45%; height: 9px; }
+.sa-skel.skl-cell { height: 11px; }
+
+/* Inside a live grid the header is real, so only the rows show. */
+.sa .sa-grid-skeleton {
+  inset: 50px 1px 52px;
+  gap: 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+
+@media (max-width: 720px) {
+  .skl-head { display: none; }
+  .skl-row { grid-template-columns: 1fr; grid-auto-flow: row; }
+  .skl-row > .sa-skel { display: none; }
 }

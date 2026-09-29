@@ -19,6 +19,7 @@ import { ScheduleBoard } from "@/components/admin/sa/ScheduleBoard";
 import { Avatar, EmptyState, KpiCard, Panel, PanelLink, StatusChip } from "@/components/admin/sa/ui";
 import { WEEK_DAY_LABELS, subjectTone, type WeekDay } from "@/lib/academy/constants";
 import { dhakaParts, formatDate, formatTaka, formatTime, monthLabel, timeToMinutes } from "@/lib/academy/codes";
+import { StatCardsSkeleton, TableSkeleton } from "@/components/admin/sa/Skeletons";
 
 const URL = "/api/admin/dashboard";
 
@@ -63,17 +64,8 @@ function greeting() {
 function DashboardSkeleton() {
   return (
     <div className="sa-page-skeleton" aria-busy="true" aria-live="polite">
-      <div className="sa-skel-stats">
-        <span className="sa-skel" />
-        <span className="sa-skel" />
-        <span className="sa-skel" />
-        <span className="sa-skel" />
-      </div>
-      <div className="sa-skel-table">
-        {Array.from({ length: 6 }, (_, index) => (
-          <span key={index} className="sa-skel" />
-        ))}
-      </div>
+      <StatCardsSkeleton />
+      <TableSkeleton rows={6} />
     </div>
   );
 }

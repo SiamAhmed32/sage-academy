@@ -33,6 +33,8 @@ import { clearGridCache, gridCacheKey, loadGridPage, readGridCache } from "./gri
 import { sageGridTheme } from "./grid-theme";
 import { GridTiles, type GridTile } from "./GridTiles";
 import { SetFilter, type SetFilterOption } from "./SetFilter";
+import { TableRowsSkeleton } from "@/components/admin/sa/Skeletons";
+
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -481,9 +483,7 @@ function SaDataGridInner<Row>(props: Props<Row>, ref: React.ForwardedRef<SaDataG
       <div className="sa-grid-body" ref={bodyRef}>
         {loading && total === null ? (
           <div className="sa-grid-skeleton" aria-hidden="true">
-            {Array.from({ length: 8 }, (_, index) => (
-              <span key={index} />
-            ))}
+            <TableRowsSkeleton rows={8} columns={Math.min(6, Math.max(3, columnDefs.length - 1))} />
           </div>
         ) : null}
         <div className="sa-grid-main">
