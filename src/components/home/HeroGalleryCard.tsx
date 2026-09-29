@@ -52,7 +52,7 @@ export function HeroGalleryCard({ slide, activeIndex }: HeroGalleryCardProps) {
   return (
     <div className="mx-auto w-full max-w-none overflow-hidden rounded-[1.6rem] bg-white shadow-lg shadow-sage-red-100/60 ring-1 ring-sage-red-100/70 lg:max-w-none lg:rounded-[2.35rem] lg:shadow-xl lg:shadow-sage-red-100/40 lg:ring-0">
       {/* Phones get a landscape frame so the whole photo shows; desktop keeps the tall card. */}
-      <div className="relative aspect-[5/4] w-full overflow-hidden bg-sage-red-50 sm:aspect-[4/3] lg:aspect-[4/5]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-sage-red-50 sm:aspect-[16/10] lg:aspect-[4/5]">
         {!activeLoaded ? (
           <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-sage-red-50 via-white to-sage-red-50" />
         ) : null}
