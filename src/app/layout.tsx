@@ -26,6 +26,8 @@ const hindSiliguri = Hind_Siliguri({
 const anekBangla = Anek_Bangla({
   variable: "--font-anek-bangla",
   subsets: ["bengali"],
+  // Width axis: headings use a slightly wider cut so conjuncts (প্র, শ্ন, ক্ষ) stay open.
+  axes: ["wdth"],
   display: "swap",
 });
 
