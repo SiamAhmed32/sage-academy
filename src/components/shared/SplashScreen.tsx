@@ -33,7 +33,7 @@ export function SplashScreen() {
             <Image src="/sage-wordmark.png" alt="" width={1040} height={411} sizes="220px" loading="eager" fetchPriority="high" />
             <span className="sage-splash-sheen" />
           </div>
-          <p className="sage-splash-tag">SAGE Academy · Banasree</p>
+          <p className="sage-splash-tag">SAGE Academy</p>
           <span className="sage-splash-bar">
             <span />
           </span>
