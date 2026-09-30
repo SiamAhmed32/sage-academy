@@ -21,8 +21,8 @@ const HeroCopy = memo(function HeroCopy() {
       </span>
 
       <h1 lang="bn" className="sage-display max-w-[48rem] lg:max-w-none">
-        <span className="bn-headline block">{heroCopy.headlineLine1}</span>
-        <span className="bn-headline-subline relative inline-block max-w-full text-sage-primary">
+        <span className="bn-headline block lg:whitespace-nowrap">{heroCopy.headlineLine1}</span>
+        <span className="bn-headline-subline relative inline-block max-w-full text-sage-primary lg:whitespace-nowrap">
           {heroCopy.headlineLine2}
           <span
             aria-hidden="true"
@@ -76,6 +76,12 @@ export function HeroSection() {
       {/* Quiet background: warm two-tone split, a faint dot texture and a soft glow. */}
       <div className="absolute inset-0 bg-[linear-gradient(118deg,#fffaf8_0%,#fff5f4_44%,#ffffff_44%,#ffffff_100%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(#7a1015_1px,transparent_1px)] [background-size:24px_24px]" />
+
+      {/* Brand geometric shapes */}
+      <div className="pointer-events-none absolute -left-14 -top-14 hidden h-56 w-56 rotate-12 rounded-[2rem] border-[22px] border-sage-gold/22 md:block" />
+      <div className="pointer-events-none absolute left-[6%] top-[55%] hidden h-36 w-36 rotate-45 rounded-[1.4rem] border-[14px] border-sage-primary/10 lg:block" />
+      <div className="pointer-events-none absolute bottom-10 left-[38%] hidden h-20 w-20 -rotate-12 rounded-[1rem] bg-sage-primary/7 lg:block" />
+      <div className="pointer-events-none absolute left-[46%] top-6 hidden h-8 w-8 rotate-45 rounded-md border-[6px] border-sage-gold/30 md:block" />
 
       {/* Soft radial glow (warms the left cream zone) ── */}
       <div className="pointer-events-none absolute -left-10 top-0 h-[70%] w-[45%] bg-[radial-gradient(ellipse_at_top_left,rgba(109,15,18,0.07),transparent_65%)]" />

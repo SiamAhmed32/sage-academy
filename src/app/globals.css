@@ -438,7 +438,8 @@
   /* Home hero headline */
   .sage-display {
     font-family: var(--font-heading);
-    font-size: clamp(1.95rem, 1.3rem + 2.1vw, 3.125rem);
+    /* Sized so each hero line stays on one line beside the photo on desktop. */
+    font-size: clamp(1.95rem, 1.3rem + 1.6vw, 2.75rem);
     font-weight: 700;
     line-height: 1.34;
     color: var(--color-sage-secondary);

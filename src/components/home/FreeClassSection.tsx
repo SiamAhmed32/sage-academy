@@ -318,6 +318,8 @@ export function FreeClassSection() {
       <div className="absolute inset-0 bg-[linear-gradient(115deg,var(--color-sage-cream)_0%,var(--color-sage-cream-deep)_42%,#fff_42%,#fff_100%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(#7a1015_1px,transparent_1px)] [background-size:24px_24px]" />
       <div className="pointer-events-none absolute left-0 top-0 h-28 w-full bg-gradient-to-b from-white/80 to-transparent" />
+      <div className="pointer-events-none absolute -left-20 top-16 hidden h-44 w-44 rotate-12 rounded-[2rem] border-[18px] border-sage-gold/25 md:block" />
+      <div className="pointer-events-none absolute bottom-12 right-8 hidden h-32 w-32 rotate-45 rounded-[2rem] bg-sage-primary/10 lg:block" />
 
       <Container className="relative">
         <FreeClassEyebrow className="mb-6 lg:hidden" />
