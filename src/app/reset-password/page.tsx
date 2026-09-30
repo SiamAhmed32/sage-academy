@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
                     className="w-full h-12 px-4 text-center text-2xl tracking-[0.5em] font-bold rounded-xl border border-sage-red-50 bg-sage-red-50/30 focus:outline-none focus:ring-2 focus:ring-sage-primary/20 transition-all"
                   />
                 </div>
-                <button type="submit" className="w-full h-12 bg-sage-primary text-white rounded-xl font-bold hover:bg-sage-primary-hover transition-all flex items-center justify-center gap-2">
+                <button type="submit" className="w-full h-12 bg-sage-primary text-white rounded-xl font-bold hover:bg-sage-secondary transition-all flex items-center justify-center gap-2">
                   এগিয়ে যান <ArrowRight size={18} />
                 </button>
               </form>
@@ -144,7 +144,7 @@ export default function ResetPasswordPage() {
                 <h2 className="text-2xl font-bold text-sage-secondary">অভিনন্দন!</h2>
                 <p className="mt-2 text-sage-gray-500">আপনার পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে।</p>
               </div>
-              <button onClick={() => router.push("/")} className="w-full h-12 bg-sage-primary text-white rounded-xl font-bold hover:bg-sage-primary-hover transition-all">
+              <button onClick={() => router.push("/")} className="w-full h-12 bg-sage-primary text-white rounded-xl font-bold hover:bg-sage-secondary transition-all">
                 লগইন করুন
               </button>
             </motion.div>

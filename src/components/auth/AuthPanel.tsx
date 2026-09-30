@@ -213,7 +213,7 @@ export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps)
               <button
                 type="submit"
                 disabled={isPending || isSignup}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sage-primary text-sm font-semibold text-white transition hover:bg-sage-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sage-primary text-sm font-semibold text-white transition hover:bg-sage-secondary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending && !isSignup && <Loader2 size={16} className="animate-spin" />}
                 লগইন করুন
@@ -236,7 +236,7 @@ export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps)
           </div>
 
           <div className={cn(styles.welcome, styles.welcomeSignin)}>
-            <h3 className={cn(styles.slideItem, "text-4xl font-bold leading-tight")}>
+            <h3 className={cn(styles.slideItem, "text-4xl font-bold leading-snug")}>
               WELCOME
               <br />
               BACK!
@@ -327,7 +327,7 @@ export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps)
               <button
                 type="submit"
                 disabled={isPending || !isSignup}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sage-primary text-sm font-semibold text-white transition hover:bg-sage-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sage-primary text-sm font-semibold text-white transition hover:bg-sage-secondary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending && isSignup && <Loader2 size={16} className="animate-spin" />}
                 অ্যাকাউন্ট তৈরি করুন
@@ -350,7 +350,7 @@ export function AuthPanel({ initialMode = "login", redirectTo }: AuthPanelProps)
           </div>
 
           <div className={cn(styles.welcome, styles.welcomeSignup)}>
-            <h3 className={cn(styles.slideItem, "text-4xl font-bold leading-tight")}>
+            <h3 className={cn(styles.slideItem, "text-4xl font-bold leading-snug")}>
               WELCOME!
             </h3>
             <p className={cn(styles.slideItem, "mt-4 text-sm leading-7 text-white/90")}>

@@ -28,7 +28,7 @@ export function BatchTabs({ promotionCard, batch }: { promotionCard: any; batch:
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              "h-16 border-r border-sage-red-100 text-sm font-black tracking-wide text-sage-secondary last:border-r-0",
+              "h-16 border-r border-sage-red-100 text-sm font-bold tracking-wide text-sage-secondary last:border-r-0",
               activeTab === tab.key && "bg-sage-primary text-white"
             )}
           >

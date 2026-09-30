@@ -16,11 +16,11 @@ export function PageHero({
       <p className="inline-flex rounded-full bg-sage-white px-4 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
         {badge}
       </p>
-      <h1 className="mt-5 text-3xl font-bold leading-tight text-sage-secondary sm:text-4xl lg:text-5xl">
+      <h1 className="sage-page-title mt-5">
         {titleStart}
         {titleAccent ? <span className="block text-sage-primary">{titleAccent}</span> : null}
       </h1>
-      <p className="mt-5 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg">
+      <p className="sage-lead mt-5 max-w-2xl">
         {description}
       </p>
     </div>

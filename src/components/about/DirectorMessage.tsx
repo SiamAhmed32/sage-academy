@@ -36,7 +36,7 @@ export default function DirectorMessage() {
             viewport={{ once: true }}
           >
             <HiOutlineChatBubbleBottomCenterText className="mb-6 size-12 text-sage-primary/20" />
-            <h2 className="text-3xl font-bold text-sage-secondary sm:text-4xl">
+            <h2 className="sage-h2">
               পরিচালকের বার্তা
             </h2>
             <div className="mt-8 relative">

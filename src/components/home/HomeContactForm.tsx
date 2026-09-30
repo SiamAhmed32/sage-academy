@@ -80,7 +80,7 @@ export function HomeContactForm({
         <Textarea id="contact-message" value={form.message} onChange={(e) => updateField("message", e.target.value)} className="min-h-32" />
       </div>
       {feedback ? <p className={`mt-4 text-sm ${status === "success" ? "text-sage-primary" : "text-destructive"}`}>{feedback}</p> : null}
-      <Button type="submit" size="lg" className="mt-6 h-11 rounded-full bg-sage-primary px-6 text-sage-white hover:bg-sage-primary-hover" disabled={status === "submitting"}>
+      <Button type="submit" size="lg" className="mt-6 h-11 rounded-full bg-sage-primary px-6 text-sage-white hover:bg-sage-secondary" disabled={status === "submitting"}>
         <SendHorizonal />
         {status === "submitting" ? "পাঠানো হচ্ছে..." : homeContactContent.submitLabel}
       </Button>

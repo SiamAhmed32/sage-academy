@@ -57,7 +57,7 @@ export function BatchRelated({ related }: BatchRelatedProps) {
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-sage-primary">
               More Academic Options
             </span>
-            <h2 className="mt-2 text-4xl font-extrabold text-sage-secondary">
+            <h2 className="sage-h2 mt-2">
               আরও ব্যাচ দেখুন
             </h2>
           </div>

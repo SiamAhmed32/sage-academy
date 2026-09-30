@@ -9,7 +9,7 @@ export default function ValuesSection() {
     <section className="bg-sage-white py-20">
       <Container>
         <div className="mb-16 text-center">
-          <h2 className="text-3xl font-bold text-sage-secondary sm:text-4xl">
+          <h2 className="sage-h2">
             আমাদের মূল বৈশিষ্ট্যসমূহ
           </h2>
           <p className="mt-4 text-lg text-sage-gray-600">

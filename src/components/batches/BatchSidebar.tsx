@@ -45,7 +45,7 @@ export function BatchSidebar({ promotionCard, batch }: { promotionCard: any; bat
           <div className="h-px bg-sage-red-100/50" />
 
           <div className="rounded-2xl bg-sage-red-50 px-5 py-4 text-center">
-            <p className="text-2xl font-black text-sage-primary">
+            <p className="text-2xl font-bold text-sage-primary">
               {promotionCard.badge || batch.status || "ভর্তি চলছে"}
             </p>
           </div>

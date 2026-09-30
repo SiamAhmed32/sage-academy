@@ -69,7 +69,7 @@ export function NotFoundPage() {
                   animate={{ opacity: 1, y: 0, rotate: 0 }}
                   transition={{ delay: 0.08 + index * 0.08, type: "spring", stiffness: 120 }}
                   className={cn(
-                    "font-heading text-[5.5rem] font-black leading-none tracking-tighter sm:text-[7rem] lg:text-[8rem]",
+                    "font-heading text-[5.5rem] font-bold leading-none tracking-tighter sm:text-[7rem] lg:text-[8rem]",
                     index === 1
                       ? "bg-gradient-to-b from-sage-primary to-sage-secondary bg-clip-text text-transparent"
                       : "text-sage-red-100"

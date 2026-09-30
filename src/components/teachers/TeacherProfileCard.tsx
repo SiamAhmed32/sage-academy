@@ -32,7 +32,7 @@ export function TeacherProfileCard({ teacher, index }: TeacherProfileCardProps) 
 
       {/* Card Content */}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-sage-primary mb-1 tracking-tight">
+        <h3 className="text-xl font-bold text-sage-primary mb-1">
           {teacher.name}
         </h3>
         <p className="text-sage-gray-700 text-sm mb-0.5 font-medium">

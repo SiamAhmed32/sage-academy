@@ -403,7 +403,7 @@ export function DepthCarousel({
             sizes="(max-width: 1024px) 92vw, 42vw"
           />
           {badge ? (
-            <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-[11px] font-black tracking-wider text-white backdrop-blur-xl">
+            <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-[11px] font-bold tracking-wider text-white backdrop-blur-xl">
               {badge}
             </span>
           ) : null}

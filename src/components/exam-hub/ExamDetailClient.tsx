@@ -337,7 +337,7 @@ export function ExamDetailClient({
                 </div>
 
                 <div className="space-y-3">
-                  <h1 className="bn-headline text-3xl font-bold text-sage-secondary sm:text-4xl lg:text-[2.35rem] lg:leading-tight">
+                  <h1 className="sage-page-title bn-headline">
                     {program.title}
                   </h1>
                   {program.subtitle ? (
@@ -703,7 +703,7 @@ function ParticipationStepCard({ step, compact = false }: { step: ParticipationS
       <div className={`flex h-full flex-col rounded-xl border p-3 ${statusStyles[step.status]}`}>
         <div className="flex items-center gap-2">
           <div
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black ${badgeStyles[step.status]}`}
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${badgeStyles[step.status]}`}
           >
             {step.status === "complete" ? <CheckCircle2 className="size-3.5" /> : step.id}
           </div>
@@ -720,7 +720,7 @@ function ParticipationStepCard({ step, compact = false }: { step: ParticipationS
   return (
     <div className={`flex gap-4 rounded-2xl border p-4 sm:p-5 ${statusStyles[step.status]}`}>
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black ${badgeStyles[step.status]}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${badgeStyles[step.status]}`}
       >
         {step.status === "complete" ? <CheckCircle2 className="size-5" /> : step.id}
       </div>

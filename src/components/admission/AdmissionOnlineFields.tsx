@@ -121,7 +121,7 @@ function Section({ title, children }: SectionProps) {
     <div className="mt-10 first:mt-0">
       <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-3">
         <span className="h-4 w-1 rounded-full bg-[#8b1a1a]" />
-        <h3 className="text-base font-extrabold text-[#1a1a2e] tracking-tight">
+        <h3 className="text-base font-bold text-[#1a1a2e]">
           {title}
         </h3>
       </div>

@@ -22,7 +22,7 @@ export function FAQHero() {
             <span className="mb-4 inline-flex rounded-full bg-sage-red-100 px-4 py-1.5 text-sm font-bold text-sage-primary">
               {hero.badge}
             </span>
-            <h1 className="text-4xl font-bold leading-tight text-sage-secondary sm:text-5xl lg:text-6xl">
+            <h1 className="sage-page-title">
               {hero.title}
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-sage-gray-700">

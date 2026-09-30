@@ -126,7 +126,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
                   <Button type="button" variant="ghost" onClick={handleClose} className="h-11 px-6 font-semibold text-sage-gray-500 hover:text-sage-primary hover:bg-sage-red-50/50 rounded-xl">
                     বাতিল
                   </Button>
-                  <Button type="submit" disabled={isPending} className="bg-sage-primary hover:bg-sage-primary-hover h-11 px-6 font-bold rounded-xl shadow-lg shadow-sage-red-100">
+                  <Button type="submit" disabled={isPending} className="bg-sage-primary hover:bg-sage-secondary h-11 px-6 font-bold rounded-xl shadow-lg shadow-sage-red-100">
                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight size={18} className="mr-2" />} OTP পাঠান
                   </Button>
                 </div>
@@ -147,7 +147,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
                 </div>
                 <div className="flex justify-between items-center pt-2">
                   <button type="button" onClick={() => setStep(1)} className="text-sm font-medium text-sage-gray-500 hover:text-sage-primary">ইমেইল পরিবর্তন করুন</button>
-                  <Button type="submit" className="bg-sage-primary hover:bg-sage-primary-hover h-11 px-8 font-bold rounded-xl shadow-lg shadow-sage-red-100">এগিয়ে যান</Button>
+                  <Button type="submit" className="bg-sage-primary hover:bg-sage-secondary h-11 px-8 font-bold rounded-xl shadow-lg shadow-sage-red-100">এগিয়ে যান</Button>
                 </div>
               </form>
             </motion.div>
@@ -180,7 +180,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
                     </button>
                   </div>
                 </div>
-                <Button type="submit" disabled={isPending} className="w-full h-12 bg-sage-primary hover:bg-sage-primary-hover text-white font-bold rounded-xl shadow-lg shadow-sage-red-100">
+                <Button type="submit" disabled={isPending} className="w-full h-12 bg-sage-primary hover:bg-sage-secondary text-white font-bold rounded-xl shadow-lg shadow-sage-red-100">
                   {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "পাসওয়ার্ড আপডেট করুন"}
                 </Button>
               </form>

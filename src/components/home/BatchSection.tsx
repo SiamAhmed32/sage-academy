@@ -64,13 +64,13 @@ export async function BatchSection() {
       <Container>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
           <div className="max-w-2xl">
-            <p className="inline-flex rounded-full bg-sage-red-50 px-4 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
+            <p className="sage-eyebrow">
               শ্রেণিভিত্তিক ব্যাচ
             </p>
-            <h2 className="mt-4 text-3xl font-bold text-sage-secondary sm:text-4xl">
+            <h2 className="sage-h2 mt-4">
               প্রতিটি শ্রেণির জন্য সাজানো একাডেমিক ব্যাচ
             </h2>
-            <p className="mt-4 text-base leading-8 text-sage-gray-700">
+            <p className="sage-lead mt-4">
               নিয়মিত ক্লাস, সাপ্তাহিক মূল্যায়ন এবং অভিজ্ঞ শিক্ষকদের তত্ত্বাবধানে ক্লাস ৫ থেকে ১২ পর্যন্ত পরিকল্পিত লেকচার প্লান
 
             </p>
@@ -78,7 +78,7 @@ export async function BatchSection() {
 
           <Link
             href="/batches"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-sage-primary px-6 py-4 text-base font-bold text-sage-white shadow-lg shadow-sage-primary/25 transition hover:bg-sage-secondary lg:mb-1 lg:w-auto lg:shrink-0 lg:rounded-full lg:border lg:border-sage-primary lg:bg-white lg:px-5 lg:py-2.5 lg:text-sm lg:text-sage-primary lg:shadow-sm lg:shadow-sage-red-100/50 lg:hover:bg-sage-primary lg:hover:text-white"
+            className="sage-btn sage-btn-secondary sage-btn-sm w-full lg:mb-1 lg:w-auto lg:shrink-0"
           >
             সব ব্যাচ দেখুন{batchCountLabel}
             <ArrowRight className="h-4 w-4" />

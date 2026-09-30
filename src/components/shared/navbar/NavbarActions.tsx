@@ -109,7 +109,7 @@ export function NavbarActions({
             trackNavCta("navbar_admission_stacked");
             onNavigate?.();
           }}
-          className="rounded-full bg-sage-primary px-5 py-2.5 text-center text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-primary-hover"
+          className="rounded-full bg-sage-primary px-5 py-2.5 text-center text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-secondary"
         >
           {navbarActions[1].label}
         </Link>
@@ -177,7 +177,7 @@ export function NavbarActions({
         <Link
           href={navbarActions[1].href}
           onClick={() => trackNavCta("navbar_admission")}
-          className="rounded-full bg-sage-primary px-5 py-2.5 text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-primary-hover"
+          className="rounded-full bg-sage-primary px-5 py-2.5 text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-secondary"
         >
           {navbarActions[1].label}
         </Link>
@@ -204,7 +204,7 @@ export function NavbarActions({
           trackNavCta("navbar_admission");
           onNavigate?.();
         }}
-        className="rounded-full bg-sage-primary px-5 py-2.5 text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-primary-hover"
+        className="rounded-full bg-sage-primary px-5 py-2.5 text-sm font-semibold text-sage-white shadow-md transition-all duration-200 hover:bg-sage-secondary"
       >
         {navbarActions[1].label}
       </Link>

@@ -34,7 +34,7 @@ export default function AboutHero() {
               {hero.badge}
             </Badge>
 
-            <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-sage-secondary sm:text-[2.75rem] lg:text-5xl">
+            <h1 className="sage-page-title">
               {titleLead.trim()}:
               <span className="mt-2 block text-sage-primary">{titleAccent.trim()}</span>
             </h1>

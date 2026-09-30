@@ -41,7 +41,7 @@ function FreeClassEyebrow({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        "inline-flex items-center gap-2 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-primary/20 ring-1 ring-white/50",
+        "inline-flex items-center gap-2 rounded-full bg-sage-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm",
         className
       )}
     >
@@ -131,7 +131,7 @@ function FreeClassFeatureChips({ className }: { className?: string }) {
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage-primary text-white shadow-md shadow-sage-primary/25">
             <Icon className="h-5 w-5" />
           </span>
-          <span className="text-sm font-black text-sage-secondary">{label}</span>
+          <span className="text-sm font-semibold text-sage-secondary">{label}</span>
         </div>
       ))}
     </div>
@@ -316,10 +316,8 @@ export function FreeClassSection() {
       className="relative scroll-mt-24 overflow-hidden border-y border-sage-warm-border bg-sage-cream py-14 sm:py-20 lg:py-24"
     >
       <div className="absolute inset-0 bg-[linear-gradient(115deg,var(--color-sage-cream)_0%,var(--color-sage-cream-deep)_42%,#fff_42%,#fff_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.22] [background-image:radial-gradient(#7a1015_1px,transparent_1px)] [background-size:22px_22px]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(#7a1015_1px,transparent_1px)] [background-size:24px_24px]" />
       <div className="pointer-events-none absolute left-0 top-0 h-28 w-full bg-gradient-to-b from-white/80 to-transparent" />
-      <div className="pointer-events-none absolute -left-20 top-16 hidden h-44 w-44 rotate-12 rounded-[2rem] border-[18px] border-sage-gold/25 md:block" />
-      <div className="pointer-events-none absolute bottom-12 right-8 hidden h-32 w-32 rotate-45 rounded-[2rem] bg-sage-primary/10 lg:block" />
 
       <Container className="relative">
         <FreeClassEyebrow className="mb-6 lg:hidden" />
@@ -335,7 +333,7 @@ export function FreeClassSection() {
               <FreeClassEyebrow />
             </div>
 
-            <h2 className="bn-headline max-w-4xl text-[1.65rem] font-black text-sage-secondary sm:text-[2rem] md:text-[2.35rem] lg:text-[2.5rem] xl:text-[2.65rem] xl:leading-[1.38]">
+            <h2 className="sage-h2 bn-headline max-w-4xl">
               <span className="text-sage-secondary">ভর্তির আগে </span>
               <span className="relative inline text-sage-primary">
                 ২টি ফ্রি ক্লাস করুন
@@ -344,14 +342,14 @@ export function FreeClassSection() {
               <span className="text-sage-secondary">, তারপর সিদ্ধান্ত নিন।</span>
             </h2>
 
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-sage-gray-700 sm:text-xl sm:leading-9">
+            <p className="sage-lead mt-5 max-w-2xl">
               ভর্তির সিদ্ধান্ত হোক আত্মবিশ্বাসের সঙ্গে। তাই শিক্ষক, পড়ানোর ধরন ও ক্লাসের পরিবেশ নিজেই দেখে তারপর ভর্তি হোন।
             </p>
 
             <div className="mt-7 grid max-w-2xl grid-cols-3 overflow-hidden rounded-2xl border border-sage-warm-border bg-white shadow-sm">
               {["ছোট ব্যাচ", "বিষয়ভিত্তিক ভর্তি", "ডাউট সলভ ক্লাস"].map((label) => (
                 <div key={label} className="flex items-center justify-center border-r border-sage-warm-border px-2 py-4 text-center last:border-r-0 sm:px-4">
-                  <p className="text-xs font-black leading-snug text-sage-secondary sm:text-sm">{label}</p>
+                  <p className="text-xs font-semibold leading-snug text-sage-secondary sm:text-sm">{label}</p>
                 </div>
               ))}
             </div>
@@ -365,12 +363,12 @@ export function FreeClassSection() {
               ].map(({ t, Icon }) => (
                 <li
                   key={t}
-                  className="group flex gap-3 rounded-2xl border border-sage-warm-border bg-white/95 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sage-gold hover:shadow-md sm:px-5 sm:py-4"
+                  className="group flex items-center gap-3 rounded-2xl border border-sage-warm-border/80 bg-white/90 px-4 py-3.5 transition hover:border-sage-gold sm:px-5"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sage-gold-soft ring-1 ring-sage-warm-ring transition group-hover:bg-sage-primary group-hover:ring-sage-primary">
                     <Icon className="h-5 w-5 text-sage-primary transition group-hover:text-white" />
                   </span>
-                  <span className="pt-1.5 text-sm font-semibold text-sage-secondary sm:text-base">{t}</span>
+                  <span className="text-sm font-medium leading-relaxed text-sage-gray-700 sm:text-base">{t}</span>
                 </li>
               ))}
             </ul>
@@ -381,10 +379,8 @@ export function FreeClassSection() {
                 disabled={!sessionReady}
                 onClick={() => sessionReady && setOpen(true)}
                 className={cn(
-                  "inline-flex h-14 min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-2xl px-7 text-base font-black text-white shadow-xl transition lg:w-auto lg:shrink-0 lg:px-5 lg:text-sm xl:px-7 xl:text-base",
-                  sessionReady
-                    ? "bg-sage-secondary shadow-sage-secondary/25 hover:scale-[1.02] hover:bg-sage-primary active:scale-[0.99]"
-                    : "cursor-not-allowed bg-sage-gray-300 shadow-none"
+                  "sage-btn w-full lg:w-auto lg:shrink-0",
+                  sessionReady ? "sage-btn-primary" : "cursor-not-allowed bg-sage-gray-300 text-white"
                 )}
               >
                 {!sessionReady ? (
@@ -402,9 +398,9 @@ export function FreeClassSection() {
 
               <Link
                 href="/exams"
-                className="group inline-flex h-14 min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-2xl border-2 border-sage-primary/20 bg-white px-7 text-base font-black text-sage-primary shadow-sm transition hover:border-sage-primary hover:bg-sage-primary hover:text-white lg:w-auto lg:shrink-0 lg:px-5 lg:text-sm xl:px-7 xl:text-base"
+                className="sage-btn sage-btn-secondary group w-full lg:w-auto lg:shrink-0"
               >
-                <BookOpen className="h-5 w-5 shrink-0 transition group-hover:text-white" />
+                <BookOpen className="h-5 w-5 shrink-0" />
                 ফ্রি অনলাইন পরীক্ষা দেখুন
                 <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
               </Link>
@@ -452,7 +448,7 @@ export function FreeClassSection() {
                             <div className="shrink-0 border-b border-sage-border bg-sage-red-50/50 px-5 py-4 pr-14 text-left sm:px-6 sm:py-5 sm:pr-16">
                               <h2
                                 id="free-class-dialog-title"
-                                className="text-lg font-black text-sage-secondary sm:text-xl"
+                                className="text-lg font-bold text-sage-secondary sm:text-xl"
                               >
                                 ফ্রি এক্সপেরিয়েন্স ক্লাস
                               </h2>
@@ -469,7 +465,7 @@ export function FreeClassSection() {
                                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                                     <CheckCircle2 className="h-9 w-9" />
                                   </div>
-                                  <h3 className="text-lg font-black text-sage-secondary">আবেদন গ্রহণ হয়েছে</h3>
+                                  <h3 className="text-lg font-bold text-sage-secondary">আবেদন গ্রহণ হয়েছে</h3>
                                   <p className="text-sm text-sage-gray-600">
                                     টিম খুব শীঘ্রই WhatsApp বা কলে নিশ্চিত করবে।
                                   </p>
@@ -675,7 +671,7 @@ export function FreeClassSection() {
                                   onClick={submit}
                                   disabled={submitting || !canSubmit}
                                   className={cn(
-                                    "flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-base font-black text-white shadow-md transition",
+                                    "flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-base font-semibold text-white shadow-md transition",
                                     submitting || !canSubmit
                                       ? "cursor-not-allowed bg-slate-400"
                                       : "bg-sage-secondary shadow-sage-secondary/25 hover:bg-sage-primary"

@@ -43,7 +43,7 @@ export function BatchHero({ promotionCard, batch }: BatchHeroProps) {
 
       <div className="mt-10">
         <p className="mb-3 text-sm font-bold text-sage-primary">SAGE Academy Academic Batch</p>
-        <h1 className="text-4xl font-extrabold leading-tight text-sage-secondary sm:text-5xl">
+        <h1 className="sage-page-title">
           {displayTitle}
         </h1>
 

@@ -49,7 +49,7 @@ export function InstructorTab({ batch }: { batch: any }) {
           </div>
           
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-sage-secondary group-hover:text-sage-primary transition">{instructor.name}</h3>
+            <h3 className="text-2xl font-bold text-sage-secondary group-hover:text-sage-primary transition">{instructor.name}</h3>
             <p className="text-sm font-bold text-sage-primary uppercase tracking-widest">
               {instructor.designation || "Senior Teachers"}
             </p>

@@ -64,7 +64,7 @@ export function ExamLeaderboardClient({ slug, title }: { slug: string; title: st
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-white font-black text-sage-secondary ring-1 ring-sage-border">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-white font-bold text-sage-secondary ring-1 ring-sage-border">
                     {row.rank <= 3 ? <Crown className="size-4 text-amber-600" /> : row.rank}
                   </span>
                   <div>
@@ -75,7 +75,7 @@ export function ExamLeaderboardClient({ slug, title }: { slug: string; title: st
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-black text-sage-primary">
+                  <p className="text-xl font-bold text-sage-primary">
                     {row.score}/{row.totalMarks}
                   </p>
                 </div>

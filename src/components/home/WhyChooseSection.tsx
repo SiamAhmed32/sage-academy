@@ -95,11 +95,11 @@ export function WhyChooseSection() {
                 {whyChooseContent.title}
               </Badge>
 
-              <h2 className="bn-headline text-3xl font-black leading-[1.15] sm:text-4xl lg:text-[2.65rem]">
+              <h2 className="sage-h2 bn-headline text-white">
                 {whyChooseContent.subtitle}
               </h2>
 
-              <p className="mt-5 max-w-2xl border-l-2 border-white/25 pl-4 text-base leading-8 text-white/85 sm:text-[1.05rem]">
+              <p className="sage-lead mt-5 max-w-2xl border-l-2 border-white/25 pl-4 text-white/80">
                 {whyChooseContent.description}
               </p>
             </motion.div>
@@ -134,7 +134,7 @@ export function WhyChooseSection() {
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <h3 className="text-base font-bold leading-snug text-white">
+                          <h3 className="text-base font-semibold leading-snug text-white sm:text-[1.05rem]">
                             {item.title}
                           </h3>
                           <p className="mt-2 text-sm leading-6 text-sage-red-100/75">
@@ -157,7 +157,7 @@ export function WhyChooseSection() {
             >
               <Link
                 href="/about"
-                className="group inline-flex h-12 items-center gap-2 rounded-full bg-sage-cream px-7 text-sm font-bold text-sage-primary shadow-lg shadow-black/20 ring-1 ring-white/15 transition hover:bg-white hover:shadow-xl"
+                className="sage-btn group bg-sage-cream text-sage-primary shadow-lg shadow-black/20 hover:bg-white"
               >
                 {whyChooseContent.ctaLabel}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

@@ -26,16 +26,16 @@ export function ContactSection() {
               transition={{ duration: 0.55, ease: "easeOut" }}
               className="lg:pt-4"
             >
-              <p className="inline-flex rounded-full bg-sage-red-50 px-4 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
+              <p className="sage-eyebrow">
                 {homeContactContent.badge}
               </p>
-              <h2 className="mt-5 text-3xl font-bold leading-tight text-sage-secondary sm:text-4xl">
+              <h2 className="sage-h2 mt-5">
                 {homeContactContent.titleStart}
                 <span className="block text-sage-primary">
                   {homeContactContent.titleAccent}
                 </span>
               </h2>
-              <p className="mt-5 max-w-xl text-base leading-8 text-sage-gray-700 sm:text-lg">
+              <p className="sage-lead mt-5 max-w-xl">
                 {homeContactContent.description}
               </p>
 
@@ -49,7 +49,7 @@ export function ContactSection() {
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-sage-secondary">
+                        <h3 className="text-base font-semibold text-sage-secondary">
                           {item.title}
                         </h3>
                         <p className="mt-1 text-sm leading-7 text-sage-gray-700">
@@ -79,7 +79,7 @@ export function ContactSection() {
                 <TrackedLink
                   href="/admission"
                   trackingLabel="contact_section_admission_cta"
-                  className="inline-flex rounded-full border border-sage-primary px-6 py-3 text-sm font-semibold text-sage-primary transition hover:bg-sage-primary hover:text-sage-white"
+                  className="sage-btn sage-btn-secondary sage-btn-sm"
                 >
                   ভর্তি আবেদন পেজে যান
                 </TrackedLink>
