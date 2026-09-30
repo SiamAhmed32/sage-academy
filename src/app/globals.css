@@ -171,7 +171,6 @@
   /* Public headings use the heading font; the admin panel (.sa) keeps its own. */
   :is(h1, h2, h3, h4, .bn-headline, .bn-headline-subline):not(.sa *) {
     font-family: var(--font-heading);
-    font-stretch: 112%;
     letter-spacing: normal;
     text-wrap: balance;
   }
@@ -441,7 +440,7 @@
     font-family: var(--font-heading);
     /* Sized so each hero line stays on one line beside the photo on desktop. */
     font-size: clamp(1.95rem, 1.3rem + 1.6vw, 2.75rem);
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.34;
     color: var(--color-sage-secondary);
   }
@@ -450,7 +449,7 @@
   .sage-page-title {
     font-family: var(--font-heading);
     font-size: clamp(1.85rem, 1.35rem + 1.8vw, 3rem);
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.34;
     color: var(--color-sage-secondary);
   }
@@ -459,7 +458,7 @@
   .sage-h2 {
     font-family: var(--font-heading);
     font-size: clamp(1.6rem, 1.25rem + 1.3vw, 2.4rem);
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.36;
     color: var(--color-sage-secondary);
   }
