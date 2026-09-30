@@ -48,7 +48,7 @@ export function BatchCard({ card }: { card: BatchCardData }) {
 
       <div className="space-y-4 p-4 md:space-y-5 md:p-7">
         <div className="flex items-start justify-between gap-3 border-b border-sage-red-100 pb-3 md:pb-4">
-          <h3 className="line-clamp-2 flex-1 text-2xl font-extrabold leading-tight text-sage-secondary md:text-[1.9rem]">
+          <h3 className="sage-h3 line-clamp-2 flex-1">
             {title}
           </h3>
 
@@ -57,7 +57,7 @@ export function BatchCard({ card }: { card: BatchCardData }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-semibold text-sage-gray-500 md:text-[0.95rem]">
+        <div className="flex items-center gap-2 text-sm font-medium text-sage-gray-500 md:text-[0.95rem]">
           <HiOutlineUserGroup size={18} className="text-sage-primary" />
           <span>{seatsInfo}</span>
         </div>
@@ -80,7 +80,7 @@ export function BatchCard({ card }: { card: BatchCardData }) {
           <PendingLink
             href={detailsHref}
             pendingLabel="লোড হচ্ছে..."
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-sage-secondary md:px-5 md:py-3"
+            className="sage-btn sage-btn-secondary sage-btn-sm"
           >
             বিস্তারিত
           </PendingLink>
@@ -88,7 +88,7 @@ export function BatchCard({ card }: { card: BatchCardData }) {
           <PendingLink
             href="/admission"
             pendingLabel="যাচ্ছে..."
-            className="inline-flex items-center gap-2 rounded-full bg-sage-primary px-4 py-2.5 text-sm font-semibold text-sage-white md:px-5 md:py-3"
+            className="sage-btn sage-btn-primary sage-btn-sm"
           >
             ভর্তি আবেদন
             <FaArrowRight size={14} />

@@ -33,7 +33,7 @@ export function ContactPageContent() {
               <p className="inline-flex rounded-full bg-sage-red-50 px-4 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
                 {homeContactContent.badge}
               </p>
-              <h1 className="mt-5 text-3xl font-bold leading-tight text-sage-secondary sm:text-4xl">
+              <h1 className="sage-page-title mt-5">
                 {homeContactContent.titleStart}
                 <span className="block text-sage-primary">{homeContactContent.titleAccent}</span>
               </h1>
@@ -99,7 +99,7 @@ export function ContactPageContent() {
                   href={facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-sage-primary px-5 py-3 text-sm font-semibold text-sage-white transition hover:bg-sage-primary-hover"
+                  className="inline-flex items-center gap-2 rounded-full bg-sage-primary px-5 py-3 text-sm font-semibold text-sage-white transition hover:bg-sage-secondary"
                 >
                   Facebook পেজ
                   <FaFacebookF className="h-4 w-4" />

@@ -24,7 +24,7 @@ export default async function BatchesPage() {
           <p className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-sage-primary ring-1 ring-sage-red-100">
             একাডেমিক ব্যাচ ও ভর্তি তথ্য
           </p>
-          <h1 className="mt-6 max-w-4xl text-4xl font-bold leading-tight text-sage-secondary sm:text-5xl lg:text-6xl">
+          <h1 className="sage-page-title mt-6 max-w-4xl">
             আপনার সুবিধামতো সময় অনুযায়ি ব্যাচ নির্বাচন করুন
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-sage-gray-700 sm:text-lg">

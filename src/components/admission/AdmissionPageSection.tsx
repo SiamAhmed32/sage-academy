@@ -29,7 +29,7 @@ export function AdmissionPageSection() {
             <p className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-sage-primary ring-1 ring-sage-red-100">
               {admissionPageContent.badge}
             </p>
-            <h1 className="mt-5 break-words text-3xl font-black leading-tight text-sage-secondary 2xs:text-4xl sm:text-5xl lg:text-6xl">
+            <h1 className="sage-page-title mt-5 break-words">
               {admissionPageContent.titleStart}
               <span className="block text-sage-primary">{admissionPageContent.titleAccent}</span>
             </h1>
@@ -88,7 +88,7 @@ export function AdmissionPageSection() {
                   <HeartHandshake size={20} />
                 </span>
                 <div>
-                  <p className="text-sm font-black uppercase tracking-widest text-sage-primary">
+                  <p className="text-sm font-bold uppercase tracking-widest text-sage-primary">
                     {admissionGuardianNote.eyebrow}
                   </p>
                   <h3 className="text-xl font-bold text-sage-secondary">
@@ -134,7 +134,7 @@ export function AdmissionPageSection() {
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-sage-primary">
                 নির্দেশনা
               </p>
-              <h2 className="mt-2 text-2xl font-black leading-snug text-sage-secondary">
+              <h2 className="mt-2 text-2xl font-bold leading-snug text-sage-secondary">
                 {admissionGuide.title}
               </h2>
               <p className="mt-3 text-sm leading-7 text-sage-gray-700">

@@ -29,7 +29,7 @@ export function ExamHubHero() {
               {examHubHeroCopy.badge}
             </Badge>
 
-            <h1 className="bn-headline mt-3 text-3xl font-bold text-sage-secondary sm:text-4xl">
+            <h1 className="sage-page-title bn-headline mt-3">
               {examHubHeroCopy.title}
             </h1>
 

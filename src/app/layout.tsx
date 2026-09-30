@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Hind_Siliguri, Noto_Sans_Bengali } from "next/font/google";
+import { Anek_Bangla, Geist_Mono, Hind_Siliguri, Noto_Sans_Bengali, Plus_Jakarta_Sans } from "next/font/google";
 
 import { Navbar } from "@/components/shared/navbar/Navbar";
 import { Footer } from "@/components/shared/footer/Footer";
@@ -14,17 +14,35 @@ import { GoogleTranslateStability } from "@/components/shared/GoogleTranslateSta
 
 import "./globals.css";
 
+// Bangla paragraphs.
 const hindSiliguri = Hind_Siliguri({
   variable: "--font-hind-siliguri",
-  subsets: ["bengali", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
+// Bangla headings (variable font: one file for every weight).
+const anekBangla = Anek_Bangla({
+  variable: "--font-anek-bangla",
+  subsets: ["bengali"],
+  display: "swap",
+});
+
+// Admin panel only (its stylesheet asks for it); not preloaded, so public pages never download it.
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-noto-sans-bengali",
-  subsets: ["bengali", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  preload: false,
+});
+
+// English text and navigation.
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -81,7 +99,7 @@ export default function RootLayout({
   return (
     <html
       lang="bn-BD"
-      className={`${notoSansBengali.variable} ${hindSiliguri.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plusJakarta.variable} ${hindSiliguri.variable} ${anekBangla.variable} ${notoSansBengali.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SplashScreen />

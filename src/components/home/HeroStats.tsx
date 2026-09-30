@@ -46,7 +46,7 @@ export function HeroStats() {
               index > 0 && "before:absolute before:inset-y-4 before:left-0 before:w-px before:bg-sage-primary/10"
             )}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sage-primary to-sage-primary-hover text-white shadow-sm shadow-sage-primary/30 sm:h-11 sm:w-11">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sage-primary text-white sm:h-11 sm:w-11">
               <Icon />
             </span>
             <div className="min-w-0 max-w-full">

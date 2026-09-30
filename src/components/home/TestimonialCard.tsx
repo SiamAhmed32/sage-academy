@@ -74,7 +74,7 @@ export function TestimonialCard({ item, index }: TestimonialCardProps) {
           ))}
         </div>
 
-        <p className="mt-7 line-clamp-5 min-h-40 text-lg font-semibold leading-8 text-sage-gray-700">
+        <p className="mt-6 line-clamp-5 min-h-40 text-base leading-8 text-sage-gray-700 sm:text-[1.05rem]">
           “{item.review}”
         </p>
       </div>
@@ -89,10 +89,10 @@ export function TestimonialCard({ item, index }: TestimonialCardProps) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-1 text-xl font-black text-sage-secondary">
+          <h3 className="line-clamp-1 text-lg font-semibold text-sage-secondary">
             {item.name}
           </h3>
-          <p className="mt-1 line-clamp-1 text-sm font-semibold text-sage-gray-500">
+          <p className="mt-1 line-clamp-1 text-sm font-medium text-sage-gray-500">
             {item.role === "guardian" ? "অভিভাবক" : "শিক্ষার্থী"}
             {item.className ? ` · ${item.className}` : ""}
           </p>

@@ -31,7 +31,7 @@ export default function OurStory() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-3xl font-black tracking-tight text-sage-secondary sm:text-4xl"
+              className="text-3xl font-bold tracking-tight text-sage-secondary sm:text-4xl"
             >
               {philosophy.title}
             </motion.h2>
@@ -83,8 +83,8 @@ export default function OurStory() {
           >
             {/* Background elements */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-            <p className="relative text-base font-extrabold sm:text-lg lg:text-xl flex flex-col sm:flex-row items-center justify-center gap-3">
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-black uppercase tracking-wider">
+            <p className="relative text-base font-bold sm:text-lg lg:text-xl flex flex-col sm:flex-row items-center justify-center gap-3">
+              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider">
                 Flexible Learning
               </span>
               <span>{philosophy.versatility}</span>
@@ -102,7 +102,7 @@ export default function OurStory() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-3xl font-black tracking-tight text-sage-secondary sm:text-4xl"
+              className="text-3xl font-bold tracking-tight text-sage-secondary sm:text-4xl"
             >
               {journey.title}
             </motion.h2>
@@ -162,7 +162,7 @@ export default function OurStory() {
                         <span className="inline-flex rounded-full bg-sage-red-50 px-3 py-1 text-xs font-bold text-sage-primary">
                           {step.badge}
                         </span>
-                        <h3 className="mt-4 text-xl font-black text-sage-secondary flex items-center gap-2">
+                        <h3 className="mt-4 text-xl font-bold text-sage-secondary flex items-center gap-2">
                           {step.title}
                           <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all duration-300 text-sage-primary" />
                         </h3>

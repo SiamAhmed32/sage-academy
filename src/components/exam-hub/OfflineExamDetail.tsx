@@ -63,7 +63,7 @@ export function OfflineExamDetail({ program }: { program: PublicExamProgram }) {
               </div>
 
               <div className="space-y-4">
-                <h1 className="bn-headline text-4xl font-bold leading-tight text-sage-secondary sm:text-5xl lg:text-[3.25rem]">
+                <h1 className="sage-page-title bn-headline">
                   {program.title}
                 </h1>
                 {program.subtitle ? (
@@ -235,7 +235,7 @@ function SubjectSyllabusCard({
         onClick={() => setOpen((value) => !value)}
         className="flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-amber-50/50"
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-700 text-sm font-black text-white">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-700 text-sm font-bold text-white">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">

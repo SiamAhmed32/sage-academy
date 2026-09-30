@@ -51,13 +51,13 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
       <Container className="relative">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-3 rounded-full bg-sage-secondary px-4 py-2 text-sm font-black text-white shadow-lg shadow-sage-secondary/15">
+            <div className="inline-flex items-center gap-3 rounded-full bg-sage-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm">
               {sectionContent.badge}
             </div>
-            <h2 className="mt-5 max-w-4xl text-4xl font-black leading-[1.06] text-sage-secondary sm:text-5xl lg:text-[3.25rem]">
+            <h2 className="sage-h2 mt-5 max-w-4xl">
               {sectionContent.titleStart}
             </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-sage-gray-700 sm:text-lg">
+            <p className="sage-lead mt-5 max-w-2xl">
               {sectionContent.description}
             </p>
           </div>

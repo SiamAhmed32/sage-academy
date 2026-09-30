@@ -307,7 +307,7 @@ function StatCard({
         <Icon className="size-4" />
         {label}
       </div>
-      <p className="mt-2 text-3xl font-black tabular-nums">{value}</p>
+      <p className="mt-2 text-3xl font-bold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -318,7 +318,7 @@ function QuickViewCard({ question }: { question: ExamAnswerReview }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-sage-gray-500">Q No.</p>
-          <p className="text-2xl font-black text-sage-secondary">{question.questionNumber}</p>
+          <p className="text-2xl font-bold text-sage-secondary">{question.questionNumber}</p>
         </div>
         <StatusBadge status={question.status} compact />
       </div>
